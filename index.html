@@ -5,61 +5,59 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      background: #eee;
       text-align: center;
+      padding-top: 50px;
     }
-    .container {
-      margin-top: 50px;
+    #admin-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
     }
-    h1 {
-      margin-bottom: 20px;
+    #admin-indicator {
+      font-size: 12px;
+      margin-top: 3px;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     input, button {
       padding: 10px;
       margin: 5px;
     }
-    .green {
-      color: green;
-      font-weight: bold;
-    }
+    .green { color: green; font-weight: bold; }
     #admin-panel {
       display: none;
       margin-top: 20px;
-      border: 1px solid black;
-      padding: 15px;
       background: #fff;
-    }
-    #admin-mode {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      background-color: red;
-      color: white;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    #admin-indicator {
-      margin-top: 5px;
-      font-size: 12px;
-    }
-    .chat {
-      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <div id="admin-mode" onclick="toggleAdminPrompt()">Mode Admin</div>
+
+  <button id="admin-button" onclick="adminPrompt()">Mode Admin</button>
   <div id="admin-indicator">[Admin: Nonaktif]</div>
 
-  <div class="container">
-    <h1>UANGDUTY</h1>
+  <div class="box">
+    <h2>UANGDUTY</h2>
 
-    <div id="buat-akun-section">
+    <div id="buat-akun">
       <input id="nama" placeholder="Nama Anda">
       <button onclick="buatAkun()">Buat Akun</button>
     </div>
 
-    <div id="akun-section" style="display:none;">
+    <div id="akun" style="display:none;">
       <h3 id="akun-nama"></h3>
       <p>Uang Anda: <span id="uang" class="green">0rb</span></p>
       <button onclick="tambahUang()">Tambah Uang</button>
@@ -67,89 +65,90 @@
       <button onclick="resetUang()">Setor (Reset)</button>
     </div>
 
-    <div class="chat">
+    <div style="margin-top:20px;">
       <input id="pesan" placeholder="Tulis pesan">
       <button onclick="kirimPesan()">Kirim</button>
-      <div id="chatbox"></div>
+      <div id="chatbox" style="margin-top:10px;"></div>
     </div>
 
     <div id="admin-panel">
       <h3>Panel Admin</h3>
-      <button onclick="toggleAksesBuatAkun()">Akses Buat Akun: <span id="status-akses">Tertutup</span></button>
-      <div id="daftar-akun"></div>
+      <button onclick="toggleAkses()">Akses Buat Akun: <span id="akses-info">Tertutup</span></button>
+      <div id="data-akun" style="margin-top:10px;"></div>
     </div>
   </div>
 
   <script>
     let akun = null;
-    let aksesBuatAkun = false;
-    let adminMode = false;
     let semuaAkun = [];
+    let adminMode = false;
+    let aksesBuka = false;
 
-    function toggleAdminPrompt() {
+    function adminPrompt() {
       if (adminMode) {
         adminMode = false;
         document.getElementById("admin-panel").style.display = "none";
-        document.getElementById("admin-mode").style.background = "red";
+        document.getElementById("admin-button").style.background = "red";
         document.getElementById("admin-indicator").innerText = "[Admin: Nonaktif]";
       } else {
-        const password = prompt("Masukkan password admin:");
-        if (password === "RFD1") {
+        const pw = prompt("Masukkan password admin:");
+        if (pw === "RFD1") {
           adminMode = true;
           document.getElementById("admin-panel").style.display = "block";
-          document.getElementById("admin-mode").style.background = "green";
+          document.getElementById("admin-button").style.background = "green";
           document.getElementById("admin-indicator").innerText = "[Admin: Aktif]";
-          tampilkanDataAdmin();
+          tampilkanAkunAdmin();
         } else {
-          alert("Password salah.");
+          alert("Password salah!");
         }
       }
     }
 
-    function tampilkanDataAdmin() {
-      const panel = document.getElementById("daftar-akun");
-      panel.innerHTML = "";
+    function toggleAkses() {
+      aksesBuka = !aksesBuka;
+      document.getElementById("akses-info").innerText = aksesBuka ? "Terbuka" : "Tertutup";
+    }
+
+    function tampilkanAkunAdmin() {
+      const wadah = document.getElementById("data-akun");
+      wadah.innerHTML = "";
       semuaAkun.forEach((a, i) => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          ${i+1}. <input value="${a.nama}" onchange="gantiNama(${i}, this.value)"> 
-          - <span class='green'>${formatUang(a.uang)}</span> 
-          <button onclick="hapusAkun(${i})">Hapus</button>`;
-        panel.appendChild(div);
+        let el = document.createElement("div");
+        el.innerHTML = `
+          ${i+1}. <input value="${a.nama}" onchange="ubahNama(${i}, this.value)"> 
+          - <span class="green">${formatUang(a.uang)}</span> 
+          <button onclick="hapusAkun(${i})">Hapus</button>
+        `;
+        wadah.appendChild(el);
       });
     }
 
-    function toggleAksesBuatAkun() {
-      aksesBuatAkun = !aksesBuatAkun;
-      document.getElementById("status-akses").innerText = aksesBuatAkun ? "Terbuka" : "Tertutup";
+    function ubahNama(index, baru) {
+      semuaAkun[index].nama = baru;
+      tampilkanAkunAdmin();
     }
 
-    function gantiNama(i, namaBaru) {
-      semuaAkun[i].nama = namaBaru;
-      tampilkanDataAdmin();
-    }
-
-    function hapusAkun(i) {
-      semuaAkun.splice(i, 1);
-      tampilkanDataAdmin();
+    function hapusAkun(index) {
+      semuaAkun.splice(index, 1);
+      tampilkanAkunAdmin();
     }
 
     function buatAkun() {
-      if (!aksesBuatAkun) {
-        alert("Pembuatan akun sedang ditutup oleh admin.");
+      if (!aksesBuka) {
+        alert("Admin telah menutup pembuatan akun.");
         return;
       }
       if (akun) {
         alert("Anda sudah memiliki akun.");
         return;
       }
-      const nama = document.getElementById("nama").value;
-      if (!nama) return alert("Nama wajib diisi.");
+      let nama = document.getElementById("nama").value;
+      if (!nama) return alert("Isi nama terlebih dahulu.");
       akun = { nama: nama, uang: 0 };
       semuaAkun.push(akun);
       document.getElementById("akun-nama").innerText = "Halo, " + nama;
-      document.getElementById("akun-section").style.display = "block";
-      document.getElementById("buat-akun-section").style.display = "none";
+      document.getElementById("buat-akun").style.display = "none";
+      document.getElementById("akun").style.display = "block";
       updateUang();
     }
 
@@ -178,11 +177,13 @@
     }
 
     function kirimPesan() {
-      const pesan = document.getElementById("pesan").value;
-      if (!pesan) return;
-      const div = document.createElement("div");
-      div.innerText = (akun ? akun.nama : "Anonim") + ": " + pesan;
-      document.getElementById("chatbox").appendChild(div);
+      let isi = document.getElementById("pesan").value;
+      if (!isi) return;
+      let dari = akun ? akun.nama : "Anonim";
+      let box = document.getElementById("chatbox");
+      let el = document.createElement("div");
+      el.innerText = dari + ": " + isi;
+      box.appendChild(el);
       document.getElementById("pesan").value = "";
     }
   </script>
