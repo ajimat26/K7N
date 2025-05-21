@@ -1,78 +1,58 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAFD Relative</title>
   <style>
     body {
-      background-color: #f5f0de;
-      font-family: 'Georgia', serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4eddc;
+      text-align: center;
+      padding: 50px;
     }
     .header {
       display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 900px;
+      flex-direction: column;
     }
-    .profile {
-      text-align: center;
-    }
-    .profile img {
-      width: 150px;
-      height: 150px;
-      border-radius: 20px;
-      object-fit: cover;
-      border: 2px solid #ccc;
+    .header img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
     }
     .buttons {
-      display: flex;
-      gap: 20px;
-      margin-top: 40px;
+      margin-top: 30px;
     }
     button {
+      margin: 10px;
       padding: 10px 20px;
-      border: 1px solid #000;
-      border-radius: 5px;
-      background-color: #fff;
+      border: 2px solid #000;
+      background: none;
       cursor: pointer;
-      font-size: 16px;
-    }
-    .desc {
-      max-width: 400px;
-      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="profile">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Iconic_image_of_a_landscape.svg/800px-Iconic_image_of_a_landscape.svg.png" alt="Profile">
-      <h2 id="username">Nama</h2>
-      <p>SAFD</p>
-    </div>
-    <div class="desc">
-      <h1>SAFD RELATIVE</h1>
-      <p>Hak cipta @AllstaffSafd @support<br>
-         website ini hanya digunakan untuk menyimpan dan mendata uang hasil duty kalian</p>
-    </div>
+    <img src="https://via.placeholder.com/200x200.png?text=Image" alt="User" />
+    <h2 id="userName">Nama</h2>
+    <p>SAFD</p>
+    <p><strong>SAFD RELATIVE</strong><br>Hak cipta @AllstaffSafd @support<br>Website ini hanya digunakan untuk menyimpan dan mendata uang hasil duty kalian</p>
   </div>  <div class="buttons">
-    <button onclick="bukaForum()">Forum Anda</button>
-    <button onclick="aksesStaff()">Khusus Staff</button>
-    <button onclick="window.location.href='chat.html'">Obrolan chat</button>
+    <button onclick="goToForum()">Forum anda</button>
+    <button onclick="goToStaff()">Khusus Staff</button>
+    <button onclick="goToChat()">Obrolan chat</button>
   </div>  <script>
-    function bukaForum() {
-      const nama = localStorage.getItem('userNama');
-      if (!nama) {
-        const depan = prompt('Masukkan nama depan Anda:');
-        const belakang = prompt('Masukkan nama belakang Anda:');
-        if (depan && belakang) {
-          const namaLengkap = `${depan} ${belakang}`;
-          localStorage.setItem('userNama', namaLengkap);
-          document.getElementById('username').innerText = namaLengkap;
+    function goToForum() {
+      const user = localStorage.getItem('username');
+      if (!user) {
+        const firstName = prompt("Masukkan Nama Depan:");
+        const lastName = prompt("Masukkan Nama Belakang:");
+        if (firstName && lastName) {
+          const fullName = `${firstName} ${lastName}`;
+          localStorage.setItem('username', fullName);
+          document.getElementById('userName').innerText = fullName;
           window.location.href = 'forum.html';
         }
       } else {
@@ -80,19 +60,24 @@
       }
     }
 
-    function aksesStaff() {
-      const pw = prompt('Masukkan password Staff:');
-      if (pw === 'RFD') {
+    function goToStaff() {
+      const input = prompt("Masukkan password staff:");
+      if (input === "RFD") {
         window.location.href = 'staff.html';
       } else {
-        alert('Password salah!');
+        alert("Password salah!");
       }
     }
 
-    // Tampilkan nama jika sudah disimpan
-    const savedName = localStorage.getItem('userNama');
-    if (savedName) {
-      document.getElementById('username').innerText = savedName;
+    function goToChat() {
+      window.location.href = 'chat.html';
+    }
+
+    window.onload = () => {
+      const user = localStorage.getItem('username');
+      if (user) {
+        document.getElementById('userName').innerText = user;
+      }
     }
   </script></body>
 </html>
