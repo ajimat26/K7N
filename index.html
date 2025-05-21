@@ -1,42 +1,106 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Menu Saya</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum Uang Duty</title>
   <style>
     body {
-      background-color: white;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding-top: 100px;
+      background: #ffffff;
+      color: #333;
+      margin: 0;
+      padding: 20px;
     }
     h1 {
-      font-size: 36px;
-      margin-bottom: 50px;
-      color: #333;
+      text-align: center;
     }
-    .button {
-      display: inline-block;
-      margin: 15px;
-      padding: 20px 30px;
-      font-size: 20px;
-      text-decoration: none;
-      color: white;
-      border-radius: 12px;
-      transition: 0.3s;
+    .container {
+      max-width: 800px;
+      margin: auto;
     }
-    .button:hover {
-      opacity: 0.8;
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
     }
-    .yt { background-color: #FF0000; }
-    .tt { background-color: #000000; }
-    .proxy { background-color: #777777; }
+    button {
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
-  <h1>Menu Saya</h1>
-  <a href="https://youtube.com" target="_blank" class="button yt">YouTube</a>
-  <a href="https://tiktok.com" target="_blank" class="button tt">TikTok</a>
-  <a href="https://www.croxyproxy.com/" target="_blank" class="button proxy">CroxyProxy</a>
+  <div class="container">
+    <h1 id="forumTitle">Forum Uang Duty</h1>
+
+    <div class="form-group">
+      <label for="customTitle">Nama Forum (Opsional):</label>
+      <input type="text" id="customTitle" placeholder="Contoh: Forum Divisi A" />
+      <button onclick="updateTitle()">Update Judul</button>
+    </div>
+
+    <div class="buttons">
+      <button onclick="addRow('Tambah')">TAMBAH UANG DUTY</button>
+      <button onclick="addRow('Kurangi')">KURANGI UANG DUTY</button>
+      <button onclick="addRow('Setor')">SETOR</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+          <th>Jumlah</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable">
+        <tr><td colspan="3">Belum ada data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function updateTitle() {
+      const title = document.getElementById('customTitle').value;
+      if (title.trim()) {
+        document.getElementById('forumTitle').textContent = title;
+      }
+    }
+
+    function addRow(action) {
+      const amount = prompt(`Masukkan jumlah untuk ${action}:`);
+      if (amount && !isNaN(amount)) {
+        const table = document.getElementById("historyTable");
+        if (table.rows[0].cells.length === 1) table.deleteRow(0);
+
+        const row = table.insertRow();
+        const date = new Date().toLocaleString();
+
+        row.insertCell(0).textContent = date;
+        row.insertCell(1).textContent = action;
+        row.insertCell(2).textContent = `Rp${parseInt(amount).toLocaleString("id-ID")}`;
+      }
+    }
+  </script>
 </body>
 </html>
