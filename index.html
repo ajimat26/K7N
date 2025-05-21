@@ -1,53 +1,96 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html><html lang="id">
 <head>
-  <title>UangDuty Forum</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFD RELATIVE</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #chat, #forums, #createForum, #staffPanel { margin-top: 20px; }
-    .message { padding: 5px; border-radius: 5px; margin: 2px 0; }
-    .self { text-align: right; background: #dcf8c6; }
-    .other { text-align: left; background: #f1f0f0; }
-    .forum-box { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    body {
+      font-family: 'Playfair Display', serif;
+      background-color: #f5f0e6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .window {
+      width: 150px;
+      height: 200px;
+      background: linear-gradient(#dff0fc, #ffffff);
+      border-radius: 50%/10%;
+      border: 2px solid #ccc;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+    p {
+      margin: 5px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: 1px solid #333;
+      border-radius: 5px;
+      cursor: pointer;
+      background: white;
+    }
+    #menu {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
-  <h2>UangDuty Forum</h2>
-  <div id="info"></div>
-  <div id="createForum">
-    <input id="username" placeholder="Masukkan nama anda" />
-    <button onclick="createForum()">Buat Forum</button>
-  </div>  <div id="main" style="display:none">
-    <div><strong>Saldo: </strong><span id="saldo">0</span> Rupiah</div>
-    <input type="number" id="jumlah" placeholder="Jumlah (Rp)" />
-    <button onclick="tambah()">Tambah</button>
-    <button onclick="ambil()">Ambil</button>
-    <button onclick="setor()">Setor</button><div>
-  <button onclick="toggleChat()">Obrolan</button>
-  <button onclick="toggleForums()">List Forum</button>
-  <button onclick="toggleStaff()">Mode Staff</button>
-</div>
+  <div class="window"></div>
+  <h1 id="nama">Nama</h1>
+  <p>SAFD</p>
+  <div id="menu">
+    <button onclick="bukaForum()">Forum anda</button>
+    <button onclick="masukStaff()">Khusus Staff</button>
+    <button onclick="bukaChat()">Obrolan chat</button>
+  </div>
+  <p>SAFD RELATIVE</p>
+  <p>Hak cipta @AllstaffSafd @support<br>website ini hanya digunakan untuk menyimpan dan mendata uang hasil duty kalian</p>  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.appspot.com",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:9b764840e51c13a3044a11",
+      measurementId: "G-YXZPEVYBDR"
+    };
 
-<div id="chat" style="display:none">
-  <h3>Obrolan Umum</h3>
-  <div id="logChat" style="max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:10px;"></div>
-  <input id="pesan" placeholder="Ketik pesan..." />
-  <button onclick="kirimChat()">Kirim</button>
-</div>
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<div id="forums" style="display:none">
-  <h3>Forum Pengguna</h3>
-  <div id="forumList"></div>
-</div>
+    function bukaForum() {
+      window.location.href = "forum.html";
+    }
 
-<div id="staffPanel" style="display:none">
-  <h3>Mode Staff</h3>
-  <input id="staffPass" placeholder="Password staff" />
-  <button onclick="masukStaff()">Masuk</button>
-  <div id="staffContent"></div>
-</div>
+    function masukStaff() {
+      const kode = prompt("Masukkan password staff:");
+      if (kode === "RFD") {
+        window.location.href = "staff.html";
+      } else {
+        alert("Password salah!");
+      }
+    }
 
-  </div><script>
-const firebaseConfig = {
- 
+    function bukaChat() {
+      window.location.href = "chat.html";
+    }
+  </script></body>
+</html>
