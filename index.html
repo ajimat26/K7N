@@ -3,34 +3,101 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Forum Investasi dengan Uang & Obrolan</title>
+<title>UANGDUTY - Forum Investasi & Uang</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  #saldo { color: green; font-weight: bold; }
-  #staffSection { margin-top: 20px; border: 1px solid #ccc; padding: 15px; max-width: 700px; }
-  #listForum div { border: 1px solid #ddd; padding: 10px; margin-bottom: 8px; }
-  button { cursor: pointer; margin: 5px 0; padding: 8px 15px; }
-  input[type="text"], input[type="password"], input[type="number"] { padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-  #riwayat p { margin: 3px 0; }
-  #infoPengguna { font-weight: bold; margin-bottom: 15px; }
-  #chatBox {
-    border: 1px solid #ccc;
-    height: 200px;
-    overflow-y: auto;
-    padding: 10px;
-    margin-bottom: 10px;
-    background: #f9f9f9;
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+  h1 { color: #2b6cb0; }
+  #infoPengguna { margin-bottom: 15px; font-weight: bold; font-size: 1.1em; }
+  #akunSection, #forumSection, #staffSection {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    max-width: 700px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  #chatBox p {
-    margin: 5px 0;
-    padding: 5px 8px;
-    background: #e2e2e2;
+  #akunSection input, #forumSection input[type=number], #staffSection input[type=password] {
+    padding: 8px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  button {
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 18px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #1e4e8c;
+  }
+  #saldo {
+    color: green;
+    font-weight: bold;
+    font-size: 1.3em;
+  }
+  #riwayat {
+    margin-top: 20px;
+    max-height: 160px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fafafa;
     border-radius: 5px;
   }
+  #riwayat p {
+    margin: 4px 0;
+    font-size: 0.9em;
+    color: #444;
+  }
+  #chatSection {
+    margin-top: 20px;
+  }
+  #chatBox {
+    background: #fff;
+    border: 1px solid #ccc;
+    height: 210px;
+    overflow-y: auto;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: #222;
+  }
+  #chatBox p {
+    margin: 6px 0;
+    padding: 6px 10px;
+    background: #e9f1fb;
+    border-radius: 10px;
+  }
   #chatInput {
+    margin-top: 8px;
+    padding: 10px;
     width: 100%;
-    padding: 8px;
     box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+  }
+  #btnStaffMode {
+    background: #dd6b20;
+    margin-bottom: 30px;
+  }
+  #staffSection {
+    display: none;
+  }
+  #listForum div {
+    background: #f0f0f0;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    font-size: 0.95em;
   }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -38,8 +105,7 @@
 </head>
 <body>
 
-<h1>Forum Investasi dengan Uang & Obrolan</h1>
-
+<h1>UANGDUTY</h1>
 <div id="infoPengguna"></div>
 
 <div id="akunSection" style="display:none;">
@@ -50,7 +116,7 @@
 </div>
 
 <div id="forumSection" style="display:none;">
-  <h2>Dashboard Forum</h2>
+  <h2>Dashboard UANGDUTY</h2>
   <p>Saldo Anda: <span id="saldo">0</span></p>
 
   <div>
@@ -79,7 +145,7 @@
 
 <button id="btnStaffMode" onclick="masukStaffMode()">Mode Staff</button>
 
-<div id="staffSection" style="display:none;">
+<div id="staffSection">
   <h2>Panel Staff</h2>
   <input type="password" id="passwordStaff" placeholder="Masukkan password staff" />
   <button onclick="cekPasswordStaff()">Masuk</button>
@@ -108,7 +174,6 @@
     return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " Rupiah";
   }
 
-  // Mengecek dan menampilkan UI sesuai status akun
   function cekStatusAkun() {
     if(userKey && fullName) {
       document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
@@ -162,152 +227,4 @@
   }
 
   function tambahRiwayat(teks) {
-    const riwayatRef = db.ref(`forum/${userKey}/riwayat`);
-    riwayatRef.once("value").then(snap => {
-      let data = snap.val() || {};
-      let keys = Object.keys(data);
-      if (keys.length >= 5) {
-        // Hapus entri paling lama (pertama)
-        const keyToRemove = keys[0];
-        riwayatRef.child(keyToRemove).remove().then(() => {
-          riwayatRef.push(teks);
-        });
-      } else {
-        riwayatRef.push(teks);
-      }
-    });
-  }
-
-  function pantauRiwayat() {
-    db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
-      const riw = snap.val();
-      const el = document.getElementById("riwayat");
-      el.innerHTML = "<h4>Riwayat Transaksi:</h4>";
-      if (!riw) {
-        el.innerHTML += "<p>Belum ada riwayat transaksi.</p>";
-        return;
-      }
-      for (let key in riw) {
-        let kalimat = riw[key];
-        // Format angka rupiah di kalimat
-        kalimat = kalimat.replace(/\d+/g, match => {
-          return formatRupiah(match).replace(" Rupiah","");
-        });
-        el.innerHTML += `<p>${kalimat}rb</p>`;
-      }
-    });
-  }
-
-  // Fungsi tambah uang
-  function tambahUang() {
-    let val = parseInt(document.getElementById("inputTambah").value);
-    if (isNaN(val) || val <= 0) {
-      alert("Masukkan jumlah tambah uang valid (lebih dari 0).");
-      return;
-    }
-    const saldoRef = db.ref(`forum/${userKey}/saldo`);
-    saldoRef.transaction(current => {
-      if (current === null) current = 0;
-      return current + val;
-    }).then(() => {
-      tambahRiwayat(`Menambah uang sebesar ${val}`);
-      document.getElementById("inputTambah").value = "";
-    });
-  }
-
-  // Fungsi ambil uang
-  function ambilUang() {
-    let val = parseInt(document.getElementById("inputAmbil").value);
-    if (isNaN(val) || val <= 0) {
-      alert("Masukkan jumlah ambil uang valid (lebih dari 0).");
-      return;
-    }
-    const saldoRef = db.ref(`forum/${userKey}/saldo`);
-    saldoRef.transaction(current => {
-      if (current === null) current = 0;
-      if (val > current) {
-        alert("Saldo tidak cukup.");
-        return; // batal transaksi
-      }
-      return current - val;
-    }).then(result => {
-      if (result.committed) {
-        tambahRiwayat(`Mengambil uang sebesar ${val}`);
-        document.getElementById("inputAmbil").value = "";
-      }
-    });
-  }
-
-  // Fungsi setor uang (reset saldo ke 0)
-  function setorUang() {
-    if (!confirm("Yakin ingin reset saldo ke 0?")) return;
-    db.ref(`forum/${userKey}/saldo`).set(0).then(() => {
-      tambahRiwayat("Setor uang, saldo direset ke 0");
-    });
-  }
-
-  // --- Obrolan ---
-
-  function kirimPesan() {
-    const input = document.getElementById("chatInput");
-    let pesan = input.value.trim();
-    if (!pesan) return;
-    if (!userKey) {
-      alert("Anda harus login/daftar untuk mengirim pesan.");
-      return;
-    }
-    const chatRef = db.ref("chat").push();
-    chatRef.set({
-      user: fullName,
-      pesan: pesan,
-      waktu: Date.now()
-    });
-    input.value = "";
-  }
-
-  function pantauChat() {
-    const chatBox = document.getElementById("chatBox");
-    db.ref("chat").limitToLast(50).on("value", snap => {
-      const chats = snap.val() || {};
-      chatBox.innerHTML = "";
-      Object.values(chats).forEach(c => {
-        const waktu = new Date(c.waktu);
-        const waktuStr = waktu.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-        const p = document.createElement("p");
-        p.innerHTML = `<b>${c.user}</b> [${waktuStr}]: ${c.pesan}`;
-        chatBox.appendChild(p);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-  }
-
-  // --- Staff Mode ---
-  function masukStaffMode() {
-    document.getElementById("staffSection").style.display = "block";
-  }
-
-  function cekPasswordStaff() {
-    const pwd = document.getElementById("passwordStaff").value.trim();
-    if(pwd === "RFD") {
-      staffLogin = true;
-      alert("Login staff berhasil.");
-      tampilkanForumStaff();
-    } else {
-      alert("Password salah.");
-      staffLogin = false;
-      document.getElementById("listForum").innerHTML = "";
-    }
-  }
-
-  function tampilkanForumStaff() {
-    if(!staffLogin) return;
-    const listEl = document.getElementById("listForum");
-    listEl.innerHTML = "<h3>Daftar Forum</h3>";
-    db.ref("forum").once("value").then(snap => {
-      const data = snap.val() || {};
-      listEl.innerHTML = "<h3>Daftar Forum</h3>";
-      for(let key in data){
-        const user = data[key];
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <b>${user.nama}</b><br/>
+    const riwayat
