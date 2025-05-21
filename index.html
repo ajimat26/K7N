@@ -1,96 +1,98 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html><html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAFD RELATIVE</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
+  <title>SAFD Relative</title>
   <style>
     body {
-      font-family: 'Playfair Display', serif;
-      background-color: #f5f0e6;
-      margin: 0;
-      padding: 0;
+      background-color: #f5f0de;
+      font-family: 'Georgia', serif;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      padding: 40px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 900px;
+    }
+    .profile {
       text-align: center;
     }
-    .window {
+    .profile img {
       width: 150px;
-      height: 200px;
-      background: linear-gradient(#dff0fc, #ffffff);
-      border-radius: 50%/10%;
+      height: 150px;
+      border-radius: 20px;
+      object-fit: cover;
       border: 2px solid #ccc;
-      margin-bottom: 20px;
     }
-    h1 {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-    p {
-      margin: 5px;
+    .buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 40px;
     }
     button {
-      margin: 10px;
       padding: 10px 20px;
-      font-size: 1em;
-      border: 1px solid #333;
+      border: 1px solid #000;
       border-radius: 5px;
+      background-color: #fff;
       cursor: pointer;
-      background: white;
+      font-size: 16px;
     }
-    #menu {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
+    .desc {
+      max-width: 400px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="window"></div>
-  <h1 id="nama">Nama</h1>
-  <p>SAFD</p>
-  <div id="menu">
-    <button onclick="bukaForum()">Forum anda</button>
-    <button onclick="masukStaff()">Khusus Staff</button>
-    <button onclick="bukaChat()">Obrolan chat</button>
-  </div>
-  <p>SAFD RELATIVE</p>
-  <p>Hak cipta @AllstaffSafd @support<br>website ini hanya digunakan untuk menyimpan dan mendata uang hasil duty kalian</p>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-      measurementId: "G-YXZPEVYBDR"
-    };
-
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
+  <div class="header">
+    <div class="profile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Iconic_image_of_a_landscape.svg/800px-Iconic_image_of_a_landscape.svg.png" alt="Profile">
+      <h2 id="username">Nama</h2>
+      <p>SAFD</p>
+    </div>
+    <div class="desc">
+      <h1>SAFD RELATIVE</h1>
+      <p>Hak cipta @AllstaffSafd @support<br>
+         website ini hanya digunakan untuk menyimpan dan mendata uang hasil duty kalian</p>
+    </div>
+  </div>  <div class="buttons">
+    <button onclick="bukaForum()">Forum Anda</button>
+    <button onclick="aksesStaff()">Khusus Staff</button>
+    <button onclick="window.location.href='chat.html'">Obrolan chat</button>
+  </div>  <script>
     function bukaForum() {
-      window.location.href = "forum.html";
-    }
-
-    function masukStaff() {
-      const kode = prompt("Masukkan password staff:");
-      if (kode === "RFD") {
-        window.location.href = "staff.html";
+      const nama = localStorage.getItem('userNama');
+      if (!nama) {
+        const depan = prompt('Masukkan nama depan Anda:');
+        const belakang = prompt('Masukkan nama belakang Anda:');
+        if (depan && belakang) {
+          const namaLengkap = `${depan} ${belakang}`;
+          localStorage.setItem('userNama', namaLengkap);
+          document.getElementById('username').innerText = namaLengkap;
+          window.location.href = 'forum.html';
+        }
       } else {
-        alert("Password salah!");
+        window.location.href = 'forum.html';
       }
     }
 
-    function bukaChat() {
-      window.location.href = "chat.html";
+    function aksesStaff() {
+      const pw = prompt('Masukkan password Staff:');
+      if (pw === 'RFD') {
+        window.location.href = 'staff.html';
+      } else {
+        alert('Password salah!');
+      }
+    }
+
+    // Tampilkan nama jika sudah disimpan
+    const savedName = localStorage.getItem('userNama');
+    if (savedName) {
+      document.getElementById('username').innerText = savedName;
     }
   </script></body>
 </html>
