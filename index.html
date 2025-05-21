@@ -1,65 +1,53 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html>
 <head>
-  <meta charset="UTF-8">
-  <title>Forum Chat Real-Time</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <title>UangDuty Forum</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chat, #forums, #createForum, #staffPanel { margin-top: 20px; }
+    .message { padding: 5px; border-radius: 5px; margin: 2px 0; }
+    .self { text-align: right; background: #dcf8c6; }
+    .other { text-align: left; background: #f1f0f0; }
+    .forum-box { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Chat Umum Real-Time</h1>
+<body>
+  <h2>UangDuty Forum</h2>
+  <div id="info"></div>
+  <div id="createForum">
+    <input id="username" placeholder="Masukkan nama anda" />
+    <button onclick="createForum()">Buat Forum</button>
+  </div>  <div id="main" style="display:none">
+    <div><strong>Saldo: </strong><span id="saldo">0</span> Rupiah</div>
+    <input type="number" id="jumlah" placeholder="Jumlah (Rp)" />
+    <button onclick="tambah()">Tambah</button>
+    <button onclick="ambil()">Ambil</button>
+    <button onclick="setor()">Setor</button><div>
+  <button onclick="toggleChat()">Obrolan</button>
+  <button onclick="toggleForums()">List Forum</button>
+  <button onclick="toggleStaff()">Mode Staff</button>
+</div>
 
-    <div class="bg-white rounded shadow p-4 mb-4">
-      <div id="chat-log" class="h-64 overflow-y-auto border rounded p-2 text-sm bg-gray-50 mb-2"></div>
-      <div class="flex gap-2">
-        <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-1 p-2 border rounded" />
-        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Kirim</button>
-      </div>
-    </div>
-  </div>
+<div id="chat" style="display:none">
+  <h3>Obrolan Umum</h3>
+  <div id="logChat" style="max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:10px;"></div>
+  <input id="pesan" placeholder="Ketik pesan..." />
+  <button onclick="kirimChat()">Kirim</button>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-    };
+<div id="forums" style="display:none">
+  <h3>Forum Pengguna</h3>
+  <div id="forumList"></div>
+</div>
 
-    // Inisialisasi Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+<div id="staffPanel" style="display:none">
+  <h3>Mode Staff</h3>
+  <input id="staffPass" placeholder="Password staff" />
+  <button onclick="masukStaff()">Masuk</button>
+  <div id="staffContent"></div>
+</div>
 
-    const user = prompt("Masukkan nama Anda:") || "Anonim";
-
-    function sendMessage() {
-      const input = document.getElementById("chat-input");
-      const text = input.value.trim();
-      if (!text) return;
-      const time = new Date().toISOString();
-
-      db.ref("chats").push({
-        user,
-        text,
-        time
-      });
-
-      input.value = "";
-    }
-
-    const chatLog = document.getElementById("chat-log");
-    db.ref("chats").on("child_added", (snapshot) => {
-      const msg = snapshot.val();
-      const waktu = new Date(msg.time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-      const chatLine = `<div><strong>${msg.user}</strong> (${waktu}): ${msg.text}</div>`;
-      chatLog.innerHTML += chatLine;
-      chatLog.scrollTop = chatLog.scrollHeight;
-    });
-  </script>
-</body>
-</html>
+  </div><script>
+const firebaseConfig = {
+ 
