@@ -1,166 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>UangDuty Panel</title>
-  <style>
-    body { font-family: Arial; background: white; margin: 20px; }
-    .forum-btn { display: block; margin: 5px 0; }
-    .indicator { position: fixed; top: 10px; left: 10px; background: red; color: white; padding: 4px 10px; border-radius: 6px; }
-  </style>
+  <title>Forum UangDuty</title>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <h2>Selamat datang di UangDuty Panel</h2>
+  <h2>Buat Forum Baru</h2>
+  <input id="namaForum" placeholder="Tulis nama forum">
+  <button onclick="buatForum()">Buat</button>
 
-  <input type="text" id="username" placeholder="Masukkan nama Anda">
-  <button onclick="setUser()">Masuk</button>
-
-  <hr>
-
-  <button onclick="buatForum()">Buat Forum</button>
-  <button onclick="aksesStaff()">Akses Staff SAFD</button>
-  <button id="normalModeBtn" onclick="modeNormal()" style="display:none;">Mode Normal</button>
-
-  <div id="indikator" class="indicator" style="display:none;">STAFF MODE</div>
-
-  <h3>Forum Anda</h3>
+  <h3>Daftar Forum Publik</h3>
   <div id="daftarForum"></div>
 
   <script>
-    let currentUser = localStorage.getItem('user') || '';
-    let isStaff = false;
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.firebasestorage.app",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:9b764840e51c13a3044a11",
+      measurementId: "G-YXZPEVYBDR"
+    };
 
-    function setUser() {
-      const user = document.getElementById('username').value;
-      if (user) {
-        currentUser = user;
-        localStorage.setItem('user', user);
-        tampilForum();
-      }
-    }
-
-    function aksesStaff() {
-      const pass = prompt("Masukkan password staff:");
-      if (pass === "RFD") {
-        isStaff = true;
-        document.getElementById('normalModeBtn').style.display = "inline";
-        document.getElementById('indikator').style.display = "block";
-        tampilForum();
-      } else {
-        alert("Password salah!");
-      }
-    }
-
-    function modeNormal() {
-      isStaff = false;
-      document.getElementById('normalModeBtn').style.display = "none";
-      document.getElementById('indikator').style.display = "none";
-      tampilForum();
-    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     function buatForum() {
-      const nama = prompt("Nama forum:");
-      if (!nama) return;
-
+      const nama = document.getElementById("namaForum").value;
+      if (!nama) return alert("Nama forum tidak boleh kosong.");
       const id = "forum_" + Date.now();
-      const data = {
-        id, nama, pemilik: currentUser, riwayat: [], total: 0
-      };
-
-      const forumData = JSON.parse(localStorage.getItem("forums") || "[]");
-      forumData.push(data);
-      localStorage.setItem("forums", JSON.stringify(forumData));
-
-      tampilForum();
+      db.ref("forums/" + id).set({ id, nama }).then(() => {
+        document.getElementById("namaForum").value = "";
+        tampilForum();
+      });
     }
 
     function tampilForum() {
-      const wrap = document.getElementById('daftarForum');
-      wrap.innerHTML = '';
-      const forumData = JSON.parse(localStorage.getItem("forums") || "[]");
-
-      forumData.forEach(forum => {
-        const bisaLihat = forum.pemilik === currentUser || isStaff;
-        if (!bisaLihat) return;
-
-        const btn = document.createElement("button");
-        btn.innerText = forum.nama;
-        btn.className = "forum-btn";
-        btn.onclick = () => bukaForum(forum.id);
-        wrap.appendChild(btn);
-
-        if (isStaff) {
-          const delBtn = document.createElement("button");
-          delBtn.innerText = "Hapus";
-          delBtn.onclick = () => {
-            if (confirm("Yakin ingin hapus forum ini?")) {
-              const newForums = forumData.filter(f => f.id !== forum.id);
-              localStorage.setItem("forums", JSON.stringify(newForums));
-              tampilForum();
-            }
-          };
-          wrap.appendChild(delBtn);
-        }
+      db.ref("forums").once("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        const daftar = document.getElementById("daftarForum");
+        daftar.innerHTML = "";
+        Object.values(data).forEach(f => {
+          const div = document.createElement("div");
+          div.textContent = f.nama;
+          daftar.appendChild(div);
+        });
       });
     }
 
-    function bukaForum(id) {
-      const win = window.open('', '_blank');
-      const forumData = JSON.parse(localStorage.getItem("forums") || "[]");
-      const forum = forumData.find(f => f.id === id);
-      if (!forum) return;
-
-      let html = `<h2>Forum: ${forum.nama}</h2>`;
-      html += `<h3>Total Uang: ${forum.total}</h3>`;
-      html += `<ul>`;
-      forum.riwayat.forEach(r => {
-        html += `<li>${r}</li>`;
-      });
-      html += `</ul>`;
-
-      if (!isStaff) {
-        html += `<button onclick="window.opener.tambahUang('${id}')">Tambah</button>
-                 <button onclick="window.opener.kurangiUang('${id}')">Kurangi</button>
-                 <button onclick="window.opener.setorUang('${id}')">Setor</button>`;
-      } else {
-        html += `<p>Mode Staff - Tidak bisa mengedit forum.</p>`;
-      }
-
-      win.document.body.innerHTML = html;
-    }
-
-    function tambahUang(id) {
-      const jumlah = parseInt(prompt("Jumlah uang:"));
-      if (isNaN(jumlah)) return;
-
-      updateUang(id, jumlah, `Tambah ${jumlah}`);
-    }
-
-    function kurangiUang(id) {
-      const jumlah = parseInt(prompt("Jumlah dikurangi:"));
-      if (isNaN(jumlah)) return;
-
-      updateUang(id, -jumlah, `Kurangi ${jumlah}`);
-    }
-
-    function setorUang(id) {
-      const jumlah = parseInt(prompt("Jumlah setor:"));
-      if (isNaN(jumlah)) return;
-
-      updateUang(id, -jumlah, `Setor ${jumlah}`);
-    }
-
-    function updateUang(id, jumlah, teks) {
-      const forumData = JSON.parse(localStorage.getItem("forums") || "[]");
-      const index = forumData.findIndex(f => f.id === id);
-      if (index === -1) return;
-
-      forumData[index].total += jumlah;
-      forumData[index].riwayat.push(teks);
-      localStorage.setItem("forums", JSON.stringify(forumData));
-      alert("Berhasil!");
-    }
-
-    if (currentUser) tampilForum();
+    tampilForum();
   </script>
 </body>
 </html>
