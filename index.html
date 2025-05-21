@@ -1,51 +1,51 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UANGDUTY</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  #adminPanel { border: 1px solid #4CAF50; padding: 10px; margin-bottom: 20px; background-color: #e8f5e9; display: none; }
-  #adminToggle {
-    position: fixed;
-    top: 10px; left: 10px;
-    background-color: #f44336; /* default merah */
-    color: white;
-    border: none; padding: 8px 12px;
-    cursor: pointer; border-radius: 4px;
-    font-weight: bold;
-    z-index: 1000;
-  }
-  #adminToggle.active {
-    background-color: #4CAF50; /* hijau kalau aktif */
-  }
-  #adminStatus {
-    position: fixed;
-    top: 45px; left: 10px;
-    font-weight: bold;
-    color: red; /* default merah */
-    display: block;
-    z-index: 1000;
-  }
-  #adminStatus.active {
-    color: green;
-  }
-  .section { margin-bottom: 30px; }
-  input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; box-sizing: border-box; }
-  .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; background: #f9f9f9; }
-  .message { margin-bottom: 10px; }
-  .right { text-align: right; }
-  #saldo { color: green; font-weight: bold; }
-  #riwayat p { margin: 0 0 5px 0; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #ddd; padding: 8px; }
-  th { background-color: #4CAF50; color: white; }
-  input.edit-nama { width: 90%; }
-  button.hapus-btn { background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UANGDUTY</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #adminPanel { border: 1px solid #4CAF50; padding: 10px; margin-bottom: 20px; background-color: #e8f5e9; display: none; }
+    #adminToggle {
+      position: fixed;
+      top: 10px; left: 10px;
+      background-color: #f44336; /* default merah */
+      color: white;
+      border: none; padding: 8px 12px;
+      cursor: pointer; border-radius: 4px;
+      font-weight: bold;
+      z-index: 1000;
+    }
+    #adminToggle.active {
+      background-color: #4CAF50; /* hijau kalau aktif */
+    }
+    #adminStatus {
+      position: fixed;
+      top: 45px; left: 10px;
+      font-weight: bold;
+      color: red; /* default merah */
+      display: block;
+      z-index: 1000;
+    }
+    #adminStatus.active {
+      color: green;
+    }
+    .section { margin-bottom: 30px; }
+    input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; box-sizing: border-box; }
+    .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; background: #f9f9f9; }
+    .message { margin-bottom: 10px; }
+    .right { text-align: right; }
+    #saldo { color: green; font-weight: bold; }
+    #riwayat p { margin: 0 0 5px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #4CAF50; color: white; }
+    input.edit-nama { width: 90%; }
+    button.hapus-btn { background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+  </style>
 </head>
 <body>
 
@@ -190,3 +190,16 @@
   });
 
   // Admin toggle create account enable/disable
+  toggleCreateAccount.addEventListener("change", () => {
+    db.ref("settings/createAccountEnabled").set(toggleCreateAccount.checked);
+  });
+
+  // Fungsi lainnya seperti pantauSaldo, pantauRiwayat, loadAdminData, dll
+  // Perlu ditambahkan sesuai kebutuhan
+
+  // Inisialisasi
+  refreshUserData();
+</script>
+
+</body>
+  </html>
