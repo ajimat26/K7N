@@ -1,191 +1,122 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="id">
 <head>
-  <title>UANGDUTY</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investasi Virtual</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eee;
-      text-align: center;
-      padding-top: 50px;
-    }
-    #admin-button {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: red;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    #admin-indicator {
-      font-size: 12px;
-      margin-top: 3px;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      display: inline-block;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, button {
-      padding: 10px;
-      margin: 5px;
-    }
-    .green { color: green; font-weight: bold; }
-    #admin-panel {
-      display: none;
-      margin-top: 20px;
-      background: #fff;
-      padding: 15px;
-      border: 1px solid #ccc;
-    }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .chat { height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-top: 10px; background: #eee; }
+    .message { margin: 5px 0; padding: 8px; border-radius: 10px; max-width: 80%; }
+    .user { background: #cce5ff; align-self: flex-end; text-align: right; margin-left: auto; }
+    .system { background: #d4edda; align-self: flex-start; }
+    .chatbox { display: flex; flex-direction: column; }
+    .admin-panel { display: none; background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px; }
   </style>
 </head>
 <body>
+<div class="container">
+  <h2>Investasi Virtual</h2>
+  <input type="text" id="username" placeholder="Masukkan nama akun">
+  <button onclick="login()">Masuk</button>  <div id="mainUI" style="display:none">
+    <p>Halo, <span id="akunName"></span>! Saldo: <span id="saldo">0</span></p>
+    <input type="number" id="jumlah" placeholder="Jumlah uang">
+    <button onclick="tambahUang()">Tambah Uang</button>
+    <button onclick="ambilUang()">Ambil Uang</button><div class="chatbox">
+  <div class="chat" id="chat"></div>
+  <input type="text" id="pesan" placeholder="Ketik pesan...">
+  <button onclick="kirimPesan()">Kirim</button>
+</div>
 
-  <button id="admin-button" onclick="adminPrompt()">Mode Admin</button>
-  <div id="admin-indicator">[Admin: Nonaktif]</div>
+<button onclick="toggleAdmin()">Masuk Admin</button>
+<div class="admin-panel" id="adminPanel">
+  <input type="password" id="adminPass" placeholder="Password Admin">
+  <button onclick="cekAdmin()">Login Admin</button>
+  <div id="adminData"></div>
+</div>
 
-  <div class="box">
-    <h2>UANGDUTY</h2>
-
-    <div id="buat-akun">
-      <input id="nama" placeholder="Nama Anda">
-      <button onclick="buatAkun()">Buat Akun</button>
-    </div>
-
-    <div id="akun" style="display:none;">
-      <h3 id="akun-nama"></h3>
-      <p>Uang Anda: <span id="uang" class="green">0rb</span></p>
-      <button onclick="tambahUang()">Tambah Uang</button>
-      <button onclick="ambilUang()">Ambil Uang</button>
-      <button onclick="resetUang()">Setor (Reset)</button>
-    </div>
-
-    <div style="margin-top:20px;">
-      <input id="pesan" placeholder="Tulis pesan">
-      <button onclick="kirimPesan()">Kirim</button>
-      <div id="chatbox" style="margin-top:10px;"></div>
-    </div>
-
-    <div id="admin-panel">
-      <h3>Panel Admin</h3>
-      <button onclick="toggleAkses()">Akses Buat Akun: <span id="akses-info">Tertutup</span></button>
-      <div id="data-akun" style="margin-top:10px;"></div>
-    </div>
   </div>
+</div><script>
+let akun = null;
+let data = JSON.parse(localStorage.getItem('dataInvestasi') || '{}');
 
-  <script>
-    let akun = null;
-    let semuaAkun = [];
-    let adminMode = false;
-    let aksesBuka = false;
+function login() {
+  const nama = document.getElementById('username').value.trim();
+  if (!nama) return alert('Isi nama akun!');
+  akun = nama;
+  if (!data[nama]) data[nama] = { saldo: 0, chat: [] };
+  localStorage.setItem('dataInvestasi', JSON.stringify(data));
+  document.getElementById('akunName').innerText = akun;
+  document.getElementById('mainUI').style.display = 'block';
+  updateSaldo();
+  tampilChat();
+}
 
-    function adminPrompt() {
-      if (adminMode) {
-        adminMode = false;
-        document.getElementById("admin-panel").style.display = "none";
-        document.getElementById("admin-button").style.background = "red";
-        document.getElementById("admin-indicator").innerText = "[Admin: Nonaktif]";
-      } else {
-        const pw = prompt("Masukkan password admin:");
-        if (pw === "RFD1") {
-          adminMode = true;
-          document.getElementById("admin-panel").style.display = "block";
-          document.getElementById("admin-button").style.background = "green";
-          document.getElementById("admin-indicator").innerText = "[Admin: Aktif]";
-          tampilkanAkunAdmin();
-        } else {
-          alert("Password salah!");
-        }
-      }
-    }
+function updateSaldo() {
+  document.getElementById('saldo').innerText = data[akun].saldo;
+}
 
-    function toggleAkses() {
-      aksesBuka = !aksesBuka;
-      document.getElementById("akses-info").innerText = aksesBuka ? "Terbuka" : "Tertutup";
-    }
+function tambahUang() {
+  const jumlah = parseInt(document.getElementById('jumlah').value);
+  if (!jumlah || jumlah <= 0) return alert('Jumlah tidak valid!');
+  data[akun].saldo += jumlah;
+  simpan();
+  updateSaldo();
+  logChat(`+${jumlah} uang ditambahkan.`, 'system');
+}
 
-    function tampilkanAkunAdmin() {
-      const wadah = document.getElementById("data-akun");
-      wadah.innerHTML = "";
-      semuaAkun.forEach((a, i) => {
-        let el = document.createElement("div");
-        el.innerHTML = `
-          ${i+1}. <input value="${a.nama}" onchange="ubahNama(${i}, this.value)"> 
-          - <span class="green">${formatUang(a.uang)}</span> 
-          <button onclick="hapusAkun(${i})">Hapus</button>
-        `;
-        wadah.appendChild(el);
-      });
-    }
+function ambilUang() {
+  const jumlah = parseInt(document.getElementById('jumlah').value);
+  if (!jumlah || jumlah <= 0 || jumlah > data[akun].saldo) return alert('Jumlah tidak valid!');
+  data[akun].saldo -= jumlah;
+  simpan();
+  updateSaldo();
+  logChat(`-${jumlah} uang diambil.`, 'system');
+}
 
-    function ubahNama(index, baru) {
-      semuaAkun[index].nama = baru;
-      tampilkanAkunAdmin();
-    }
+function simpan() {
+  localStorage.setItem('dataInvestasi', JSON.stringify(data));
+}
 
-    function hapusAkun(index) {
-      semuaAkun.splice(index, 1);
-      tampilkanAkunAdmin();
-    }
+function kirimPesan() {
+  const teks = document.getElementById('pesan').value.trim();
+  if (!teks) return;
+  logChat(teks, 'user');
+  document.getElementById('pesan').value = '';
+}
 
-    function buatAkun() {
-      if (!aksesBuka) {
-        alert("Admin telah menutup pembuatan akun.");
-        return;
-      }
-      if (akun) {
-        alert("Anda sudah memiliki akun.");
-        return;
-      }
-      let nama = document.getElementById("nama").value;
-      if (!nama) return alert("Isi nama terlebih dahulu.");
-      akun = { nama: nama, uang: 0 };
-      semuaAkun.push(akun);
-      document.getElementById("akun-nama").innerText = "Halo, " + nama;
-      document.getElementById("buat-akun").style.display = "none";
-      document.getElementById("akun").style.display = "block";
-      updateUang();
-    }
+function logChat(teks, tipe) {
+  const time = new Date().toLocaleTimeString();
+  data[akun].chat.push({ teks, tipe, time });
+  simpan();
+  tampilChat();
+}
 
-    function tambahUang() {
-      akun.uang += 10000;
-      updateUang();
-    }
+function tampilChat() {
+  const chat = document.getElementById('chat');
+  chat.innerHTML = '';
+  data[akun].chat.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'message ' + (c.tipe === 'user' ? 'user' : 'system');
+    div.innerHTML = `<strong>[${c.time}]</strong> ${c.teks}`;
+    chat.appendChild(div);
+  });
+  chat.scrollTop = chat.scrollHeight;
+}
 
-    function ambilUang() {
-      akun.uang -= 10000;
-      if (akun.uang < 0) akun.uang = 0;
-      updateUang();
-    }
+function toggleAdmin() {
+  document.getElementById('adminPanel').style.display = 'block';
+}
 
-    function resetUang() {
-      akun.uang = 0;
-      updateUang();
-    }
-
-    function updateUang() {
-      document.getElementById("uang").innerText = formatUang(akun.uang);
-    }
-
-    function formatUang(nilai) {
-      return nilai.toLocaleString("id-ID") + "rb";
-    }
-
-    function kirimPesan() {
-      let isi = document.getElementById("pesan").value;
-      if (!isi) return;
-      let dari = akun ? akun.nama : "Anonim";
-      let box = document.getElementById("chatbox");
-      let el = document.createElement("div");
-      el.innerText = dari + ": " + isi;
-      box.appendChild(el);
-      document.getElementById("pesan").value = "";
-    }
-  </script>
-</body>
+function cekAdmin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass !== 'RFD1') return alert('Password salah!');
+  const panel = document.getElementById('adminData');
+  panel.innerHTML = '<h4>Data Semua Akun</h4>';
+  for (const nama in data) {
+    panel.innerHTML += `<p><strong>${nama}</strong>: Saldo ${data[nama].saldo}</p>`;
+  }
+}
+</script></body>
 </html>
