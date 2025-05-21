@@ -1,164 +1,190 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>UANGDUTY</title>
   <style>
-    body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
-    header { background: #4CAF50; color: white; padding: 1em; text-align: center; position: relative; }
-    #adminBtn {
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+    }
+    .green {
+      color: green;
+      font-weight: bold;
+    }
+    #admin-panel {
+      display: none;
+      margin-top: 20px;
+      border: 1px solid black;
+      padding: 15px;
+      background: #fff;
+    }
+    #admin-mode {
       position: absolute;
       left: 10px;
       top: 10px;
       background-color: red;
       color: white;
       padding: 5px 10px;
-      border: none;
       cursor: pointer;
     }
-    #adminStatus { font-size: 12px; margin-top: 5px; }
-    main { padding: 20px; }
-    .box { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-    button { margin: 3px; }
-    .hidden { display: none; }
-    .green { background-color: green; }
-    .red { background-color: red; }
-    input, button { padding: 8px; }
-    #chatLog { max-height: 150px; overflow-y: auto; background: #e0e0e0; padding: 5px; margin-bottom: 10px; }
+    #admin-indicator {
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    .chat {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <button id="adminBtn">Mode Admin</button>
+  <div id="admin-mode" onclick="toggleAdminPrompt()">Mode Admin</div>
+  <div id="admin-indicator">[Admin: Nonaktif]</div>
+
+  <div class="container">
     <h1>UANGDUTY</h1>
-    <div id="adminStatus">Status: Nonaktif</div>
-  </header>  <main>
-    <div class="box" id="akunSection">
-      <h3>Buat Akun</h3>
-      <input type="text" id="namaAkun" placeholder="Nama akun">
-      <button onclick="buatAkun()">Buat</button>
-      <div id="infoAkun"></div>
-    </div><div class="box hidden" id="keuangan">
-  <h3>Menu Keuangan</h3>
-  <div>Saldo: <span id="saldo" style="color:green">0rb</span></div>
-  <button onclick="tambahUang()">Tambah Uang</button>
-  <button onclick="ambilUang()">Ambil Uang</button>
-  <button onclick="resetUang()">Setor (Reset)</button>
-</div>
 
-<div class="box">
-  <h3>Obrolan</h3>
-  <div id="chatLog"></div>
-  <input type="text" id="chatInput" placeholder="Ketik pesan">
-  <button onclick="kirimChat()">Kirim</button>
-</div>
+    <div id="buat-akun-section">
+      <input id="nama" placeholder="Nama Anda">
+      <button onclick="buatAkun()">Buat Akun</button>
+    </div>
 
-<div class="box hidden" id="adminPanel">
-  <h3>Panel Admin</h3>
-  <button onclick="toggleAkunAccess()">Buka/Tutup Pembuatan Akun</button>
-  <div>Status Pembuatan Akun: <span id="akunStatus">Dibuka</span></div>
-  <div id="listAkun"></div>
-</div>
+    <div id="akun-section" style="display:none;">
+      <h3 id="akun-nama"></h3>
+      <p>Uang Anda: <span id="uang" class="green">0rb</span></p>
+      <button onclick="tambahUang()">Tambah Uang</button>
+      <button onclick="ambilUang()">Ambil Uang</button>
+      <button onclick="resetUang()">Setor (Reset)</button>
+    </div>
 
-  </main>  <script>
+    <div class="chat">
+      <input id="pesan" placeholder="Tulis pesan">
+      <button onclick="kirimPesan()">Kirim</button>
+      <div id="chatbox"></div>
+    </div>
+
+    <div id="admin-panel">
+      <h3>Panel Admin</h3>
+      <button onclick="toggleAksesBuatAkun()">Akses Buat Akun: <span id="status-akses">Tertutup</span></button>
+      <div id="daftar-akun"></div>
+    </div>
+  </div>
+
+  <script>
     let akun = null;
-    let saldo = 0;
-    let akunDiizinkan = true;
-    let modeAdmin = false;
-    const dataAkun = [];
+    let aksesBuatAkun = false;
+    let adminMode = false;
+    let semuaAkun = [];
 
-    function updateUI() {
-      document.getElementById("keuangan").classList.toggle("hidden", akun === null);
-      document.getElementById("akunSection").classList.toggle("hidden", akun !== null || !akunDiizinkan);
-      document.getElementById("infoAkun").innerText = akun === null && !akunDiizinkan ? 'Pembuatan akun ditutup oleh admin.' : '';
-      document.getElementById("saldo").innerText = saldo.toLocaleString('id-ID') + 'rb';
-      document.getElementById("akunStatus").innerText = akunDiizinkan ? 'Dibuka' : 'Ditutup';
-      document.getElementById("adminStatus").innerText = 'Status: ' + (modeAdmin ? 'Aktif' : 'Nonaktif');
-      document.getElementById("adminBtn").style.backgroundColor = modeAdmin ? 'green' : 'red';
-      document.getElementById("adminPanel").classList.toggle("hidden", !modeAdmin);
-
-      if (modeAdmin) {
-        let list = dataAkun.map((a, i) => `
-          <div>
-            ${a.nama} - ${a.saldo.toLocaleString('id-ID')}rb
-            <button onclick="hapusAkun(${i})">Hapus</button>
-            <button onclick="ubahNama(${i})">Ubah Nama</button>
-          </div>
-        `).join('');
-        document.getElementById("listAkun").innerHTML = list;
-      }
-    }
-
-    function buatAkun() {
-      const nama = document.getElementById("namaAkun").value.trim();
-      if (!nama || akun !== null || !akunDiizinkan) return;
-      akun = nama;
-      saldo = 0;
-      dataAkun.push({ nama: akun, saldo });
-      updateUI();
-    }
-
-    function tambahUang() {
-      saldo += 50000;
-      simpanSaldo();
-      updateUI();
-    }
-
-    function ambilUang() {
-      if (saldo >= 50000) saldo -= 50000;
-      simpanSaldo();
-      updateUI();
-    }
-
-    function resetUang() {
-      saldo = 0;
-      simpanSaldo();
-      updateUI();
-    }
-
-    function simpanSaldo() {
-      const index = dataAkun.findIndex(a => a.nama === akun);
-      if (index !== -1) dataAkun[index].saldo = saldo;
-    }
-
-    function kirimChat() {
-      const isi = document.getElementById("chatInput").value;
-      if (!isi) return;
-      const log = document.getElementById("chatLog");
-      log.innerHTML += `<div><b>${akun || 'Anon'}:</b> ${isi}</div>`;
-      document.getElementById("chatInput").value = '';
-      log.scrollTop = log.scrollHeight;
-    }
-
-    document.getElementById("adminBtn").onclick = function () {
-      if (!modeAdmin) {
-        const pass = prompt("Masukkan password admin:");
-        if (pass === "RFD1") modeAdmin = true;
+    function toggleAdminPrompt() {
+      if (adminMode) {
+        adminMode = false;
+        document.getElementById("admin-panel").style.display = "none";
+        document.getElementById("admin-mode").style.background = "red";
+        document.getElementById("admin-indicator").innerText = "[Admin: Nonaktif]";
       } else {
-        modeAdmin = false;
+        const password = prompt("Masukkan password admin:");
+        if (password === "RFD1") {
+          adminMode = true;
+          document.getElementById("admin-panel").style.display = "block";
+          document.getElementById("admin-mode").style.background = "green";
+          document.getElementById("admin-indicator").innerText = "[Admin: Aktif]";
+          tampilkanDataAdmin();
+        } else {
+          alert("Password salah.");
+        }
       }
-      updateUI();
     }
 
-    function toggleAkunAccess() {
-      akunDiizinkan = !akunDiizinkan;
-      updateUI();
+    function tampilkanDataAdmin() {
+      const panel = document.getElementById("daftar-akun");
+      panel.innerHTML = "";
+      semuaAkun.forEach((a, i) => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          ${i+1}. <input value="${a.nama}" onchange="gantiNama(${i}, this.value)"> 
+          - <span class='green'>${formatUang(a.uang)}</span> 
+          <button onclick="hapusAkun(${i})">Hapus</button>`;
+        panel.appendChild(div);
+      });
+    }
+
+    function toggleAksesBuatAkun() {
+      aksesBuatAkun = !aksesBuatAkun;
+      document.getElementById("status-akses").innerText = aksesBuatAkun ? "Terbuka" : "Tertutup";
+    }
+
+    function gantiNama(i, namaBaru) {
+      semuaAkun[i].nama = namaBaru;
+      tampilkanDataAdmin();
     }
 
     function hapusAkun(i) {
-      dataAkun.splice(i, 1);
-      if (akun && dataAkun.every(a => a.nama !== akun)) akun = null;
-      updateUI();
+      semuaAkun.splice(i, 1);
+      tampilkanDataAdmin();
     }
 
-    function ubahNama(i) {
-      const baru = prompt("Masukkan nama baru:");
-      if (baru) {
-        dataAkun[i].nama = baru;
-        if (akun === dataAkun[i].nama) akun = baru;
-        updateUI();
+    function buatAkun() {
+      if (!aksesBuatAkun) {
+        alert("Pembuatan akun sedang ditutup oleh admin.");
+        return;
       }
+      if (akun) {
+        alert("Anda sudah memiliki akun.");
+        return;
+      }
+      const nama = document.getElementById("nama").value;
+      if (!nama) return alert("Nama wajib diisi.");
+      akun = { nama: nama, uang: 0 };
+      semuaAkun.push(akun);
+      document.getElementById("akun-nama").innerText = "Halo, " + nama;
+      document.getElementById("akun-section").style.display = "block";
+      document.getElementById("buat-akun-section").style.display = "none";
+      updateUang();
     }
 
-    updateUI();
-  </script></body>
-                                </html>
+    function tambahUang() {
+      akun.uang += 10000;
+      updateUang();
+    }
+
+    function ambilUang() {
+      akun.uang -= 10000;
+      if (akun.uang < 0) akun.uang = 0;
+      updateUang();
+    }
+
+    function resetUang() {
+      akun.uang = 0;
+      updateUang();
+    }
+
+    function updateUang() {
+      document.getElementById("uang").innerText = formatUang(akun.uang);
+    }
+
+    function formatUang(nilai) {
+      return nilai.toLocaleString("id-ID") + "rb";
+    }
+
+    function kirimPesan() {
+      const pesan = document.getElementById("pesan").value;
+      if (!pesan) return;
+      const div = document.createElement("div");
+      div.innerText = (akun ? akun.nama : "Anonim") + ": " + pesan;
+      document.getElementById("chatbox").appendChild(div);
+      document.getElementById("pesan").value = "";
+    }
+  </script>
+</body>
+</html>
