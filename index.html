@@ -1,300 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+  <meta charset="UTF-8">
   <title>UANGDUTY</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0; padding: 20px;
-      text-align: center;
-    }
-    #admin-btn {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background-color: red;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      cursor: pointer;
-      border-radius: 5px;
-      z-index: 1000;
-    }
-    #admin-indicator {
-      position: fixed;
-      top: 45px;
-      left: 10px;
-      font-weight: bold;
-      color: red;
-      font-size: 14px;
-      z-index: 1000;
-    }
-    #account-section, #chat-section, #admin-panel {
-      background: white;
-      max-width: 450px;
-      margin: 20px auto;
-      padding: 15px 25px;
-      border-radius: 10px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.1);
-    }
-    #admin-panel {
-      display: none;
-      text-align: left;
-    }
-    input[type=text], input[type=number] {
-      width: 80%;
-      padding: 8px;
-      margin: 8px 0;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #007bff;
-      border: none;
-      color: white;
-      padding: 10px 18px;
-      margin: 5px 3px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:disabled {
-      background-color: #999;
-      cursor: not-allowed;
-    }
-    .green-text {
-      color: green;
-      font-weight: bold;
-    }
-    .user-info {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    #chatbox {
-      height: 150px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-      text-align: left;
-      font-size: 14px;
-      background-color: #fafafa;
-      border-radius: 6px;
-    }
-    .chat-message {
-      margin-bottom: 5px;
-    }
-    .chat-user {
-      font-weight: bold;
-    }
-    .admin-action-btn {
-      background-color: #28a745;
-      margin-left: 5px;
-      padding: 4px 8px;
-      font-size: 12px;
-    }
-    .admin-remove-btn {
-      background-color: #dc3545;
-    }
-    .admin-edit-input {
-      width: 60%;
-      padding: 2px 4px;
-      margin-right: 5px;
-      font-size: 14px;
-    }
+    body { font-family: Arial; margin: 20px; }
+    h1 { color: green; }
+    .admin-indicator { color: white; background: red; padding: 4px 8px; border-radius: 5px; display: inline-block; margin-left: 10px; }
+    .admin-active { background: green; }
+    .hidden { display: none; }
+    button { margin: 5px; }
+    input { margin: 5px; }
+    .user-list, .history-log { margin-top: 10px; }
   </style>
 </head>
 <body>
 
-<button id="admin-btn" onclick="toggleAdminMode()">Mode Admin</button>
-<div id="admin-indicator">Admin: Nonaktif</div>
+<h1>UANGDUTY <span id="adminStatus" class="admin-indicator">Admin: OFF</span></h1>
 
-<div id="account-section">
-  <h1>UANGDUTY</h1>
+<!-- Tombol Mode Admin -->
+<button onclick="promptAdmin()">Mode Admin</button>
 
-  <div id="create-account-div">
-    <input id="input-nama" type="text" placeholder="Masukkan nama Anda" autocomplete="off" />
-    <button id="btn-create-account" onclick="createAccount()">Buat Akun</button>
-    <p id="account-status-msg" style="color: red; font-weight: bold;"></p>
-  </div>
-
-  <div id="user-info-div" style="display:none;">
-    <div class="user-info" id="user-name-display"></div>
-    <div class="user-info">Uang Anda: <span class="green-text" id="user-money-display">0rb</span></div>
-    <button onclick="addMoney()">Tambah Uang (+10.000rb)</button>
-    <button onclick="takeMoney()">Ambil Uang (-10.000rb)</button>
-    <button onclick="resetMoney()">Setor (Reset Uang)</button>
-  </div>
+<!-- Hanya muncul jika admin aktif -->
+<div id="adminPanel" class="hidden">
+  <p><strong>Panel Admin Aktif</strong></p>
+  <button onclick="toggleAccountCreation()">Tutup/Buka Pembuatan Akun</button>
+  <p>Status Pembuatan Akun: <span id="accountStatus">Dibuka</span></p>
+  <div class="user-list" id="userList"></div>
 </div>
 
-<div id="chat-section">
-  <h2>Chat</h2>
-  <input id="chat-input" type="text" placeholder="Tulis pesan..." autocomplete="off" />
-  <button onclick="sendMessage()">Kirim</button>
-  <div id="chatbox"></div>
+<hr>
+
+<!-- Form Buat Akun -->
+<div id="registerForm">
+  <h3>Buat Akun</h3>
+  <input type="text" id="username" placeholder="Nama Anda">
+  <button onclick="createAccount()">Buat Akun</button>
 </div>
 
-<div id="admin-panel">
-  <h2>Panel Admin</h2>
-  <button onclick="toggleAccountCreationAccess()">
-    Pembuatan Akun: <span id="account-access-status">Tertutup</span>
-  </button>
-
-  <h3>Daftar Akun</h3>
-  <div id="admin-account-list"></div>
+<!-- Panel Uang -->
+<div id="userPanel" class="hidden">
+  <h3>Selamat datang, <span id="userName"></span></h3>
+  <p>Saldo: <span id="userMoney" style="color:green;">0rb</span></p>
+  <button onclick="addMoney()">+ Tambah Uang</button>
+  <button onclick="takeMoney()">- Ambil Uang</button>
+  <button onclick="resetMoney()">Setor / Reset</button>
 </div>
+
+<!-- Log Aktivitas -->
+<h3>Riwayat (maks 5):</h3>
+<ul id="historyLog" class="history-log"></ul>
 
 <script>
-  // Data Storage
-  let accounts = [];
+  let isAdmin = false;
+  let adminPassword = "RFD1";
+  let accountCreationOpen = true;
   let currentUser = null;
-  let adminMode = false;
-  let accountCreationOpen = false;
+  let accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+  let history = JSON.parse(localStorage.getItem("history") || "[]");
 
-  // Format angka uang jadi "xx.xxxrb"
-  function formatMoney(value) {
-    return value.toLocaleString("id-ID") + "rb";
-  }
-
-  // Load saved data dari localStorage (opsional, untuk simpan permanen)
-  function loadData() {
-    const savedAccounts = localStorage.getItem("uangduty_accounts");
-    if (savedAccounts) accounts = JSON.parse(savedAccounts);
-    const savedAccountCreation = localStorage.getItem("uangduty_creation");
-    accountCreationOpen = savedAccountCreation === "true" ? true : false;
-  }
-
-  // Simpan data ke localStorage
   function saveData() {
-    localStorage.setItem("uangduty_accounts", JSON.stringify(accounts));
-    localStorage.setItem("uangduty_creation", accountCreationOpen);
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    localStorage.setItem("history", JSON.stringify(history));
   }
 
-  // Render user info
-  function renderUserInfo() {
-    if (!currentUser) {
-      document.getElementById("create-account-div").style.display = accountCreationOpen ? "block" : "none";
-      document.getElementById("user-info-div").style.display = "none";
-      if(!accountCreationOpen) {
-        document.getElementById("account-status-msg").innerText = "Pembuatan akun sedang ditutup oleh admin.";
-      } else {
-        document.getElementById("account-status-msg").innerText = "";
-      }
-      return;
-    }
-    document.getElementById("create-account-div").style.display = "none";
-    document.getElementById("user-info-div").style.display = "block";
-    document.getElementById("user-name-display").innerText = "Halo, " + currentUser.nama;
-    document.getElementById("user-money-display").innerText = formatMoney(currentUser.uang);
-  }
-
-  // Buat akun baru jika belum punya dan akses dibuka
-  function createAccount() {
-    if (!accountCreationOpen) {
-      alert("Pembuatan akun sedang ditutup oleh admin.");
-      return;
-    }
-    if(currentUser) {
-      alert("Anda sudah memiliki akun.");
-      return;
-    }
-    const namaInput = document.getElementById("input-nama");
-    let nama = namaInput.value.trim();
-    if(!nama) {
-      alert("Masukkan nama Anda terlebih dahulu.");
-      return;
-    }
-    // Pastikan nama unik (optional)
-    if(accounts.some(acc => acc.nama.toLowerCase() === nama.toLowerCase())) {
-      alert("Nama sudah terdaftar. Gunakan nama lain.");
-      return;
-    }
-    // Buat akun baru
-    let akunBaru = {nama: nama, uang: 0};
-    accounts.push(akunBaru);
-    currentUser = akunBaru;
-    namaInput.value = "";
+  function logHistory(text) {
+    history.unshift(text);
+    if (history.length > 5) history.pop();
     saveData();
-    renderUserInfo();
+    renderHistory();
   }
 
-  // Tambah uang +10.000rb
+  function renderHistory() {
+    const log = document.getElementById("historyLog");
+    log.innerHTML = "";
+    history.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      log.appendChild(li);
+    });
+  }
+
+  function createAccount() {
+    const name = document.getElementById("username").value;
+    if (!accountCreationOpen) return alert("Pembuatan akun ditutup oleh admin.");
+    if (!name) return alert("Nama tidak boleh kosong.");
+    if (accounts[name]) return alert("Akun sudah dibuat.");
+    currentUser = name;
+    accounts[name] = { money: 0 };
+    logHistory(`${name} membuat akun.`);
+    saveData();
+    updateUI();
+  }
+
+  function updateUI() {
+    if (currentUser) {
+      document.getElementById("registerForm").classList.add("hidden");
+      document.getElementById("userPanel").classList.remove("hidden");
+      document.getElementById("userName").textContent = currentUser;
+      document.getElementById("userMoney").textContent = formatMoney(accounts[currentUser].money);
+    }
+  }
+
   function addMoney() {
     if (!currentUser) return;
-    currentUser.uang += 10000;
+    accounts[currentUser].money += 50000;
+    logHistory(`${currentUser} menambah uang.`);
     saveData();
-    renderUserInfo();
+    updateUI();
   }
 
-  // Ambil uang -10.000rb (tidak bisa negatif)
   function takeMoney() {
     if (!currentUser) return;
-    currentUser.uang -= 10000;
-    if (currentUser.uang < 0) currentUser.uang = 0;
+    accounts[currentUser].money -= 25000;
+    logHistory(`${currentUser} mengambil uang.`);
     saveData();
-    renderUserInfo();
+    updateUI();
   }
 
-  // Reset uang jadi 0
   function resetMoney() {
     if (!currentUser) return;
-    currentUser.uang = 0;
+    accounts[currentUser].money = 0;
+    logHistory(`${currentUser} menyetor semua uang.`);
     saveData();
-    renderUserInfo();
+    updateUI();
   }
 
-  // Chat system
-  function sendMessage() {
-    const input = document.getElementById("chat-input");
-    let msg = input.value.trim();
-    if(!msg) return;
-    let userName = currentUser ? currentUser.nama : "Anonim";
-    addChatMessage(userName, msg);
-    input.value = "";
-  }
-
-  function addChatMessage(user, message) {
-    const chatbox = document.getElementById("chatbox");
-    const div = document.createElement("div");
-    div.classList.add("chat-message");
-    div.innerHTML = `<span class="chat-user">${user}:</span> ${message}`;
-    chatbox.appendChild(div);
-    chatbox.scrollTop = chatbox.scrollHeight;
-  }
-
-  // Admin functions
-  function toggleAdminMode() {
-    if(adminMode) {
-      adminMode = false;
-      document.getElementById("admin-btn").style.backgroundColor = "red";
-      document.getElementById("admin-indicator").innerText = "Admin: Nonaktif";
-      document.getElementById("admin-panel").style.display = "none";
-      renderUserInfo();
+  function promptAdmin() {
+    const pwd = prompt("Masukkan Password Admin:");
+    if (pwd === adminPassword) {
+      isAdmin = true;
+      document.getElementById("adminPanel").classList.remove("hidden");
+      document.getElementById("adminStatus").classList.add("admin-active");
+      document.getElementById("adminStatus").textContent = "Admin: ON";
+      renderAdminUsers();
     } else {
-      const pw = prompt("Masukkan password admin:");
-      if(pw === "RFD1") {
-        adminMode = true;
-        document.getElementById("admin-btn").style.backgroundColor = "green";
-        document.getElementById("admin-indicator").innerText = "Admin: Aktif";
-        document.getElementById("admin-panel").style.display = "block";
-        renderAdminAccountList();
-        renderUserInfo();
-      } else {
-        alert("Password salah.");
-      }
+      alert("Password salah.");
     }
   }
 
-  function toggleAccountCreationAccess() {
-    if(!adminMode) return;
+  function toggleAccountCreation() {
     accountCreationOpen = !accountCreationOpen;
-    document.getElementById("account-access-status").innerText = accountCreationOpen ? "Terbuka" : "Tertutup";
-    saveData();
-    renderUserInfo();
+    document.getElementById("accountStatus").textContent = accountCreationOpen ? "Dibuka" : "Ditutup";
   }
 
-  // Admin edit nama akun
-  function editAccountName(index) {
-    if(!adminMode) return;
-    let newName = prompt("Masukkan nama baru:", accounts[index].nama);
-    if(newName
+  function renderAdminUsers() {
+    const div = document.getElementById("userList");
+    div.innerHTML = "<h4>Daftar Akun:</h4>";
+    Object.keys(accounts).forEach(name => {
+      const p = document.createElement("p");
+      p.innerHTML = `${name} - <span style="color:green">${formatMoney(accounts[name].money)}</span> 
+      <button onclick="renameUser('${name}')">Ganti Nama</button>
+      <button onclick="deleteUser('${name}')">Hapus</button>`;
+      div.appendChild(p);
+    });
+  }
+
+  function renameUser(oldName) {
+    const newName = prompt("Nama baru untuk " + oldName);
+    if (!newName || accounts[newName]) return alert("Nama tidak valid.");
+    accounts[newName] = accounts[oldName];
+    delete accounts[oldName];
+    if (currentUser === oldName) currentUser = newName;
+    saveData();
+    renderAdminUsers();
+    updateUI();
+  }
+
+  function deleteUser(name) {
+    if (confirm("Hapus akun " + name + "?")) {
+      delete accounts[name];
+      if (currentUser === name) currentUser = null;
+      saveData();
+      renderAdminUsers();
+      location.reload();
+    }
+  }
+
+  function formatMoney(m) {
+    return m.toLocaleString("id-ID") + "rb";
+  }
+
+  // Inisialisasi
+  renderHistory();
+  updateUI();
+</script>
+</body>
+                                              </html>
