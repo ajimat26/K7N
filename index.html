@@ -1,129 +1,220 @@
 <!DOCTYPE html><html>
 <head>
-  <title>Forum UangDuty</title>
+  <title>UangDuty Panel</title>
   <style>
-    body { font-family: Arial, sans-serif; }
-    #loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.8); z-index: 9999; text-align: center; padding-top: 200px; font-size: 24px; }
-    .forum-box { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
-    #mode-info { position: fixed; top: 10px; left: 10px; font-weight: bold; }
+    body { font-family: Arial; background: #f2f2f2; margin: 20px; }
+    .forum-btn { display: block; margin: 5px 0; padding: 10px; background: #fff; border: 1px solid #ccc; cursor: pointer; }
+    .indicator { position: fixed; top: 10px; left: 10px; background: red; color: white; padding: 4px 10px; border-radius: 6px; }
+    .loading { font-weight: bold; color: #555; }
   </style>
 </head>
-<body><div id="loading">Loading...</div>
-<div id="mode-info"></div><h2>Forum UangDuty</h2>
-<button onclick="createForum()">Buat Forum</button>
-<button onclick="toggleStaffMode()">Mode Staff</button>
-<div id="forum-container"></div><script>
-const db = {} // simulasi database sementara
-let isStaffMode = false;
-let staffName = localStorage.getItem("staffName") || "";
-let currentUser = localStorage.getItem("forumUser") || null;
+<body>
+  <div id="indikator" class="indicator" style="display:none;">STAFF MODE</div>  <h2>Selamat datang di UangDuty Panel</h2>  <input type="text" id="username" placeholder="Masukkan nama Anda">
+  <button onclick="setUser()">Masuk</button>  <hr><button onclick="aksesStaff()">Akses Staff SAFD</button> <button onclick="modeNormal()" id="normalModeBtn" style="display:none;">Mode Normal</button>
 
-if (!currentUser) {
-  const forumName = prompt("Masukkan nama forum (otomatis jadi akun):");
-  localStorage.setItem("forumUser", forumName);
-  currentUser = forumName;
-}
+  <div id="tambahStaffWrap" style="display:none;">
+    <input type="text" id="namaStaffBaru" placeholder="Nama Staff">
+    <button onclick="tambahStaff()">Tambah Staff</button>
+  </div>  <h3>Buat Forum</h3>
+  <button onclick="buatForum()">Buat Forum Saya</button>  <h3>List Forum Umum</h3>
+  <div id="listForumUmum"></div>  <h3>Forum Anda</h3>
+  <div id="daftarForum"></div>  <script>
+    let currentUser = localStorage.getItem('user') || '';
+    let isStaff = localStorage.getItem('staffMode') === 'true';
+    let daftarStaff = JSON.parse(localStorage.getItem('daftarStaff') || '[]');
+    let forums = JSON.parse(localStorage.getItem('forums') || '[]');
 
-function showLoading() { document.getElementById("loading").style.display = "block"; }
-function hideLoading() { document.getElementById("loading").style.display = "none"; }
-
-function toggleStaffMode() {
-  const pass = prompt("Masukkan password staff:");
-  if (pass === "RFD") {
-    isStaffMode = true;
-    staffName = prompt("Masukkan nama staff:");
-    localStorage.setItem("staffName", staffName);
-    alert("Mode staff diaktifkan sebagai " + staffName);
-    updateModeInfo();
-    renderForums();
-  }
-}
-
-function updateModeInfo() {
-  document.getElementById("mode-info").innerText = isStaffMode ? `Mode Staff (${staffName})` : `Mode Normal (${currentUser})`;
-}
-
-function createForum() {
-  const title = prompt("Judul forum:");
-  const timestamp = new Date().toLocaleString();
-  db[title] = {
-    owner: currentUser,
-    waktu: timestamp,
-    uang: 0,
-    history: []
-  };
-  renderForums();
-}
-
-function renderForums() {
-  const container = document.getElementById("forum-container");
-  container.innerHTML = "";
-  for (const title in db) {
-    const forum = db[title];
-    if (forum.owner === currentUser || isStaffMode) {
-      const box = document.createElement("div");
-      box.className = "forum-box";
-      box.innerHTML = `<b>${title}</b> oleh ${forum.owner}<br>Waktu: ${forum.waktu}<br>UangDuty: ${forum.uang}<br>`;
-
-      if (isStaffMode && forum.owner !== currentUser) {
-        forum.history.push(`Staff ${staffName} melihat forum pada ${new Date().toLocaleString()}`);
-        box.innerHTML += `<i>Forum dimiliki oleh orang lain</i><br>`;
-      }
-
-      if (isStaffMode) {
-        box.innerHTML += `<button onclick="editForum('${title}')">Ubah Nama</button>
-                          <button onclick="deleteForum('${title}')">Hapus</button>`;
-      }
-
-      if (forum.owner === currentUser || isStaffMode) {
-        box.innerHTML += `<br>
-          <button onclick="tambahUang('${title}')">Tambah UangDuty</button>
-          <button onclick="ambilUang('${title}')">Ambil UangDuty</button>
-          <button onclick="setorUang('${title}')">Setor UangDuty</button>`;
-      }
-
-      if (forum.history.length > 0 && forum.owner === currentUser) {
-        box.innerHTML += `<br><b>Riwayat:</b><br>` + forum.history.join("<br>");
-      }
-
-      container.appendChild(box);
+    if (currentUser && !forums.find(f => f.pemilik === currentUser)) {
+      localStorage.removeItem('user');
+      currentUser = '';
     }
-  }
-  updateModeInfo();
-}
 
-function editForum(oldTitle) {
-  const newTitle = prompt("Nama forum baru:");
-  db[newTitle] = { ...db[oldTitle] };
-  delete db[oldTitle];
-  renderForums();
-}
+    if (isStaff) {
+      document.getElementById('indikator').style.display = 'block';
+      document.getElementById('normalModeBtn').style.display = 'inline';
+      document.getElementById('tambahStaffWrap').style.display = 'block';
+    }
 
-function deleteForum(title) {
-  if (confirm("Yakin ingin menghapus forum?")) {
-    delete db[title];
-    renderForums();
-  }
-}
+    function simpanData() {
+      localStorage.setItem('forums', JSON.stringify(forums));
+    }
 
-function tambahUang(title) {
-  db[title].uang += 100;
-  renderForums();
-}
+    function setUser() {
+      const nama = document.getElementById('username').value.trim();
+      if (!nama) return;
+      if (!forums.find(f => f.pemilik === nama)) {
+        alert("Forum belum dibuat. Silakan klik 'Buat Forum Saya'.");
+        return;
+      }
+      currentUser = nama;
+      localStorage.setItem('user', nama);
+      tampilForum();
+    }
 
-function ambilUang(title) {
-  db[title].uang -= 50;
-  renderForums();
-}
+    function aksesStaff() {
+      const pass = prompt("Masukkan password staff:");
+      if (pass === "RFD") {
+        isStaff = true;
+        localStorage.setItem('staffMode', 'true');
+        document.getElementById('indikator').style.display = 'block';
+        document.getElementById('normalModeBtn').style.display = 'inline';
+        document.getElementById('tambahStaffWrap').style.display = 'block';
+        tampilForum();
+      } else {
+        alert("Password salah!");
+      }
+    }
 
-function setorUang(title) {
-  db[title].uang += 200;
-  renderForums();
-}
+    function modeNormal() {
+      isStaff = false;
+      localStorage.removeItem('staffMode');
+      document.getElementById('indikator').style.display = 'none';
+      document.getElementById('normalModeBtn').style.display = 'none';
+      document.getElementById('tambahStaffWrap').style.display = 'none';
+      tampilForum();
+    }
 
-// Inisialisasi tampilan
-updateModeInfo();
-renderForums();
-</script></body>
+    function tambahStaff() {
+      const nama = document.getElementById('namaStaffBaru').value.trim();
+      if (!nama || daftarStaff.includes(nama)) return;
+      daftarStaff.push(nama);
+      localStorage.setItem('daftarStaff', JSON.stringify(daftarStaff));
+      alert('Staff ditambahkan');
+    }
+
+    function buatForum() {
+      if (currentUser) return alert("Anda sudah punya forum.");
+      const nama = document.getElementById('username').value.trim();
+      if (!nama) return;
+
+      if (forums.find(f => f.pemilik === nama)) {
+        alert("Forum sudah dibuat.");
+        return;
+      }
+
+      const forum = {
+        id: "forum_" + Date.now(),
+        nama: nama + "'s Forum",
+        pemilik: nama,
+        total: 0,
+        riwayat: [],
+        akses: []
+      };
+
+      forums.push(forum);
+      simpanData();
+      localStorage.setItem('user', nama);
+      currentUser = nama;
+      tampilForum();
+    }
+
+    function tampilForum() {
+      const daftar = document.getElementById('daftarForum');
+      daftar.innerHTML = '<div class="loading">Memuat forum...</div>';
+
+      setTimeout(() => {
+        daftar.innerHTML = '';
+        forums.forEach(f => {
+          const bisaLihat = f.pemilik === currentUser || isStaff;
+          if (!bisaLihat) return;
+
+          const btn = document.createElement('button');
+          btn.className = 'forum-btn';
+          btn.innerText = f.nama;
+          btn.onclick = () => bukaForum(f.id);
+          daftar.appendChild(btn);
+
+          if (isStaff) {
+            const ubah = document.createElement('button');
+            ubah.innerText = 'Ubah Nama';
+            ubah.onclick = () => {
+              const baru = prompt("Nama baru:", f.nama);
+              if (baru) {
+                f.nama = baru;
+                simpanData();
+                tampilForum();
+              }
+            };
+            daftar.appendChild(ubah);
+
+            const hapus = document.createElement('button');
+            hapus.innerText = 'Hapus';
+            hapus.onclick = () => {
+              if (confirm("Yakin hapus forum?")) {
+                forums = forums.filter(ff => ff.id !== f.id);
+                simpanData();
+                tampilForum();
+              }
+            };
+            daftar.appendChild(hapus);
+          }
+        });
+        tampilUmum();
+      }, 500);
+    }
+
+    function tampilUmum() {
+      const umum = document.getElementById('listForumUmum');
+      umum.innerHTML = '';
+      forums.forEach(f => {
+        const item = document.createElement('div');
+        item.innerText = f.pemilik;
+        umum.appendChild(item);
+      });
+    }
+
+    function bukaForum(id) {
+      const win = window.open('', '_blank');
+      const forum = forums.find(f => f.id === id);
+      if (!forum) return;
+
+      if (isStaff && currentUser !== forum.pemilik) {
+        const waktu = new Date().toLocaleString();
+        forum.riwayat.push("Staff " + currentUser + " melihat forum anda pada " + waktu);
+        simpanData();
+      }
+
+      let html = `<h2>${forum.nama}</h2>`;
+      html += `<h3>Total Uang: ${forum.total}</h3><ul>`;
+      forum.riwayat.forEach(r => html += `<li>${r}</li>`);
+      html += `</ul>`;
+
+      if (!isStaff || currentUser === forum.pemilik) {
+        html += `<button onclick="window.opener.tambahUang('${id}')">Tambah UangDuty</button>
+                 <button onclick="window.opener.ambilUang('${id}')">Ambil UangDuty</button>
+                 <button onclick="window.opener.setorUang('${id}')">Setor UangDuty</button>`;
+      } else {
+        html += `<p>Mode Staff - Tidak bisa mengedit forum.</p>`;
+      }
+
+      win.document.body.innerHTML = html;
+    }
+
+    function tambahUang(id) {
+      const jumlah = parseInt(prompt("Jumlah: "));
+      if (isNaN(jumlah)) return;
+      const f = forums.find(f => f.id === id);
+      f.total += jumlah;
+      f.riwayat.push("Tambah " + jumlah);
+      simpanData();
+    }
+
+    function ambilUang(id) {
+      const jumlah = parseInt(prompt("Jumlah: "));
+      if (isNaN(jumlah)) return;
+      const f = forums.find(f => f.id === id);
+      f.total -= jumlah;
+      f.riwayat.push("Ambil " + jumlah);
+      simpanData();
+    }
+
+    function setorUang(id) {
+      const f = forums.find(f => f.id === id);
+      f.riwayat.push("Setor " + f.total);
+      f.total = 0;
+      simpanData();
+    }
+
+    if (currentUser) tampilForum();
+  </script></body>
 </html>
