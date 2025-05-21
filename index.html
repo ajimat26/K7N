@@ -2,105 +2,142 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Forum Uang Duty</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #ffffff;
-      color: #333;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-    }
-    .buttons {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    .form-group {
-      margin-bottom: 10px;
-    }
-    input[type="text"], input[type="number"] {
-      padding: 8px;
-      width: 100%;
-      box-sizing: border-box;
-    }
+    body { font-family: Arial; background: #fff; padding: 20px; }
+    h1, h2 { text-align: center; }
+    .container { max-width: 800px; margin: auto; }
+    .buttons, .forum-select { display: flex; justify-content: space-between; margin: 15px 0; }
+    button { padding: 10px 15px; font-weight: bold; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1 id="forumTitle">Forum Uang Duty</h1>
+<div class="container">
+  <h1 id="pageTitle">Forum Uang Duty</h1>
 
-    <div class="form-group">
-      <label for="customTitle">Nama Forum (Opsional):</label>
-      <input type="text" id="customTitle" placeholder="Contoh: Forum Divisi A" />
-      <button onclick="updateTitle()">Update Judul</button>
-    </div>
-
-    <div class="buttons">
-      <button onclick="addRow('Tambah')">TAMBAH UANG DUTY</button>
-      <button onclick="addRow('Kurangi')">KURANGI UANG DUTY</button>
-      <button onclick="addRow('Setor')">SETOR</button>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Aksi</th>
-          <th>Jumlah</th>
-        </tr>
-      </thead>
-      <tbody id="historyTable">
-        <tr><td colspan="3">Belum ada data</td></tr>
-      </tbody>
-    </table>
+  <div class="forum-select">
+    <input type="text" id="forumName" placeholder="Nama forum baru..." />
+    <button onclick="createForum()">Buat Forum</button>
+    <select id="forumList" onchange="loadForum()">
+      <option value="">-- Pilih Forum --</option>
+    </select>
+    <button onclick="accessStaff()">Akses Staff Safd</button>
   </div>
 
-  <script>
-    function updateTitle() {
-      const title = document.getElementById('customTitle').value;
-      if (title.trim()) {
-        document.getElementById('forumTitle').textContent = title;
-      }
+  <div class="buttons" id="actionButtons">
+    <button onclick="addRow('Tambah')">TAMBAH UANG DUTY</button>
+    <button onclick="addRow('Kurangi')">KURANGI UANG DUTY</button>
+    <button onclick="addRow('Setor')">SETOR</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tanggal</th>
+        <th>Aksi</th>
+        <th>Jumlah</th>
+      </tr>
+    </thead>
+    <tbody id="historyTable">
+      <tr><td colspan="3">Belum ada forum</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  let forums = JSON.parse(localStorage.getItem("uangduty_forums") || "{}");
+  let currentForum = "";
+  let isStaff = false;
+
+  function saveForums() {
+    localStorage.setItem("uangduty_forums", JSON.stringify(forums));
+  }
+
+  function refreshForumList() {
+    const forumList = document.getElementById("forumList");
+    forumList.innerHTML = '<option value="">-- Pilih Forum --</option>';
+    for (const name in forums) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      forumList.appendChild(opt);
+    }
+  }
+
+  function createForum() {
+    const name = document.getElementById("forumName").value.trim();
+    if (!name) return alert("Nama forum tidak boleh kosong");
+    if (forums[name]) return alert("Forum sudah ada");
+    forums[name] = [];
+    saveForums();
+    refreshForumList();
+    document.getElementById("forumName").value = "";
+    alert("Forum berhasil dibuat");
+  }
+
+  function loadForum() {
+    currentForum = document.getElementById("forumList").value;
+    document.getElementById("pageTitle").textContent = currentForum || "Forum Uang Duty";
+    renderTable();
+  }
+
+  function addRow(action) {
+    if (!currentForum || isStaff) return;
+    const jumlah = prompt(`Masukkan jumlah untuk ${action}:`);
+    if (jumlah && !isNaN(jumlah)) {
+      forums[currentForum].push({
+        tanggal: new Date().toLocaleString(),
+        aksi: action,
+        jumlah: parseInt(jumlah)
+      });
+      saveForums();
+      renderTable();
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById("historyTable");
+    tbody.innerHTML = "";
+
+    if (!currentForum) {
+      tbody.innerHTML = '<tr><td colspan="3">Belum ada forum</td></tr>';
+      return;
     }
 
-    function addRow(action) {
-      const amount = prompt(`Masukkan jumlah untuk ${action}:`);
-      if (amount && !isNaN(amount)) {
-        const table = document.getElementById("historyTable");
-        if (table.rows[0].cells.length === 1) table.deleteRow(0);
-
-        const row = table.insertRow();
-        const date = new Date().toLocaleString();
-
-        row.insertCell(0).textContent = date;
-        row.insertCell(1).textContent = action;
-        row.insertCell(2).textContent = `Rp${parseInt(amount).toLocaleString("id-ID")}`;
-      }
+    const data = forums[currentForum];
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3">Belum ada data</td></tr>';
+      return;
     }
-  </script>
+
+    for (const row of data) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${row.tanggal}</td>
+        <td>${row.aksi}</td>
+        <td>Rp${row.jumlah.toLocaleString("id-ID")}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function accessStaff() {
+    const pass = prompt("Masukkan Password Staff:");
+    if (pass === "RFD") {
+      isStaff = true;
+      alert("Akses Staff berhasil");
+      document.getElementById("actionButtons").style.display = "none";
+      refreshForumList();
+    } else {
+      alert("Password salah!");
+    }
+  }
+
+  // Inisialisasi saat halaman dibuka
+  refreshForumList();
+</script>
 </body>
 </html>
