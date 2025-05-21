@@ -1,288 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Forum UangDuty Real-time</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-  #status { position: fixed; top: 10px; left: 10px; padding: 5px 10px; background: #333; color: white; border-radius: 5px; }
-  #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-weight: bold; font-size: 20px; display: none; }
-  #login, #forumSection, #staffSection { padding: 10px; max-width: 600px; margin: 70px auto 20px; }
-  input, button, select, textarea { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-  #forumList, #chatMessages { max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin-bottom: 10px; }
-  #chatMessages div { margin-bottom: 5px; }
-  .staffBtn { background: #0066cc; color: white; border: none; cursor: pointer; padding: 8px; margin-top: 5px; border-radius: 3px; }
-  .btn { background: #28a745; color: white; border: none; cursor: pointer; padding: 10px; border-radius: 3px; }
-  .btn-danger { background: #dc3545; }
-  .forum-item { border-bottom: 1px solid #ddd; padding: 5px; }
-  .hidden { display: none; }
-</style>
+  <meta charset="UTF-8">
+  <title>Forum Chat Real-Time</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Chat Umum Real-Time</h1>
 
-<div id="status">Mode: Normal</div>
-<div id="loading">Loading...</div>
-
-<div id="login">
-  <h2>Buat atau Masuk Forum</h2>
-  <input type="text" id="forumNameInput" placeholder="Masukkan nama forum Anda (nama akun)" />
-  <button id="loginBtn" class="btn">Masuk / Buat Forum</button>
-
-  <hr />
-  <h3>Masuk sebagai Staff</h3>
-  <input type="password" id="staffPassInput" placeholder="Password staff" />
-  <button id="staffLoginBtn" class="staffBtn">Masuk Mode Staff</button>
-</div>
-
-<div id="forumSection" class="hidden">
-  <h2>Forum Anda: <span id="myForumName"></span></h2>
-  <div>
-    <label>Tambah UangDuty:</label>
-    <input type="number" id="addAmount" placeholder="Jumlah tambah" />
-    <button id="addBtn" class="btn">Tambah</button>
+    <div class="bg-white rounded shadow p-4 mb-4">
+      <div id="chat-log" class="h-64 overflow-y-auto border rounded p-2 text-sm bg-gray-50 mb-2"></div>
+      <div class="flex gap-2">
+        <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-1 p-2 border rounded" />
+        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Kirim</button>
+      </div>
+    </div>
   </div>
-  <div>
-    <label>Ambil UangDuty:</label>
-    <input type="number" id="takeAmount" placeholder="Jumlah ambil" />
-    <button id="takeBtn" class="btn btn-danger">Ambil</button>
-  </div>
-  <div>
-    <button id="resetBtn" class="btn btn-danger">Setor (Reset ke 0)</button>
-  </div>
-  <h3>UangDuty Saat Ini: <span id="uangdutyValue">0</span></h3>
-</div>
 
-<div id="staffSection" class="hidden">
-  <h2>Mode Staff</h2>
-  <div>
-    <label>Daftar Forum:</label>
-    <div id="forumList"></div>
-  </div>
-  <div>
-    <label>Chat dengan Semua:</label>
-    <div id="chatMessages"></div>
-    <textarea id="chatInput" rows="2" placeholder="Ketik pesan dan tekan Enter"></textarea>
-  </div>
-</div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.appspot.com",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:9b764840e51c13a3044a11",
+    };
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script>
-// Ganti konfigurasi ini dengan milik Firebase Anda
-const firebaseConfig = {
-  apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-  authDomain: "uangduty.firebaseapp.com",
-  databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "uangduty",
-  storageBucket: "uangduty.firebasestorage.app",
-  messagingSenderId: "598905752132",
-  appId: "1:598905752132:web:9b764840e51c3044a11",
-  measurementId: "G-YXZPEVYBDR"
-};
+    const user = prompt("Masukkan nama Anda:") || "Anonim";
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+    function sendMessage() {
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (!text) return;
+      const time = new Date().toISOString();
 
-let currentUser = null; // forum name (user id)
-let isStaff = false;
-
-const loadingEl = document.getElementById('loading');
-const statusEl = document.getElementById('status');
-const loginDiv = document.getElementById('login');
-const forumSection = document.getElementById('forumSection');
-const staffSection = document.getElementById('staffSection');
-
-const forumNameInput = document.getElementById('forumNameInput');
-const loginBtn = document.getElementById('loginBtn');
-const staffPassInput = document.getElementById('staffPassInput');
-const staffLoginBtn = document.getElementById('staffLoginBtn');
-
-const myForumNameEl = document.getElementById('myForumName');
-const addAmount = document.getElementById('addAmount');
-const addBtn = document.getElementById('addBtn');
-const takeAmount = document.getElementById('takeAmount');
-const takeBtn = document.getElementById('takeBtn');
-const resetBtn = document.getElementById('resetBtn');
-const uangdutyValue = document.getElementById('uangdutyValue');
-
-const forumList = document.getElementById('forumList');
-const chatMessages = document.getElementById('chatMessages');
-const chatInput = document.getElementById('chatInput');
-
-function showLoading(show) {
-  loadingEl.style.display = show ? 'block' : 'none';
-}
-
-function showStatus(text) {
-  statusEl.textContent = "Mode: " + text;
-}
-
-function saveUser(user) {
-  localStorage.setItem('forumUser', user);
-  currentUser = user;
-}
-
-function loadUser() {
-  const user = localStorage.getItem('forumUser');
-  if(user) {
-    currentUser = user;
-    return true;
-  }
-  return false;
-}
-
-function enterNormalMode(user) {
-  isStaff = false;
-  showStatus('Normal');
-  loginDiv.classList.add('hidden');
-  staffSection.classList.add('hidden');
-  forumSection.classList.remove('hidden');
-  myForumNameEl.textContent = user;
-  listenUserForum(user);
-  listenForumList();
-}
-
-function enterStaffMode() {
-  isStaff = true;
-  showStatus('Staff');
-  loginDiv.classList.add('hidden');
-  forumSection.classList.add('hidden');
-  staffSection.classList.remove('hidden');
-  listenForumList();
-  listenChat();
-}
-
-function listenUserForum(user) {
-  showLoading(true);
-  const userForumRef = db.ref('forums/' + user);
-  userForumRef.on('value', snapshot => {
-    showLoading(false);
-    if(!snapshot.exists()) {
-      // buat data baru
-      userForumRef.set({
-        uangduty: 0,
-        createdAt: Date.now(),
-        owner: user,
-        lastModified: Date.now()
+      db.ref("chats").push({
+        user,
+        text,
+        time
       });
-      uangdutyValue.textContent = '0';
-    } else {
-      const data = snapshot.val();
-      uangdutyValue.textContent = data.uangduty || 0;
-    }
-  });
-}
 
-function listenForumList() {
-  const forumsRef = db.ref('forums');
-  forumsRef.on('value', snapshot => {
-    forumList.innerHTML = '';
-    snapshot.forEach(child => {
-      const val = child.val();
-      const name = val.owner;
-      const div = document.createElement('div');
-      div.textContent = name;
-      div.className = 'forum-item';
-      forumList.appendChild(div);
+      input.value = "";
+    }
+
+    const chatLog = document.getElementById("chat-log");
+    db.ref("chats").on("child_added", (snapshot) => {
+      const msg = snapshot.val();
+      const waktu = new Date(msg.time).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const chatLine = `<div><strong>${msg.user}</strong> (${waktu}): ${msg.text}</div>`;
+      chatLog.innerHTML += chatLine;
+      chatLog.scrollTop = chatLog.scrollHeight;
     });
-  });
-}
-
-function listenChat() {
-  const chatRef = db.ref('chat');
-  chatRef.on('child_added', snapshot => {
-    const msg = snapshot.val();
-    const div = document.createElement('div');
-    const time = new Date(msg.timestamp).toLocaleTimeString();
-    div.textContent = `[${time}] ${msg.user}: ${msg.text}`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
-}
-
-loginBtn.onclick = () => {
-  const forumName = forumNameInput.value.trim();
-  if(!forumName) {
-    alert('Masukkan nama forum');
-    return;
-  }
-  saveUser(forumName);
-  enterNormalMode(forumName);
-};
-
-staffLoginBtn.onclick = () => {
-  const pass = staffPassInput.value.trim();
-  if(pass === 'RFD') {
-    enterStaffMode();
-  } else {
-    alert('Password staff salah!');
-  }
-};
-
-addBtn.onclick = () => {
-  const val = parseInt(addAmount.value);
-  if(isNaN(val) || val <= 0) {
-    alert('Masukkan jumlah tambah yang valid');
-    return;
-  }
-  const userForumRef = db.ref('forums/' + currentUser);
-  userForumRef.transaction(current => {
-    if(current) {
-      current.uangduty = (current.uangduty || 0) + val;
-      current.lastModified = Date.now();
-    }
-    return current;
-  });
-  addAmount.value = '';
-};
-
-takeBtn.onclick = () => {
-  const val = parseInt(takeAmount.value);
-  if(isNaN(val) || val <= 0) {
-    alert('Masukkan jumlah ambil yang valid');
-    return;
-  }
-  const userForumRef = db.ref('forums/' + currentUser);
-  userForumRef.transaction(current => {
-    if(current) {
-      current.uangduty = Math.max(0, (current.uangduty || 0) - val);
-      current.lastModified = Date.now();
-    }
-    return current;
-  });
-  takeAmount.value = '';
-};
-
-resetBtn.onclick = () => {
-  if(confirm('Yakin ingin setor (reset uangduty ke 0)?')) {
-    const userForumRef = db.ref('forums/' + currentUser);
-    userForumRef.update({ uangduty: 0, lastModified: Date.now() });
-  }
-};
-
-chatInput.addEventListener('keypress', e => {
-  if(e.key === 'Enter' && chatInput.value.trim()) {
-    const text = chatInput.value.trim();
-    const chatRef = db.ref('chat');
-    chatRef.push({
-      user: currentUser || 'Anon',
-      text,
-      timestamp: Date.now()
-    });
-    chatInput.value = '';
-  }
-});
-
-// Otomatis login jika data ada
-window.onload = () => {
-  if(loadUser()) {
-    enterNormalMode(currentUser);
-  }
-};
-</script>
-
+  </script>
 </body>
-  </html>
+</html>
