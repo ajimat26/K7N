@@ -8,7 +8,7 @@
   body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
   h1 { color: #2b6cb0; }
   #infoPengguna { margin-bottom: 15px; font-weight: bold; font-size: 1.1em; }
-  #akunSection, #forumSection, #staffSection {
+  #akunSection, #dashboardSection, #staffSection {
     background: white;
     padding: 15px 20px;
     border-radius: 8px;
@@ -16,7 +16,7 @@
     margin-bottom: 20px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  #akunSection input, #forumSection input[type=number], #staffSection input[type=password] {
+  input[type=text], input[type=number], input[type=password] {
     padding: 8px;
     margin: 8px 0;
     width: 100%;
@@ -51,11 +51,11 @@
     padding: 10px;
     background: #fafafa;
     border-radius: 5px;
+    font-size: 0.9em;
+    color: #444;
   }
   #riwayat p {
     margin: 4px 0;
-    font-size: 0.9em;
-    color: #444;
   }
   #chatSection {
     margin-top: 20px;
@@ -108,6 +108,7 @@
 <h1>UANGDUTY</h1>
 <div id="infoPengguna"></div>
 
+<!-- Buat akun -->
 <div id="akunSection" style="display:none;">
   <h3>Buat Akun Baru</h3>
   <input type="text" id="namaDepan" placeholder="Nama Depan" />
@@ -115,9 +116,10 @@
   <button onclick="buatAkun()">Buat Akun</button>
 </div>
 
-<div id="forumSection" style="display:none;">
+<!-- Dashboard setelah login -->
+<div id="dashboardSection" style="display:none;">
   <h2>Dashboard UANGDUTY</h2>
-  <p>Saldo Anda: <span id="saldo">0</span></p>
+  <p>Saldo Anda: <span id="saldo">0 Rupiah</span></p>
 
   <div>
     <input type="number" id="inputTambah" placeholder="Jumlah tambah (contoh: 50000)" />
@@ -143,8 +145,9 @@
   </div>
 </div>
 
-<button id="btnStaffMode" onclick="masukStaffMode()">Mode Staff</button>
+<button id="btnStaffMode" onclick="toggleStaffSection()">Mode Staff</button>
 
+<!-- Panel Staff -->
 <div id="staffSection">
   <h2>Panel Staff</h2>
   <input type="password" id="passwordStaff" placeholder="Masukkan password staff" />
@@ -153,7 +156,7 @@
 </div>
 
 <script>
-  // --- FIREBASE CONFIG ---
+  // --- KONFIGURASI FIREBASE ---
   const firebaseConfig = {
     apiKey: "API_KEY",
     authDomain: "PROJECT_ID.firebaseapp.com",
@@ -170,25 +173,29 @@
   let fullName = localStorage.getItem("fullName");
   let staffLogin = false;
 
+  // Format angka jadi Rp
   function formatRupiah(angka) {
+    if (!angka) return "0 Rupiah";
     return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " Rupiah";
   }
 
+  // Cek status akun di localstorage, tampilkan sesuai
   function cekStatusAkun() {
     if(userKey && fullName) {
       document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
       document.getElementById("akunSection").style.display = "none";
-      document.getElementById("forumSection").style.display = "block";
+      document.getElementById("dashboardSection").style.display = "block";
       pantauSaldo();
       pantauRiwayat();
       pantauChat();
     } else {
       document.getElementById("infoPengguna").innerText = "Anda belum memiliki akun, silakan buat akun.";
       document.getElementById("akunSection").style.display = "block";
-      document.getElementById("forumSection").style.display = "none";
+      document.getElementById("dashboardSection").style.display = "none";
     }
   }
 
+  // Buat akun baru
   function buatAkun() {
     const depan = document.getElementById("namaDepan").value.trim();
     const belakang = document.getElementById("namaBelakang").value.trim();
@@ -205,6 +212,7 @@
 
     const namaLengkap = `${depan} ${belakang}`;
 
+    // Simpan akun ke Firebase forum
     const ref = db.ref("forum").push();
     ref.set({
       nama: namaLengkap,
@@ -216,15 +224,82 @@
       localStorage.setItem("fullName", fullName);
       alert("Akun berhasil dibuat. Selamat datang, " + fullName);
       cekStatusAkun();
-    });
+    }).catch(err => alert("Gagal membuat akun: " + err));
   }
 
+  // Pantau saldo realtime
   function pantauSaldo() {
     db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-      let val = snap.val() || 0;
+      const val = snap.val() || 0;
       document.getElementById("saldo").innerText = formatRupiah(val);
     });
   }
 
+  // Fungsi tambah uang
+  function tambahUang() {
+    let jumlah = parseInt(document.getElementById("inputTambah").value);
+    if (!jumlah || jumlah <= 0) {
+      alert("Masukkan jumlah tambah yang valid.");
+      return;
+    }
+    db.ref(`forum/${userKey}`).once("value").then(snap => {
+      let saldoSekarang = snap.val().saldo || 0;
+      let saldoBaru = saldoSekarang + jumlah;
+      db.ref(`forum/${userKey}`).update({ saldo: saldoBaru });
+      tambahRiwayat(`Menambah uang: +${formatRupiah(jumlah)}`);
+      document.getElementById("inputTambah").value = "";
+    });
+  }
+
+  // Fungsi ambil uang
+  function ambilUang() {
+    let jumlah = parseInt(document.getElementById("inputAmbil").value);
+    if (!jumlah || jumlah <= 0) {
+      alert("Masukkan jumlah ambil yang valid.");
+      return;
+    }
+    db.ref(`forum/${userKey}`).once("value").then(snap => {
+      let saldoSekarang = snap.val().saldo || 0;
+      if (jumlah > saldoSekarang) {
+        alert("Saldo tidak cukup.");
+        return;
+      }
+      let saldoBaru = saldoSekarang - jumlah;
+      db.ref(`forum/${userKey}`).update({ saldo: saldoBaru });
+      tambahRiwayat(`Mengambil uang: -${formatRupiah(jumlah)}`);
+      document.getElementById("inputAmbil").value = "";
+    });
+  }
+
+  // Fungsi setor uang (reset saldo ke 0)
+  function setorUang() {
+    if(!confirm("Apakah anda yakin ingin reset saldo menjadi 0?")) return;
+    db.ref(`forum/${userKey}`).update({ saldo: 0 });
+    tambahRiwayat("Setor uang: saldo direset ke 0");
+  }
+
+  // Tambah riwayat transaksi, batasi 5 terakhir
   function tambahRiwayat(teks) {
-    const riwayat
+    const riwayatRef = db.ref(`forum/${userKey}/riwayat`);
+    riwayatRef.once("value").then(snap => {
+      let riwayat = snap.val() || [];
+      riwayat.push({ waktu: Date.now(), pesan: teks });
+      if(riwayat.length > 5) riwayat.shift();
+      riwayatRef.set(riwayat);
+    });
+  }
+
+  // Pantau riwayat realtime
+  function pantauRiwayat() {
+    db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
+      const list = snap.val();
+      const div = document.getElementById("riwayat");
+      if(!list || list.length === 0) {
+        div.innerHTML = "<h4>Riwayat Transaksi:</h4><p>Belum ada riwayat transaksi.</p>";
+      } else {
+        let html = "<h4>Riwayat Transaksi:</h4>";
+        for(let i=list.length-1; i>=0; i--) {
+          let date = new Date(list[i].waktu);
+          html += `<p>[${date.toLocaleTimeString()}] ${list[i].pesan}</p>`;
+        }
+        div.innerHTML = html;
