@@ -8,39 +8,72 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
+    #adminPanel { border: 1px solid #4CAF50; padding: 10px; margin-bottom: 20px; background-color: #e8f5e9; display: none; }
+    #adminToggle {
+      position: fixed;
+      top: 10px; left: 10px;
+      background-color: #4CAF50; color: white;
+      border: none; padding: 8px 12px;
+      cursor: pointer; border-radius: 4px;
+      font-weight: bold;
+      z-index: 1000;
+    }
+    #adminToggle.active { background-color: #2e7d32; }
+    #adminStatus {
+      position: fixed;
+      top: 45px; left: 10px;
+      font-weight: bold;
+      color: green;
+      display: none;
+      z-index: 1000;
+    }
     .section { margin-bottom: 30px; }
     input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; box-sizing: border-box; }
-    button { cursor: pointer; }
-    .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; background: #fafafa; }
+    .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: auto; background: #f9f9f9; }
     .message { margin-bottom: 10px; }
-    .right { text-align: right; background: #d4f7d4; padding: 5px; border-radius: 5px; }
-    #adminIndicator { color: green; font-weight: bold; }
-    #adminBtn { background-color: green; color: white; width: auto; margin-bottom: 10px; }
-    #adminPanel { border: 1px solid #000; padding: 10px; margin-top: 10px; background: #eef7ee; }
-    #saldo { color: green; font-weight: bold; font-size: 1.2em; }
-    .error { color: red; margin: 0 0 10px 0; }
+    .right { text-align: right; }
+    #saldo { color: green; font-weight: bold; }
+    #riwayat p { margin: 0 0 5px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #4CAF50; color: white; }
   </style>
 </head>
 <body>
 
+<button id="adminToggle">Mode Admin</button>
+<div id="adminStatus">Mode Admin Aktif</div>
+
 <h1>UANGDUTY</h1>
 
-<button id="adminBtn" onclick="toggleAdminMode()">Mode Admin</button>
-<p id="adminIndicator" style="display:none">Mode Admin Aktif</p>
+<div id="adminPanel">
+  <h3>Panel Admin</h3>
+  <label>
+    <input type="checkbox" id="toggleCreateAccount" />
+    Aktifkan pembuatan akun untuk anggota
+  </label>
+  <h4>Data Anggota Forum</h4>
+  <table id="dataAnggotaTable">
+    <thead>
+      <tr><th>Nama</th><th>Saldo</th><th>Aksi</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-<div class="section" id="buatAkunSection">
-  <h2>Buat Akun Anda</h2>
+<div class="section" id="createAccountSection">
+  <h2>Buat Forum Anda</h2>
   <input type="text" id="namaDepan" placeholder="Nama Depan" />
   <input type="text" id="namaBelakang" placeholder="Nama Belakang" />
-  <button onclick="buatAkun()">Buat Forum Anda</button>
+  <button onclick="buatAkun()">Buat Akun</button>
   <p id="infoPengguna"></p>
-  <p id="infoAkunDitutup" style="color: red; display: none;">Pembuatan akun sedang ditutup oleh admin.</p>
+  <p id="infoCreateStatus" style="color:red; font-weight:bold;"></p>
 </div>
 
 <div class="section" id="forumSection" style="display:none;">
   <h2>Forum Anda</h2>
   <p><strong>Saldo:</strong> <span id="saldo">0</span> Rupiah</p>
-  <input type="number" id="jumlah" placeholder="Masukkan jumlah uang" />
+  <input type="number" id="jumlah" placeholder="Jumlah Uang" />
   <button onclick="tambahUang()">Tambah Uang</button>
   <button onclick="ambilUang()">Ambil Uang</button>
   <button onclick="setorUang()">Setor (Reset Saldo)</button>
@@ -52,13 +85,6 @@
   <div class="chat-box" id="chatBox"></div>
   <textarea id="pesan" placeholder="Ketik pesan Anda"></textarea>
   <button onclick="kirimPesan()">Kirim</button>
-</div>
-
-<div class="section" id="adminPanel" style="display:none;">
-  <h2>Panel Admin</h2>
-  <button onclick="toggleAkunStatus()">Tutup/Buka Pembuatan Akun</button>
-  <p id="statusAkun">Status Akun: Aktif</p>
-  <div id="daftarForum"></div>
 </div>
 
 <script>
@@ -76,138 +102,181 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  const adminToggleBtn = document.getElementById('adminToggle');
+  const adminStatus = document.getElementById('adminStatus');
+  const adminPanel = document.getElementById('adminPanel');
+  const toggleCreateAccount = document.getElementById('toggleCreateAccount');
+  const createAccountSection = document.getElementById('createAccountSection');
+  const dataAnggotaTableBody = document.querySelector('#dataAnggotaTable tbody');
+  const infoCreateStatus = document.getElementById('infoCreateStatus');
+
   let userKey = localStorage.getItem("userKey");
   let fullName = localStorage.getItem("fullName");
   let isAdmin = false;
+  let createAccountEnabled = true;
 
-  // Cek dan set default akun aktif jika belum ada
-  db.ref("pengaturan/akunAktif").once("value").then(snap => {
-    if (!snap.exists()) {
-      db.ref("pengaturan/akunAktif").set(true);
+  // Load create account status from db (once)
+  db.ref("settings/createAccountEnabled").once("value").then(snap => {
+    if (snap.exists()) {
+      createAccountEnabled = snap.val();
+      toggleCreateAccount.checked = createAccountEnabled;
+      updateCreateAccountSection();
     } else {
-      updateStatusAkunUI(snap.val());
+      // Default aktif
+      db.ref("settings/createAccountEnabled").set(true);
     }
   });
 
-  // Jika user sudah login (data localStorage ada)
-  if (userKey && fullName) {
-    tampilkanUserInfo();
-    showForumSection();
-    pantauSaldo();
-    pantauRiwayat();
+  function updateCreateAccountSection() {
+    if (!createAccountEnabled) {
+      createAccountSection.style.display = "none";
+      if (!userKey) {
+        infoCreateStatus.innerText = "Pembuatan akun saat ini DITUTUP oleh admin.";
+      }
+    } else {
+      if (!userKey) {
+        createAccountSection.style.display = "block";
+        infoCreateStatus.innerText = "";
+      }
+    }
   }
 
+  function refreshUserData() {
+    if (userKey && fullName) {
+      document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
+      document.getElementById("forumSection").style.display = "block";
+      createAccountSection.style.display = "none";
+      pantauSaldo();
+      pantauRiwayat();
+    } else {
+      document.getElementById("forumSection").style.display = "none";
+      if (createAccountEnabled) {
+        createAccountSection.style.display = "block";
+        infoCreateStatus.innerText = "";
+      } else {
+        createAccountSection.style.display = "none";
+        if (!userKey) infoCreateStatus.innerText = "Pembuatan akun saat ini DITUTUP oleh admin.";
+      }
+    }
+  }
+
+  // Admin toggle button click
+  adminToggleBtn.addEventListener("click", () => {
+    if (!isAdmin) {
+      const pwd = prompt("Masukkan password admin:");
+      if (pwd === "RFD1") {
+        isAdmin = true;
+        adminToggleBtn.classList.add("active");
+        adminStatus.style.display = "block";
+        adminPanel.style.display = "block";
+        loadAdminData();
+      } else {
+        alert("Password salah!");
+      }
+    } else {
+      isAdmin = false;
+      adminToggleBtn.classList.remove("active");
+      adminStatus.style.display = "none";
+      adminPanel.style.display = "none";
+    }
+  });
+
+  // Admin toggles create account status
+  toggleCreateAccount.addEventListener("change", () => {
+    createAccountEnabled = toggleCreateAccount.checked;
+    db.ref("settings/createAccountEnabled").set(createAccountEnabled);
+    updateCreateAccountSection();
+  });
+
+  // Buat akun baru
   function buatAkun() {
     const depan = document.getElementById("namaDepan").value.trim();
     const belakang = document.getElementById("namaBelakang").value.trim();
-    const nama = `${depan} ${belakang}`;
-
     if (!depan || !belakang) {
       alert("Lengkapi nama Anda.");
+      return;
+    }
+    if (!createAccountEnabled) {
+      alert("Pembuatan akun sedang ditutup oleh admin.");
       return;
     }
     if (userKey) {
       alert("Anda sudah memiliki akun.");
       return;
     }
+    const nama = depan + " " + belakang;
 
-    db.ref("pengaturan/akunAktif").once("value").then(snap => {
-      if (!snap.val()) {
-        document.getElementById("infoAkunDitutup").style.display = "block";
-        return;
+    // Periksa apakah nama sudah ada (unik)
+    db.ref("forum").orderByChild("nama").equalTo(nama).once("value").then(snap => {
+      if (snap.exists()) {
+        alert("Nama sudah digunakan.");
+      } else {
+        const ref = db.ref("forum").push();
+        ref.set({ nama, saldo: 0 });
+        userKey = ref.key;
+        fullName = nama;
+        localStorage.setItem("userKey", userKey);
+        localStorage.setItem("fullName", fullName);
+        refreshUserData();
+        location.reload();
       }
-      const ref = db.ref("forum").push();
-      ref.set({ nama, saldo: 0 });
-      userKey = ref.key;
-      fullName = nama;
-      localStorage.setItem("userKey", userKey);
-      localStorage.setItem("fullName", fullName);
-      location.reload();
     });
   }
 
-  function tampilkanUserInfo() {
-    document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
-  }
-
-  function showForumSection() {
-    document.getElementById("forumSection").style.display = "block";
-    document.getElementById("buatAkunSection").style.display = "none";
-  }
-
+  // Pantau saldo realtime
   function pantauSaldo() {
     db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-      const val = snap.val() || 0;
-      document.getElementById("saldo").innerText = formatUang(val);
+      let val = snap.val();
+      val = val ? val : 0;
+      document.getElementById("saldo").innerText = val.toLocaleString("id-ID") + " Rupiah";
     });
   }
 
+  // Pantau riwayat maksimal 5
   function pantauRiwayat() {
     db.ref(`forum/${userKey}/riwayat`).limitToLast(5).on("value", snap => {
       const riw = snap.val() || {};
       const el = document.getElementById("riwayat");
-      el.innerHTML = "<h4>Riwayat (Max 5):</h4>";
-      for (let key in riw) {
-        el.innerHTML += `<p>${riw[key]}</p>`;
-      }
+      el.innerHTML = "<h4>Riwayat:</h4>";
+      Object.values(riw).forEach(teks => {
+        el.innerHTML += `<p>${teks}</p>`;
+      });
     });
   }
 
-  function tambahUang() {
-    ubahSaldo("tambah");
+  // Tambah riwayat, simpan maksimal 5
+  function tambahRiwayat(teks) {
+    const riwayatRef = db.ref(`forum/${userKey}/riwayat`);
+    riwayatRef.push(teks).then(() => {
+      riwayatRef.once("value").then(snap => {
+        const val = snap.val();
+        if (val && Object.keys(val).length > 5) {
+          // hapus paling lama
+          const keys = Object.keys(val);
+          const oldestKey = keys[0];
+          riwayatRef.child(oldestKey).remove();
+        }
+      });
+    });
   }
 
-  function ambilUang() {
-    ubahSaldo("ambil");
-  }
-
-  function setorUang() {
-    if (!userKey) return alert("Anda belum login.");
-    if (confirm("Apakah Anda yakin ingin reset saldo ke 0?")) {
-      db.ref(`forum/${userKey}`).update({ saldo: 0 });
-      tambahRiwayat("Setor saldo ke 0 (reset saldo)");
-    }
-  }
-
+  // Ubah saldo
   function ubahSaldo(tipe) {
-    const jumlahInput = document.getElementById("jumlah").value;
-    let jumlah = parseInt(jumlahInput);
+    const jumlah = parseInt(document.getElementById("jumlah").value);
     if (isNaN(jumlah) || jumlah <= 0) {
-      alert("Masukkan jumlah uang yang valid (lebih dari 0).");
+      alert("Masukkan jumlah valid.");
       return;
     }
     const saldoRef = db.ref(`forum/${userKey}/saldo`);
     saldoRef.once("value").then(snap => {
       let saldo = snap.val() || 0;
-      if (tipe === "ambil" && jumlah > saldo) {
-        alert("Saldo tidak cukup untuk mengambil uang sebanyak itu.");
-        return;
-      }
       if (tipe === "tambah") saldo += jumlah;
-      if (tipe === "ambil") saldo -= jumlah;
-
+      if (tipe === "ambil") {
+        if (saldo < jumlah) {
+          alert("Saldo tidak cukup.");
+          return;
+        }
+        saldo -= jumlah;
+      }
       saldoRef.set(saldo);
-      tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil"} ${formatUang(jumlah)} Rupiah`);
-    });
-  }
-
-  function tambahRiwayat(teks) {
-    const ref = db.ref(`forum/${userKey}/riwayat`).push();
-    ref.set(teks);
-  }
-
-  db.ref("chat").on("child_added", snap => {
-    const { nama, pesan } = snap.val();
-    const div = document.createElement("div");
-    div.className = "message" + (nama === fullName ? " right" : "");
-    div.innerText = `${nama}: ${pesan}`;
-    document.getElementById("chatBox").appendChild(div);
-    document.getElementById("chatBox").scrollTop = 99999;
-  });
-
-  function kirimPesan() {
-    const teks = document.getElementById("pesan").value.trim();
-    if (!teks) return alert("Pesan tidak boleh kosong.");
-    if (!fullName) return alert("Anda belum login.");
-    db.ref("chat").push({ nama: fullName, pesan: teks });
-    document.getElementById("pesan").
+      tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil
