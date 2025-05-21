@@ -2,52 +2,52 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UANGDUTY</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
-    .section { margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-    input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; }
-    .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; background: #eee; }
-    .message { margin-bottom: 10px; }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f0f0; }
+    .box { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 8px #ccc; }
+    input, button, textarea { width: 100%; padding: 10px; margin-top: 5px; }
+    .chat-box { max-height: 200px; overflow-y: auto; background: #eee; padding: 10px; margin-top: 10px; }
+    .message { margin-bottom: 8px; }
     .right { text-align: right; }
-    #saldo { color: green; font-weight: bold; }
     .admin-data { border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <h1>UANGDUTY</h1>
 
-  <div class="section" id="akunSection">
-    <h2>Buat Akun</h2>
+  <div class="box" id="akunBox">
+    <h2>Buat Akun Pegawai</h2>
     <input type="text" id="namaDepan" placeholder="Nama Depan">
     <input type="text" id="namaBelakang" placeholder="Nama Belakang">
     <button onclick="buatAkun()">Buat Forum Anda</button>
+    <hr>
     <button onclick="masukAdmin()">Mode Admin</button>
-    <p id="infoPengguna"></p>
   </div>
 
-  <div class="section" id="forumSection" style="display:none">
-    <h2>Forum Anda</h2>
+  <div class="box hidden" id="forumBox">
+    <h2>Forum Pegawai</h2>
+    <p><strong>Selamat datang:</strong> <span id="namaLengkap"></span></p>
     <p><strong>Saldo:</strong> <span id="saldo">0</span> Rupiah</p>
-    <input type="number" id="jumlah" placeholder="Jumlah Uang">
+    <input type="number" id="jumlah" placeholder="Jumlah uang">
     <button onclick="tambahUang()">Tambah</button>
     <button onclick="ambilUang()">Ambil</button>
     <button onclick="setorUang()">Setor (Reset)</button>
     <div id="riwayat"></div>
   </div>
 
-  <div class="section" id="adminSection" style="display:none">
-    <h2>Mode Admin</h2>
+  <div class="box hidden" id="adminBox">
+    <h2>Panel Admin</h2>
     <div id="adminList"></div>
   </div>
 
-  <div class="section">
-    <h2>Obrolan</h2>
+  <div class="box">
+    <h2>Obrolan Chat</h2>
     <div class="chat-box" id="chatBox"></div>
-    <textarea id="pesan" placeholder="Ketik pesan Anda"></textarea>
+    <textarea id="pesan" placeholder="Ketik pesan..."></textarea>
     <button onclick="kirimPesan()">Kirim</button>
   </div>
 
@@ -59,8 +59,7 @@
       projectId: "uangduty",
       storageBucket: "uangduty.appspot.com",
       messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-      measurementId: "G-YXZPEVYBDR"
+      appId: "1:598905752132:web:9b764840e51c13a3044a11"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -69,9 +68,9 @@
     let fullName = localStorage.getItem("fullName");
 
     if (userKey && fullName && fullName !== "ADMIN") {
-      document.getElementById("akunSection").style.display = "none";
-      document.getElementById("forumSection").style.display = "block";
-      document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
+      document.getElementById("akunBox").classList.add("hidden");
+      document.getElementById("forumBox").classList.remove("hidden");
+      document.getElementById("namaLengkap").innerText = fullName;
       pantauSaldo();
       pantauRiwayat();
     }
@@ -80,36 +79,33 @@
       const depan = document.getElementById("namaDepan").value.trim();
       const belakang = document.getElementById("namaBelakang").value.trim();
       const nama = `${depan} ${belakang}`;
+      if (!depan || !belakang) return alert("Isi nama lengkap.");
 
-      if (!depan || !belakang) return alert("Lengkapi nama Anda.");
-
-      if (!userKey) {
-        const ref = db.ref("forum").push();
-        ref.set({ nama, saldo: 0 });
-        userKey = ref.key;
-        fullName = nama;
-        localStorage.setItem("userKey", userKey);
-        localStorage.setItem("fullName", nama);
-        location.reload();
-      }
+      const ref = db.ref("forum").push();
+      ref.set({ nama, saldo: 0 });
+      userKey = ref.key;
+      fullName = nama;
+      localStorage.setItem("userKey", userKey);
+      localStorage.setItem("fullName", fullName);
+      location.reload();
     }
 
     function pantauSaldo() {
       db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-        const val = snap.val();
-        document.getElementById("saldo").innerText = formatUang(val || 0);
+        const val = snap.val() || 0;
+        document.getElementById("saldo").innerText = formatRupiah(val);
       });
     }
 
     function pantauRiwayat() {
       db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
-        const riw = snap.val();
         const el = document.getElementById("riwayat");
         el.innerHTML = "<h4>Riwayat:</h4>";
-        if (riw) {
-          const list = Object.values(riw).slice(-5); // max 5 riwayat terakhir
-          for (let item of list) {
-            el.innerHTML += `<p>${item}</p>`;
+        const val = snap.val();
+        if (val) {
+          const list = Object.values(val).slice(-5);
+          for (let log of list) {
+            el.innerHTML += `<p>${log}</p>`;
           }
         }
       });
@@ -124,82 +120,81 @@
     }
 
     function setorUang() {
-      db.ref(`forum/${userKey}`).update({ saldo: 0 });
+      db.ref(`forum/${userKey}/saldo`).set(0);
       tambahRiwayat("Setor semua saldo ke 0");
     }
 
-    function ubahSaldo(tipe) {
+    function ubahSaldo(mode) {
       const jumlah = parseInt(document.getElementById("jumlah").value);
       if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah valid.");
       const saldoRef = db.ref(`forum/${userKey}/saldo`);
       saldoRef.once("value").then(snap => {
         let saldo = snap.val() || 0;
-        if (tipe === "tambah") saldo += jumlah;
-        if (tipe === "ambil") saldo -= jumlah;
+        saldo = mode === "tambah" ? saldo + jumlah : saldo - jumlah;
         saldoRef.set(saldo);
-        tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil"} ${formatUang(jumlah)} Rupiah`);
+        tambahRiwayat(`${mode === "tambah" ? "Tambah" : "Ambil"} ${formatRupiah(jumlah)}`);
       });
     }
 
     function tambahRiwayat(teks) {
-      const riwayatRef = db.ref(`forum/${userKey}/riwayat`);
-      riwayatRef.once("value").then(snap => {
-        const data = snap.val() || {};
-        const keys = Object.keys(data);
-        if (keys.length >= 5) {
-          riwayatRef.child(keys[0]).remove();
-        }
-        riwayatRef.push(teks);
-      });
+      const ref = db.ref(`forum/${userKey}/riwayat`).push();
+      ref.set(teks);
     }
 
-    // Chat
+    function kirimPesan() {
+      const teks = document.getElementById("pesan").value;
+      if (!teks.trim()) return;
+      const nama = localStorage.getItem("fullName") || "Tamu";
+      db.ref("chat").push({ nama, pesan: teks });
+      document.getElementById("pesan").value = "";
+    }
+
     db.ref("chat").on("child_added", snap => {
       const { nama, pesan } = snap.val();
       const div = document.createElement("div");
       div.className = "message" + (nama === fullName ? " right" : "");
       div.innerText = `${nama}: ${pesan}`;
       document.getElementById("chatBox").appendChild(div);
-      document.getElementById("chatBox").scrollTop = 99999;
+      document.getElementById("chatBox").scrollTop = 9999;
     });
 
-    function kirimPesan() {
-      const teks = document.getElementById("pesan").value;
-      if (!teks || !fullName) return;
-      db.ref("chat").push({ nama: fullName, pesan: teks });
-      document.getElementById("pesan").value = "";
-    }
-
     function masukAdmin() {
-      const pwd = prompt("Masukkan password admin:");
-      if (pwd === "RFD") {
-        document.getElementById("akunSection").style.display = "none";
-        document.getElementById("adminSection").style.display = "block";
+      const pass = prompt("Masukkan password admin:");
+      if (pass === "RFD") {
         fullName = "ADMIN";
-        tampilkanDataForum();
+        localStorage.setItem("fullName", fullName);
+        document.getElementById("akunBox").classList.add("hidden");
+        document.getElementById("forumBox").classList.add("hidden");
+        document.getElementById("adminBox").classList.remove("hidden");
+        tampilkanSemuaData();
       } else {
         alert("Password salah.");
       }
     }
 
-    function tampilkanDataForum() {
-      const adminList = document.getElementById("adminList");
-      adminList.innerHTML = "";
+    function tampilkanSemuaData() {
+      const list = document.getElementById("adminList");
+      list.innerHTML = "";
       db.ref("forum").once("value").then(snap => {
         snap.forEach(child => {
           const data = child.val();
-          adminList.innerHTML += `
-            <div class="admin-data">
-              <p><strong>Nama:</strong> ${data.nama}</p>
-              <p><strong>Saldo:</strong> ${formatUang(data.saldo)} Rupiah</p>
-              <hr>
-            </div>
-          `;
+          const id = child.key;
+          let el = `<div class="admin-data"><p><strong>Nama:</strong> ${data.nama}</p><p><strong>Saldo:</strong> ${formatRupiah(data.saldo)}</p>`;
+          if (data.riwayat) {
+            el += `<p><strong>Riwayat:</strong><br>`;
+            const logs = Object.values(data.riwayat).slice(-5);
+            for (let log of logs) {
+              el += `- ${log}<br>`;
+            }
+            el += `</p>`;
+          }
+          el += `</div>`;
+          list.innerHTML += el;
         });
       });
     }
 
-    function formatUang(angka) {
+    function formatRupiah(angka) {
       return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "rb";
     }
   </script>
