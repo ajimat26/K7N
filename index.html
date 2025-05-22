@@ -1,176 +1,171 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAFD MONEY</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SAFD MONEY Forum</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    header { background: #4CAF50; color: white; padding: 10px; text-align: center; }
-    main { padding: 20px; }
+    body { font-family: Arial, sans-serif; background: #eee; padding: 20px; margin: 0; }
+    .panel { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; }
     .hidden { display: none; }
-    .panel, .admin-panel, .forum-panel, .top-tier { background: white; padding: 20px; margin: 10px 0; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    input, button { margin-top: 5px; display: block; padding: 8px; width: 100%; max-width: 300px; }
+    .chat-box { background: #f9f9f9; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #ccc; margin-top: 10px; }
     .green { color: green; font-weight: bold; }
-    button { margin: 5px 0; }
   </style>
 </head>
 <body>
-<header>
-  <h1>SAFD MONEY</h1>
-</header>
-<main>
-  <div id="buatAkun" class="panel">
-    <h2>Buat Akun</h2>
-    <input type="text" id="username" placeholder="Nama Akun"><br>
-    <input type="number" id="uang" placeholder="Masukkan uang"><br>
-    <button onclick="buatAkun()">Buat</button>
-  </div>
 
-  <div id="forumPanel" class="forum-panel hidden">
-    <h2>Forum SAFD MONEY</h2>
-    <p id="namaForum"></p>
-    <p>Uang: <span id="uangDisplay" class="green"></span></p>
-    <input type="text" id="chatInput" placeholder="Ketik pesan"><br>
-    <button onclick="kirimChat()">Kirim</button>
-    <p id="chatArea"></p>
-    <button onclick="aksesAdmin()">Admin</button>
-  </div>
+<div class="panel" id="buatAkun">
+  <h2>Buat Akun SAFD</h2>
+  <input type="text" id="namaAkun" placeholder="Nama Akun"/>
+  <input type="number" id="uangAkun" placeholder="Saldo Awal"/>
+  <button onclick="buatAkun()">Buat Akun</button>
+</div>
 
-  <div id="adminLogin" class="admin-panel hidden">
-    <h3>Masukkan Password Admin</h3>
-    <input type="password" id="adminPass"><br>
-    <button onclick="loginAdmin()">Masuk</button>
-  </div>
+<div class="panel hidden" id="forumPanel">
+  <h2>Forum SAFD MONEY</h2>
+  <p>Selamat datang, <span id="namaPengguna"></span>!</p>
+  <p>Saldo: <span id="uangPengguna" class="green"></span></p>
+  <input type="text" id="chatInput" placeholder="Tulis pesan..."/>
+  <button onclick="kirimChat()">Kirim</button>
+  <div class="chat-box" id="chatBox"></div>
+  <button onclick="bukaAdmin()">Masuk Admin</button>
+</div>
 
-  <div id="adminPanel" class="admin-panel hidden">
-    <h2>Panel Admin</h2>
-    <p>Nama Admin: <span id="namaAdmin"></span></p>
-    <input type="text" id="editAdmin" placeholder="Ubah Nama Admin">
-    <button onclick="ubahNamaAdmin()">Ubah Nama</button>
+<div class="panel hidden" id="loginAdmin">
+  <h2>Login Admin</h2>
+  <input type="password" id="adminPassword" placeholder="Password Admin"/>
+  <button onclick="loginAdmin()">Login</button>
+</div>
 
-    <h3>Data Akun</h3>
-    <ul id="listAkun"></ul>
+<div class="panel hidden" id="adminPanel">
+  <h2>Panel Admin</h2>
+  <p>Nama Admin: <span id="namaAdminTampil"></span></p>
+  <input type="text" id="editNamaAdmin" placeholder="Ubah Nama Admin"/>
+  <button onclick="ubahNamaAdmin()">Ubah Nama</button>
+  <h3>Daftar Akun</h3>
+  <ul id="daftarAkun"></ul>
+</div>
 
-    <h3>Top Tier</h3>
-    <ol id="topTierList"></ol>
-  </div>
-</main>
+<div class="panel" id="topTierPanel">
+  <h2>Top Tier Investor</h2>
+  <ol id="topTierList"></ol>
+</div>
 
 <script>
 let akun = null;
-let akunList = JSON.parse(localStorage.getItem('akunList')) || [];
-let adminName = localStorage.getItem('adminName') || "Admin";
+let akunList = JSON.parse(localStorage.getItem("akunList")) || [];
+let adminName = localStorage.getItem("adminName") || "Admin SAFD";
 
-function buatAkun() {
-  const nama = document.getElementById('username').value.trim();
-  const uang = parseInt(document.getElementById('uang').value);
-  if (nama && uang) {
-    akun = { nama, uang };
-    akunList.push(akun);
-    localStorage.setItem('akunList', JSON.stringify(akunList));
-    document.getElementById('buatAkun').classList.add('hidden');
-    tampilForum();
-  }
-}
-
-function tampilForum() {
-  document.getElementById('forumPanel').classList.remove('hidden');
-  document.getElementById('namaForum').innerText = "Selamat datang, " + akun.nama;
-  document.getElementById('uangDisplay').innerText = formatRupiah(akun.uang);
-}
-
-function kirimChat() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (text) {
-    document.getElementById('chatArea').innerHTML += `<br><b>${akun.nama}:</b> ${text}`;
-    input.value = '';
-  }
-}
-
-function aksesAdmin() {
-  document.getElementById('adminLogin').classList.remove('hidden');
-}
-
-function loginAdmin() {
-  const pass = document.getElementById('adminPass').value;
-  if (pass === "RFD1") {
-    document.getElementById('adminLogin').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    document.getElementById('namaAdmin').innerText = adminName;
-    tampilkanDataAkun();
-    tampilkanTopTier();
-    akun.nama = adminName;
-  }
-}
-
-function ubahNamaAdmin() {
-  const newName = document.getElementById('editAdmin').value.trim();
-  if (newName) {
-    adminName = newName;
-    localStorage.setItem('adminName', adminName);
-    document.getElementById('namaAdmin').innerText = adminName;
-    akun.nama = adminName;
-  }
-}
-
-function tampilkanDataAkun() {
-  const list = document.getElementById('listAkun');
-  list.innerHTML = '';
-  akunList.forEach((a, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `${a.nama} - <span class="green">${formatRupiah(a.uang)}</span>
-      <button onclick="ubahNama(${i})">Ubah Nama</button>
-      <button onclick="hapusAkun(${i})">Hapus</button>`;
-    list.appendChild(li);
-  });
+function simpanAkunList() {
+  localStorage.setItem("akunList", JSON.stringify(akunList));
 }
 
 function tampilkanTopTier() {
-  const top = akunList.slice().sort((a, b) => b.uang - a.uang).slice(0, 3);
-  const topList = document.getElementById('topTierList');
-  topList.innerHTML = '';
-  top.forEach((a, i) => {
-    const li = document.createElement('li');
-    li.textContent = `${a.nama} - ${formatRupiah(a.uang)}`;
-    topList.appendChild(li);
+  const sorted = [...akunList].sort((a, b) => b.uang - a.uang).slice(0, 3);
+  const list = document.getElementById("topTierList");
+  list.innerHTML = "";
+  sorted.forEach(a => {
+    list.innerHTML += `<li>${a.nama} - <span class="green">Rp ${a.uang.toLocaleString()}</span></li>`;
   });
 }
 
-function ubahNama(index) {
-  const newName = prompt("Masukkan nama baru:");
-  if (newName) {
-    akunList[index].nama = newName;
-    localStorage.setItem('akunList', JSON.stringify(akunList));
-    tampilkanDataAkun();
-    tampilkanTopTier();
-  }
+function buatAkun() {
+  const nama = document.getElementById("namaAkun").value.trim();
+  const uang = parseInt(document.getElementById("uangAkun").value);
+  if (!nama || isNaN(uang)) return alert("Isi semua kolom!");
+
+  akun = { nama, uang };
+  akunList.push(akun);
+  simpanAkunList();
+  document.getElementById("buatAkun").classList.add("hidden");
+  masukForum();
+}
+
+function masukForum() {
+  document.getElementById("forumPanel").classList.remove("hidden");
+  document.getElementById("namaPengguna").textContent = akun.nama;
+  document.getElementById("uangPengguna").textContent = `Rp ${akun.uang.toLocaleString()}`;
+  tampilkanTopTier();
+}
+
+function kirimChat() {
+  const pesan = document.getElementById("chatInput").value.trim();
+  if (!pesan) return;
+  document.getElementById("chatBox").innerHTML += `<p><b>${akun.nama}:</b> ${pesan}</p>`;
+  document.getElementById("chatInput").value = "";
+}
+
+function bukaAdmin() {
+  document.getElementById("loginAdmin").classList.remove("hidden");
+}
+
+function loginAdmin() {
+  const pass = document.getElementById("adminPassword").value;
+  if (pass !== "RFD1") return alert("Password salah!");
+  document.getElementById("loginAdmin").classList.add("hidden");
+  document.getElementById("adminPanel").classList.remove("hidden");
+  document.getElementById("namaAdminTampil").textContent = adminName;
+  tampilkanDaftarAkun();
+  akun.nama = adminName;
+  document.getElementById("namaPengguna").textContent = adminName;
+}
+
+function ubahNamaAdmin() {
+  const namaBaru = document.getElementById("editNamaAdmin").value.trim();
+  if (!namaBaru) return;
+  adminName = namaBaru;
+  localStorage.setItem("adminName", adminName);
+  document.getElementById("namaAdminTampil").textContent = adminName;
+  akun.nama = adminName;
+  document.getElementById("namaPengguna").textContent = adminName;
+}
+
+function tampilkanDaftarAkun() {
+  const ul = document.getElementById("daftarAkun");
+  ul.innerHTML = "";
+  akunList.forEach((a, i) => {
+    ul.innerHTML += `<li>${a.nama} - <span class="green">Rp ${a.uang.toLocaleString()}</span> 
+    <button onclick="gantiNama(${i})">Ganti Nama</button> 
+    <button onclick="hapusAkun(${i})">Hapus</button></li>`;
+  });
+}
+
+function gantiNama(index) {
+  const namaBaru = prompt("Nama baru:");
+  if (!namaBaru) return;
+  akunList[index].nama = namaBaru;
+  simpanAkunList();
+  tampilkanDaftarAkun();
+  tampilkanTopTier();
 }
 
 function hapusAkun(index) {
+  const hapusNama = akunList[index].nama;
   akunList.splice(index, 1);
-  localStorage.setItem('akunList', JSON.stringify(akunList));
-  tampilkanDataAkun();
+  simpanAkunList();
+  tampilkanDaftarAkun();
   tampilkanTopTier();
-  if (akun && akun.nama === akunList[index]?.nama) {
-    akun = null;
-    document.getElementById('forumPanel').classList.add('hidden');
-    document.getElementById('buatAkun').classList.remove('hidden');
-  }
-}
 
-function formatRupiah(angka) {
-  return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (akun && akun.nama === hapusNama) {
+    akun = null;
+    document.getElementById("forumPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
+    document.getElementById("buatAkun").classList.remove("hidden");
+  }
 }
 
 window.onload = () => {
   if (akunList.length === 0) {
-    document.getElementById('buatAkun').classList.remove('hidden');
+    document.getElementById("buatAkun").classList.remove("hidden");
   } else {
     akun = akunList[0];
-    tampilForum();
+    masukForum();
   }
+  tampilkanTopTier();
 };
 </script>
+
 </body>
 </html>
