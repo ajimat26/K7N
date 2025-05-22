@@ -2,181 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Multi Game Simulator</title>
+<title>Fishing Simulator dengan Gambar</title>
 <style>
-  body { font-family: Arial, sans-serif; text-align: center; }
-  #menu { margin-top: 20px; }
-  button { margin: 5px; padding: 10px 20px; font-size: 16px; }
-  #gameArea { margin-top: 20px; }
-  canvas { background: #eee; display: block; margin: 0 auto; }
+  body { text-align: center; font-family: Arial, sans-serif; background: #a0d8f7; }
+  canvas { background: #87ceeb; display: block; margin: 20px auto; border: 2px solid #004466; }
+  button { padding: 10px 20px; font-size: 16px; }
 </style>
 </head>
 <body>
 
-<h1>Pilih Game Simulator</h1>
-<div id="menu">
-  <button onclick="startFishing()">Simulator Memancing</button>
-  <button onclick="startGardening()">Simulator Berkebun</button>
-  <button onclick="startBusiness()">Simulator Bisnis</button>
-</div>
-
-<div id="gameArea"></div>
+<h1>Fishing Simulator dengan Gambar</h1>
+<canvas id="gameCanvas" width="600" height="400"></canvas>
+<p>Score: <span id="score">0</span></p>
+<button id="castBtn">Lempar Joran</button>
 
 <script>
-const gameArea = document.getElementById('gameArea');
+// Load gambar ikan dan joran
+const fishImg = new Image();
+fishImg.src = 'https://i.imgur.com/JhxNu0B.png'; // contoh gambar ikan
 
-// Bersihkan gameArea sebelum mulai game baru
-function clearGameArea() {
-  gameArea.innerHTML = '';
+const rodImg = new Image();
+rodImg.src = 'https://i.imgur.com/MhG63ZV.png'; // contoh gambar joran
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreDisplay = document.getElementById('score');
+const castBtn = document.getElementById('castBtn');
+
+let score = 0;
+let fishing = false;
+let fishAppeared = false;
+let fishX = 0;
+let fishY = 0;
+let fishWidth = 80;
+let fishHeight = 40;
+
+function drawWater() {
+  ctx.fillStyle = '#3399ff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-// --- Simulator Memancing ---
-function startFishing() {
-  clearGameArea();
+function drawFish() {
+  ctx.drawImage(fishImg, fishX, fishY, fishWidth, fishHeight);
+}
 
-  const container = document.createElement('div');
-  container.innerHTML = `
-    <h2>Fishing Simulator</h2>
-    <canvas id="fishCanvas" width="600" height="400"></canvas>
-    <p>Score: <span id="score">0</span></p>
-    <button id="castBtn">Lempar Joran</button>
-  `;
-  gameArea.appendChild(container);
+function drawRod() {
+  // Gambar joran di sisi kanan bawah
+  ctx.drawImage(rodImg, canvas.width - 150, canvas.height - 150, 100, 100);
+}
 
-  const canvas = document.getElementById('fishCanvas');
-  const ctx = canvas.getContext('2d');
-  const scoreDisplay = container.querySelector('#score');
-  const castBtn = container.querySelector('#castBtn');
+function clear() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
-  let score = 0;
-  let fishing = false;
-  let fishAppeared = false;
-  let fishX = 0;
-  let fishY = 0;
-  let fishSize = 30;
+function appearFish() {
+  fishX = Math.random() * (canvas.width - fishWidth);
+  fishY = Math.random() * (canvas.height - fishHeight);
+  fishAppeared = true;
+  drawFish();
+}
 
-  function drawWater() {
-    ctx.fillStyle = '#3399ff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+function update() {
+  clear();
+  drawWater();
+  drawRod();
 
-  function drawFish() {
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.ellipse(fishX, fishY, fishSize, fishSize / 2, 0, 0, 2 * Math.PI);
-    ctx.fill();
-  }
-
-  function clear() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  function appearFish() {
-    fishX = Math.random() * (canvas.width - fishSize * 2) + fishSize;
-    fishY = Math.random() * (canvas.height - fishSize * 2) + fishSize;
-    fishAppeared = true;
+  if (fishAppeared) {
     drawFish();
   }
+}
 
-  function update() {
-    clear();
-    drawWater();
-
-    if (fishAppeared) {
-      drawFish();
-    }
-  }
-
-  castBtn.addEventListener('click', () => {
-    if (!fishing) {
-      fishing = true;
-      fishAppeared = false;
-      scoreDisplay.textContent = score;
-      update();
-
-      const waitTime = Math.random() * 2000 + 1000;
-      setTimeout(() => {
-        if (fishing) {
-          appearFish();
-        }
-      }, waitTime);
-    }
-  });
-
-  canvas.addEventListener('click', (e) => {
-    if (fishing && fishAppeared) {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      const dx = mouseX - fishX;
-      const dy = mouseY - fishY;
-
-      if (Math.sqrt(dx * dx + dy * dy) < fishSize) {
-        score++;
-        scoreDisplay.textContent = score;
-        fishing = false;
-        fishAppeared = false;
-        update();
-        alert('Ikan tertangkap!');
-      }
-    }
-  });
-
-  function gameLoop() {
+castBtn.addEventListener('click', () => {
+  if (!fishing) {
+    fishing = true;
+    fishAppeared = false;
+    scoreDisplay.textContent = score;
     update();
-    requestAnimationFrame(gameLoop);
+
+    const waitTime = Math.random() * 2000 + 1000;
+    setTimeout(() => {
+      if (fishing) {
+        appearFish();
+      }
+    }, waitTime);
   }
+});
 
-  gameLoop();
+canvas.addEventListener('click', (e) => {
+  if (fishing && fishAppeared) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    if (mouseX > fishX && mouseX < fishX + fishWidth && mouseY > fishY && mouseY < fishY + fishHeight) {
+      score++;
+      scoreDisplay.textContent = score;
+      fishing = false;
+      fishAppeared = false;
+      update();
+      alert('Ikan tertangkap!');
+    }
+  }
+});
+
+function gameLoop() {
+  update();
+  requestAnimationFrame(gameLoop);
 }
 
-// --- Simulator Berkebun (contoh sederhana) ---
-function startGardening() {
-  clearGameArea();
-
-  const container = document.createElement('div');
-  container.innerHTML = `
-    <h2>Gardening Simulator</h2>
-    <p>Tanam tanaman dengan klik tombol!</p>
-    <button id="plantBtn">Tanam</button>
-    <p>Tanaman tumbuh: <span id="plants">0</span></p>
-  `;
-  gameArea.appendChild(container);
-
-  const plantBtn = container.querySelector('#plantBtn');
-  const plantsDisplay = container.querySelector('#plants');
-
-  let plants = 0;
-
-  plantBtn.addEventListener('click', () => {
-    plants++;
-    plantsDisplay.textContent = plants;
-  });
-}
-
-// --- Simulator Bisnis (contoh sederhana) ---
-function startBusiness() {
-  clearGameArea();
-
-  const container = document.createElement('div');
-  container.innerHTML = `
-    <h2>Business Simulator</h2>
-    <p>Buka toko dan dapatkan uang!</p>
-    <button id="sellBtn">Jual Barang</button>
-    <p>Uang: $<span id="money">0</span></p>
-  `;
-  gameArea.appendChild(container);
-
-  const sellBtn = container.querySelector('#sellBtn');
-  const moneyDisplay = container.querySelector('#money');
-
-  let money = 0;
-
-  sellBtn.addEventListener('click', () => {
-    money += 10;
-    moneyDisplay.textContent = money;
-  });
-}
+gameLoop();
 </script>
 
 </body>
