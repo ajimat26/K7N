@@ -1,4 +1,5 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
   <meta charset="UTF-8">
   <title>SAFD MONEY Forum</title>
@@ -36,35 +37,53 @@
   </style>
 </head>
 <body>
-  <h1>SAFD MONEY Forum</h1>  <div id="buttons">
+  <h1>SAFD MONEY Forum</h1>
+
+  <div id="buttons">
     <button class="btn" onclick="togglePanel('buatAkunPanel')">Buat Akun</button>
     <button class="btn" onclick="togglePanel('moneyPanel')">Uang</button>
     <button class="btn" onclick="togglePanel('chatPanel')">Chat</button>
     <button class="btn" onclick="togglePanel('topTierPanel')">Top Tier</button>
     <button class="btn" onclick="togglePanel('adminLoginPanel')">Admin</button>
-  </div>  <div id="buatAkunPanel" class="panel">
+  </div>
+
+  <div id="buatAkunPanel" class="panel">
     <input id="namaAkun" placeholder="Nama akun">
     <button onclick="buatAkun()">Simpan</button>
-  </div>  <div id="moneyPanel" class="panel">
+  </div>
+
+  <div id="moneyPanel" class="panel">
     <p>Total Uang: <span id="totalUang" class="money">Rp 0</span></p>
     <input id="jumlah" type="number" placeholder="Jumlah">
     <button onclick="tambahUang()">Tambah</button>
     <button onclick="ambilUang()">Ambil</button>
     <button onclick="setorUang()">Setor</button>
-  </div>  <div id="chatPanel" class="panel">
+  </div>
+
+  <div id="chatPanel" class="panel">
     <div id="chatBox"></div>
     <input id="pesan" placeholder="Ketik pesan">
     <button onclick="kirimPesan()">Kirim</button>
-  </div>  <div id="topTierPanel" class="panel">
+  </div>
+
+  <div id="topTierPanel" class="panel">
     <h3>Top Tier</h3>
     <div id="topTierList"></div>
-  </div>  <div id="adminLoginPanel" class="panel">
+  </div>
+
+  <div id="adminLoginPanel" class="panel">
     <input id="adminPassword" type="password" placeholder="Password">
     <button onclick="loginAdmin()">Masuk Admin</button>
-  </div>  <div id="adminPanel" class="panel">
+  </div>
+
+  <div id="adminPanel" class="panel">
     <h3>Panel Admin</h3>
     <div id="adminData"></div>
-  </div>  <div id="logRiwayat" class="panel"></div>  <script>
+  </div>
+
+  <div id="logRiwayat" class="panel"></div>
+
+  <script>
     let akun = localStorage.getItem("akun") || null;
     let uang = parseInt(localStorage.getItem("uang")) || 0;
     let isAdmin = false;
@@ -188,5 +207,6 @@
     }
 
     update();
-  </script></body>
+  </script>
+</body>
 </html>
