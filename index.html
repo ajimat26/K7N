@@ -1,173 +1,235 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <title>UANGDUTY</title>
-  <style>
-    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
-    .admin { color: white; background: green; padding: 5px 10px; border: none; border-radius: 5px; }
-    .hidden { display: none; }
-    .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-    .indicator { font-size: 12px; color: red; margin-top: 5px; }
-    .form-group { margin-bottom: 10px; }
-    .form-group input { width: 100%; padding: 8px; }
-    .form-group button { padding: 8px 12px; }
-    .chat-box { border: 1px solid #ccc; height: 150px; overflow-y: scroll; padding: 10px; background: #fafafa; margin-bottom: 10px; }
-    .riwayat { font-size: 12px; background: #eee; padding: 5px; margin-top: 5px; border-radius: 4px; }
-    .money { color: green; font-weight: bold; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UANGDUTY - Forum Pekerja</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+    background: #f5f8fa;
+    color: #222;
+  }
+  #header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  #logo {
+    font-weight: 900;
+    font-size: 28px;
+    user-select: none;
+    color: #1976d2;
+  }
+  #btnAdminToggle {
+    margin-left: auto;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #btnAdminToggle.active {
+    background-color: #388e3c;
+  }
+  #adminIndicator {
+    font-weight: 600;
+    font-size: 14px;
+    user-select: none;
+  }
+  .section {
+    background: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 6px rgb(32 33 36 / 0.28);
+    margin-bottom: 25px;
+  }
+  input, button, textarea {
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1.5px solid #ddd;
+    padding: 10px;
+    margin-top: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+  }
+  input:focus, textarea:focus {
+    border-color: #1976d2;
+    outline: none;
+  }
+  button {
+    background: #1976d2;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #0f4a8c;
+  }
+  #saldo {
+    font-weight: 700;
+    color: #388e3c;
+    font-size: 18px;
+  }
+  .chat-box {
+    border: 1px solid #ccc;
+    height: 180px;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 6px;
+    background: #fafafa;
+  }
+  .message {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .right {
+    text-align: right;
+    font-weight: 600;
+    color: #1976d2;
+  }
+  #riwayat p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+  #adminPanel {
+    display: none;
+  }
+  #adminPanel table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  #adminPanel th, #adminPanel td {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+  }
+  #adminPanel th {
+    background: #1976d2;
+    color: white;
+  }
+  #adminPanel button {
+    padding: 6px 10px;
+    background: #d32f2f;
+    font-size: 13px;
+  }
+  #adminPanel button:hover {
+    background: #9a1a1a;
+  }
+  .input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .input-group input {
+    flex: 1;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">UANGDUTY</div>
-    <button id="modeAdmin">Mode Admin</button>
-    <div id="adminPanel" class="hidden">
-      <div class="indicator" id="adminStatus">Admin Nonaktif</div>
-      <button onclick="togglePendaftaran()">Tutup/Buka Pendaftaran</button>
-      <div id="adminData"></div>
-    </div>
-    <div id="registerSection">
-      <div class="form-group">
-        <input type="text" id="username" placeholder="Masukkan Nama">
-        <button onclick="buatAkun()">Buat Akun</button>
-      </div>
-    </div><div id="userPanel" class="hidden">
-  <div>Halo, <span id="namaUser"></span></div>
-  <div>Uangmu: <span class="money" id="uangUser">Rp 0</span></div>
-  <div class="form-group">
-    <input type="number" id="jumlahTambah" placeholder="Jumlah Tambah">
-    <button onclick="tambahUang()">Tambah Uang</button>
+
+<div id="header">
+  <div id="logo">UANGDUTY</div>
+  <button id="btnAdminToggle">Mode Admin OFF</button>
+  <div id="adminIndicator" style="color:#d32f2f;">Status: Non-Admin</div>
+</div>
+
+<div class="section" id="akunSection">
+  <h2>Buat Akun Anda</h2>
+  <p id="infoStatusAkun" style="color:#555; font-style: italic;"></p>
+  <input type="text" id="namaDepan" placeholder="Nama Depan" autocomplete="off" />
+  <input type="text" id="namaBelakang" placeholder="Nama Belakang" autocomplete="off" />
+  <button id="btnBuatAkun">Buat Forum Anda</button>
+</div>
+
+<div class="section" id="forumSection" style="display:none;">
+  <h2>Forum Anda</h2>
+  <p><strong>Saldo:</strong> <span id="saldo">0</span> Rupiah</p>
+
+  <div class="input-group">
+    <input type="number" id="jumlahUang" placeholder="Masukkan jumlah uang" min="1" />
+    <button id="btnTambahUang">Tambah Uang</button>
+    <button id="btnAmbilUang">Ambil Uang</button>
+    <button id="btnResetUang">Setor (Reset) Saldo</button>
   </div>
-  <div class="form-group">
-    <input type="number" id="jumlahAmbil" placeholder="Jumlah Ambil">
-    <button onclick="ambilUang()">Ambil Uang</button>
-  </div>
-  <div class="form-group">
-    <button onclick="resetUang()">Setor / Reset Uang</button>
-  </div>
-  <div class="form-group">
-    <div><strong>Riwayat (maks 5):</strong></div>
-    <div id="riwayatList"></div>
-  </div>
-  <div class="form-group">
-    <div class="chat-box" id="chatBox"></div>
-    <input type="text" id="chatInput" placeholder="Ketik pesan...">
-    <button onclick="kirimChat()">Kirim</button>
+
+  <div id="riwayat">
+    <h4>Riwayat Transaksi</h4>
   </div>
 </div>
 
-  </div>  <script>
-    let akun = localStorage.getItem("akun") ? JSON.parse(localStorage.getItem("akun")) : null;
-    let pendaftaranAktif = true;
-    let isAdmin = false;
+<div class="section">
+  <h2>Obrolan</h2>
+  <div class="chat-box" id="chatBox"></div>
+  <textarea id="pesan" placeholder="Ketik pesan Anda" rows="3"></textarea>
+  <button id="btnKirimPesan">Kirim Pesan</button>
+</div>
 
-    document.getElementById("modeAdmin").addEventListener("click", function () {
-      let pass = prompt("Masukkan password admin:");
-      if (pass === "RFD1") {
-        isAdmin = true;
-        document.getElementById("adminPanel").classList.remove("hidden");
-        document.getElementById("adminStatus").textContent = "Admin Aktif";
-        document.getElementById("adminStatus").style.color = "green";
-        tampilkanAdminData();
-      }
-    });
+<div class="section" id="adminPanel">
+  <h2>Panel Admin - Data Semua Forum</h2>
+  <p>Di sini admin bisa mengubah nama forum anggota atau menghapus akun.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Forum</th>
+        <th>Saldo</th>
+        <th>Ubah Nama</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="adminTableBody"></tbody>
+  </table>
+</div>
 
-    function togglePendaftaran() {
-      pendaftaranAktif = !pendaftaranAktif;
-      alert("Pendaftaran " + (pendaftaranAktif ? "dibuka" : "ditutup"));
-    }
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.appspot.com",
+    messagingSenderId: "598905752132",
+    appId: "1:598905752132:web:9b764840e51c13a3044a11",
+    measurementId: "G-YXZPEVYBDR"
+  };
 
-    function buatAkun() {
-      if (!pendaftaranAktif) return alert("Pendaftaran sedang ditutup oleh admin.");
-      if (akun) return alert("Kamu sudah memiliki akun!");
-      let nama = document.getElementById("username").value.trim();
-      if (!nama) return alert("Nama tidak boleh kosong!");
-      akun = { nama: nama, uang: 0, riwayat: [] };
-      localStorage.setItem("akun", JSON.stringify(akun));
-      mulai();
-    }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    function mulai() {
-      if (!akun) return;
-      document.getElementById("registerSection").classList.add("hidden");
-      document.getElementById("userPanel").classList.remove("hidden");
-      document.getElementById("namaUser").textContent = akun.nama;
-      updateUang();
-      tampilkanRiwayat();
-    }
+  // Global vars
+  let userKey = localStorage.getItem("userKey");
+  let fullName = localStorage.getItem("fullName");
+  let isAdminMode = false;
+  let adminPassword = "RFD1";
+  let isCreateAccountOpen = true; // admin controlled
 
-    function tambahUang() {
-      let jumlah = parseInt(document.getElementById("jumlahTambah").value);
-      if (isNaN(jumlah) || jumlah <= 0) return alert("Jumlah tidak valid.");
-      akun.uang += jumlah;
-      tambahRiwayat("+" + jumlah);
-      simpan();
-    }
+  // Elements
+  const btnAdminToggle = document.getElementById("btnAdminToggle");
+  const adminIndicator = document.getElementById("adminIndicator");
+  const akunSection = document.getElementById("akunSection");
+  const forumSection = document.getElementById("forumSection");
+  const infoStatusAkun = document.getElementById("infoStatusAkun");
+  const saldoEl = document.getElementById("saldo");
+  const riwayatEl = document.getElementById("riwayat");
+  const chatBox = document.getElementById("chatBox");
 
-    function ambilUang() {
-      let jumlah = parseInt(document.getElementById("jumlahAmbil").value);
-      if (isNaN(jumlah) || jumlah <= 0 || jumlah > akun.uang) return alert("Jumlah tidak valid.");
-      akun.uang -= jumlah;
-      tambahRiwayat("-" + jumlah);
-      simpan();
-    }
-
-    function resetUang() {
-      akun.uang = 0;
-      tambahRiwayat("Reset");
-      simpan();
-    }
-
-    function tambahRiwayat(aksi) {
-      akun.riwayat.unshift(aksi);
-      if (akun.riwayat.length > 5) akun.riwayat.pop();
-    }
-
-    function tampilkanRiwayat() {
-      document.getElementById("riwayatList").innerHTML = akun.riwayat.map(r => `<div class="riwayat">${r}</div>`).join("");
-    }
-
-    function updateUang() {
-      document.getElementById("uangUser").textContent = "Rp " + akun.uang.toLocaleString("id-ID");
-    }
-
-    function simpan() {
-      localStorage.setItem("akun", JSON.stringify(akun));
-      updateUang();
-      tampilkanRiwayat();
-    }
-
-    function tampilkanAdminData() {
-      let data = localStorage.getItem("akun");
-      if (!data) return;
-      let user = JSON.parse(data);
-      let html = `<div><strong>Nama:</strong> ${user.nama} | <strong>Uang:</strong> Rp ${user.uang.toLocaleString("id-ID")}</div>
-        <button onclick="hapusAkun()">Hapus Akun</button>
-        <button onclick="ubahNama()">Ubah Nama</button>`;
-      document.getElementById("adminData").innerHTML = html;
-    }
-
-    function hapusAkun() {
-      localStorage.removeItem("akun");
-      location.reload();
-    }
-
-    function ubahNama() {
-      let baru = prompt("Nama baru:", akun.nama);
-      if (!baru) return;
-      akun.nama = baru;
-      simpan();
-      tampilkanAdminData();
-    }
-
-    function kirimChat() {
-      let pesan = document.getElementById("chatInput").value.trim();
-      if (!pesan) return;
-      let box = document.getElementById("chatBox");
-      box.innerHTML += `<div><b>${akun.nama}:</b> ${pesan}</div>`;
-      document.getElementById("chatInput").value = "";
-      box.scrollTop = box.scrollHeight;
-    }
-
-    if (akun) mulai();
-  </script></body>
-</html>
+  // UI init
+  function updateAdminUI() {
+    if(isAdminMode){
+      btnAdminToggle.classList.add("active");
+      btnAdminToggle.textContent = "Mode Admin ON";
+      adminIndicator.textContent = "Status: Admin Aktif";
+      adminIndicator.style.color = "#388e3c";
+      document.getElementById("adminPanel").style
