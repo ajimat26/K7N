@@ -78,36 +78,31 @@
     let currentUserKey = null;
     let isAdmin = false;
 
-    function toggleAdminForm() {
-      const form = document.getElementById('adminLoginForm');
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-
     function login() {
       const badge = document.getElementById('badge').value.trim();
       const name = document.getElementById('fullname').value.trim();
-      const userKey = badge + "_" + name;
+      if (!badge || !name) return alert("Isi semua field!");
+
+      const userKey = badge.replace(/[^a-zA-Z0-9]/g, '') + "_" + name.replace(/\s/g, '_');
       currentUserKey = userKey;
 
       db.ref('users/' + userKey).once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          document.getElementById('bankPanel').style.display = 'block';
-          document.getElementById('namaUser').innerText = userKey;
-          loadSaldo();
-        } else {
-          // Auto buat akun baru
+        if (!snapshot.exists()) {
           db.ref('users/' + userKey).set({
             badge: badge,
             name: name
-          }).then(() => {
-            db.ref('saldo/' + userKey).set(0);
-            alert("Akun berhasil dibuat!");
-            document.getElementById('bankPanel').style.display = 'block';
-            document.getElementById('namaUser').innerText = userKey;
-            loadSaldo();
           });
+          db.ref('saldo/' + userKey).set(0);
         }
+        document.getElementById('bankPanel').style.display = 'block';
+        document.getElementById('namaUser').innerText = badge + " " + name;
+        loadSaldo();
       });
+    }
+
+    function toggleAdminForm() {
+      const form = document.getElementById('adminLoginForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
 
     function adminLogin() {
@@ -131,7 +126,7 @@
 
     function tambahUang() {
       const amount = parseInt(document.getElementById('amountInput').value);
-      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid.");
+      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid!");
       const saldoRef = db.ref('saldo/' + currentUserKey);
       saldoRef.once('value').then(snapshot => {
         const current = snapshot.val() || 0;
@@ -141,7 +136,7 @@
 
     function ambilUang() {
       const amount = parseInt(document.getElementById('amountInput').value);
-      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid.");
+      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid!");
       const saldoRef = db.ref('saldo/' + currentUserKey);
       saldoRef.once('value').then(snapshot => {
         const current = snapshot.val() || 0;
@@ -196,4 +191,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
