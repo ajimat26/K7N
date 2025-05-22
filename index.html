@@ -1,247 +1,186 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>UANGDUTY</title>
+  <title>Aplikasi Pegawai</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    #adminStatus {
-      font-size: 12px;
-      color: white;
-      background: red;
-      padding: 2px 6px;
-      border-radius: 4px;
-      display: inline-block;
-    }
-    #adminControls {
-      display: none;
-      margin-top: 10px;
-    }
-    button {
-      margin: 5px;
-      padding: 6px 12px;
-    }
-    .hidden {
-      display: none;
-    }
-    #chatBox {
-      width: 100%;
-      height: 150px;
-      border: 1px solid #ccc;
-      overflow-y: scroll;
-      background: white;
-      padding: 10px;
-    }
-    #formSection, #userPanel, #adminPanel {
-      margin-top: 20px;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+    body { font-family: Arial; max-width: 600px; margin: 20px auto; }
+    #chat { border: 1px solid #ccc; height: 200px; overflow-y: scroll; padding: 5px; margin-bottom: 10px; }
+    #pegawaiList table { width: 100%; border-collapse: collapse; }
+    #pegawaiList th, #pegawaiList td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+    .hidden { display: none; }
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script>
-    // Ganti dengan konfigurasi Firebase Anda
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-  </script>
 </head>
 <body>
 
-<h1>UANGDUTY</h1>
-<div id="adminSection">
-  <button onclick="enterAdminMode()" style="background: green; color: white;">Mode Admin</button>
-  <span id="adminStatus">Admin: Nonaktif</span>
-</div>
+  <div id="loginDiv">
+    <h2>Login Pegawai</h2>
+    <input id="username" placeholder="Username"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+    <p id="loginInfo" style="color:red;"></p>
+  </div>
 
-<div id="adminControls">
-  <label><input type="checkbox" id="toggleRegister" onchange="toggleRegistration()"> Izinkan Pembuatan Akun</label>
-</div>
+  <div id="appDiv" class="hidden">
+    <h2>Halo, <span id="displayName"></span> (<span id="displayRole"></span>)</h2>
+    <p>Total Uang: Rp <span id="uangDisplay">0</span></p>
 
-<div id="formSection">
-  <h2>Form Akun</h2>
-  <input id="username" placeholder="Nama akun">
-  <button onclick="createAccount()">Buat Akun</button>
-</div>
+    <input type="number" id="tambahUangInput" placeholder="Tambah uang (angka)">
+    <button onclick="tambahUang()">Tambah</button>
+    <button onclick="logout()">Logout</button>
 
-<div id="userPanel" class="hidden">
-  <h2>Selamat datang, <span id="userName"></span></h2>
-  <p>Saldo: <span id="userMoney" style="color: green;">Rp0</span></p>
+    <div id="adminPanel" class="hidden">
+      <h3>Data Semua Pegawai</h3>
+      <div id="pegawaiList"></div>
+    </div>
 
-  <input id="amount" type="number" placeholder="Jumlah uang">
-  <button onclick="addMoney()">Tambah Uang</button>
-  <button onclick="withdrawMoney()">Ambil Uang</button>
-  <button onclick="resetMoney()">Setor (Reset)</button>
+    <h3>Chat Realtime</h3>
+    <div id="chat"></div>
+    <input type="text" id="chatInput" placeholder="Ketik pesan...">
+    <button onclick="kirimChat()">Kirim</button>
+  </div>
 
-  <h3>Riwayat (maks. 5)</h3>
-  <ul id="historyList"></ul>
-</div>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<div id="chatSection">
-  <h2>Obrolan</h2>
-  <div id="chatBox"></div>
-  <input id="chatInput" placeholder="Ketik pesan">
-  <button onclick="sendChat()">Kirim</button>
-</div>
+  <script>
+    // CONFIG FIREBASE - GANTI SESUAI PROJECTMU
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.firebasestorage.app",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:7be400c23de21665044a11",
+      measurementId: "G-TJL9K6YDL9"
+    };
 
-<div id="adminPanel" class="hidden">
-  <h2>Panel Admin: Data Semua Akun</h2>
-  <ul id="allAccounts"></ul>
-</div>
+    // INIT FIREBASE
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script>
-let account = null;
-let isAdmin = false;
-let allowRegister = true;
+    let currentUser = null;
 
-// Mendengarkan perubahan pada pengaturan pendaftaran
-db.ref("settings/allowRegister").on("value", snap => {
-  allowRegister = snap.val() !== false;
-  document.getElementById("toggleRegister").checked = allowRegister;
-});
+    const loginDiv = document.getElementById('loginDiv');
+    const appDiv = document.getElementById('appDiv');
+    const displayNameSpan = document.getElementById('displayName');
+    const displayRoleSpan = document.getElementById('displayRole');
+    const uangDisplay = document.getElementById('uangDisplay');
+    const tambahUangInput = document.getElementById('tambahUangInput');
+    const loginInfo = document.getElementById('loginInfo');
+    const adminPanel = document.getElementById('adminPanel');
+    const pegawaiList = document.getElementById('pegawaiList');
+    const chatDiv = document.getElementById('chat');
+    const chatInput = document.getElementById('chatInput');
 
-function createAccount() {
-  const name = document.getElementById("username").value.trim();
-  if (!allowRegister) return alert("Pembuatan akun sedang ditutup admin.");
-  if (!name) return alert("Nama tidak boleh kosong");
-  if (account) return alert("Akun sudah dibuat.");
+    // Fungsi login
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      loginInfo.innerText = '';
 
-  const userRef = db.ref("accounts/" + name);
-  userRef.once("value", snap => {
-    if (snap.exists()) return alert("Nama sudah dipakai.");
-    userRef.set({ money: 0, history: [] });
-    login(name);
-  });
-}
+      if (!username || !password) {
+        loginInfo.innerText = 'Username dan password harus diisi';
+        return;
+      }
 
-function login(name) {
-  account = name;
-  document.getElementById("formSection").classList.add("hidden");
-  document.getElementById("userPanel").classList.remove("hidden");
-  document.getElementById("userName").textContent = account;
-  db.ref("accounts/" + account).on("value", snap => {
-    const data = snap.val();
-    if (!data) return;
-    document.getElementById("userMoney").textContent = "Rp" + formatMoney(data.money);
-    const list = document.getElementById("historyList");
-    list.innerHTML = "";
-    (data.history || []).slice(-5).forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list.appendChild(li);
-    });
-  });
-}
-
-function addMoney() {
-  const amount = parseInt(document.getElementById("amount").value);
-  if (isNaN(amount) || amount <= 0) return;
-  const userRef = db.ref("accounts/" + account);
-  userRef.once("value", snap => {
-    const data = snap.val();
-    const newMoney = (data.money || 0) + amount;
-    const history = (data.history || []).concat("Tambah Rp" + formatMoney(amount)).slice(-5);
-    userRef.update({ money: newMoney, history });
-  });
-}
-
-function withdrawMoney() {
-  const amount = parseInt(document.getElementById("amount").value);
-  if (isNaN(amount) || amount <= 0) return;
-  const userRef = db.ref("accounts/" + account);
-  userRef.once("value", snap => {
-    const data = snap.val();
-    if ((data.money || 0) < amount) return;
-    const newMoney = data.money - amount;
-    const history = (data.history || []).concat("Ambil Rp" + formatMoney(amount)).slice(-5);
-    userRef.update({ money: newMoney, history });
-  });
-}
-
-function resetMoney() {
-  const userRef = db.ref("accounts/" + account);
-  userRef.once("value", snap => {
-    const history = (snap.val().history || []).concat("Setor (reset) saldo").slice(-5);
-    userRef.update({ money: 0, history });
-  });
-}
-
-function formatMoney(n) {
-  return n.toLocaleString('id-ID') + "rb";
-}
-
-function sendChat() {
-  const msg = document.getElementById("chatInput").value.trim();
-  if (!msg || !account) return;
-  db.ref("chatLog").push(account + ": " + msg);
-  document.getElementById("chatInput").value = "";
-}
-
-function renderChat() {
-  const box = document.getElementById("chatBox");
-  db.ref("chatLog").on("value", snap => {
-    const val = snap.val() || {};
-    box.innerHTML = Object.values(val).map(m => `<div>${m}</div>`).join('');
-    box.scrollTop = box.scrollHeight;
-  });
-}
-
-function enterAdminMode() {
-  const pass = prompt("Masukkan password admin:");
-  if (pass === "RFD1") {
-    isAdmin = true;
-    document.getElementById("adminStatus").textContent = "Admin: Aktif";
-    document.getElementById("adminStatus").style.background = "green";
-    document.getElementById("adminControls").style.display = "block";
-    document.getElementById("adminPanel").classList.remove("hidden");
-    renderAdmin();
-  } else {
-    alert("Password salah.");
-  }
-}
-
-function toggleRegistration() {
-  const status = document.getElementById("toggleRegister").checked;
-  db.ref("settings/allowRegister").set(status);
-}
-
-function renderAdmin() {
-  const panel = document.getElementById("allAccounts");
-  panel.innerHTML = "";
-  db.ref("accounts").once("value", snap => {
-    const data = snap.val() || {};
-    for (const name in data) {
-      const li = document.createElement("li");
-      li.textContent = `${name} - Rp${formatMoney(data[name].money)} `;
-      const renameBtn = document.createElement("button");
-      renameBtn.textContent = "Ubah Nama";
-      renameBtn.onclick = () => {
-        const newName = prompt("Masukkan nama baru:");
-        if (newName && !data[newName]) {
-          db.ref("accounts/" + newName).set(data[name]);
-          db.ref("accounts/" + name).remove();
-          renderAdmin();
+      db.ref('users/' + username).get().then(snapshot => {
+        if (!snapshot.exists()) {
+          loginInfo.innerText = 'User tidak ditemukan';
+          return;
         }
-      };
-      const delBtn = document.createElement("button");
-      delBtn.textContent = "Hapus";
-      delBtn.onclick = () => {
-        db.ref("accounts/" + name).remove0
+        const user = snapshot.val();
+        if (user.password !== password) {
+          loginInfo.innerText = 'Password salah';
+          return;
+        }
+        // Sukses login
+        currentUser = { username, role: user.role || 'pegawai' };
+        tampilkanApp(user);
+        setupRealtimeUang();
+        if (currentUser.role === 'admin') {
+          tampilkanAdminPanel();
+        }
+        setupChatListener();
+      });
+    }
+
+    // Tampilkan app setelah login
+    function tampilkanApp(user) {
+      loginDiv.classList.add('hidden');
+      appDiv.classList.remove('hidden');
+      displayNameSpan.innerText = currentUser.username;
+      displayRoleSpan.innerText = currentUser.role;
+      uangDisplay.innerText = user.uang || 0;
+    }
+
+    // Update realtime uang tampilan
+    function setupRealtimeUang() {
+      db.ref('users/' + currentUser.username + '/uang').on('value', snap => {
+        uangDisplay.innerText = snap.val() || 0;
+      });
+    }
+
+    // Tambah uang
+    function tambahUang() {
+      const amount = parseInt(tambahUangInput.value);
+      if (isNaN(amount)) {
+        alert('Masukkan angka yang valid');
+        return;
+      }
+      const userRef = db.ref('users/' + currentUser.username);
+      userRef.transaction(user => {
+        if (user) {
+          if (!user.uang) user.uang = 0;
+          user.uang += amount;
+        }
+        return user;
+      });
+      tambahUangInput.value = '';
+    }
+
+    // Logout
+    function logout() {
+      location.reload();
+    }
+
+    // Tampilkan data semua pegawai (admin)
+    function tampilkanAdminPanel() {
+      adminPanel.classList.remove('hidden');
+      db.ref('users').on('value', snapshot => {
+        const users = snapshot.val();
+        let html = '<table><tr><th>Username</th><th>Role</th><th>Uang</th></tr>';
+        for (const u in users) {
+          html += `<tr><td>${u}</td><td>${users[u].role || 'pegawai'}</td><td>Rp ${users[u].uang || 0}</td></tr>`;
+        }
+        html += '</table>';
+        pegawaiList.innerHTML = html;
+      });
+    }
+
+    // Setup Chat Listener
+    function setupChatListener() {
+      db.ref('chat').on('child_added', snapshot => {
+        const data = snapshot.val();
+        const div = document.createElement('div');
+        div.textContent = `${data.username}: ${data.message}`;
+        chatDiv.appendChild(div);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      });
+    }
+
+    // Kirim chat
+    function kirimChat() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+      db.ref('chat').push({
+        username: currentUser.username,
+        message: message,
+        timestamp: Date.now()
+      });
+      chatInput.value = '';
+    }
+  </script>
+</body>
+</html>
