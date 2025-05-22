@@ -1,290 +1,170 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UANGDUTY</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #333;
-    }
-    header {
-      background-color: #2f855a;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 1rem;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin-top: 1rem;
-    }
-    .section {
-      margin-bottom: 1.5rem;
-    }
-    h2 {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-      color: #2f855a;
-    }
-    input, button, select {
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      width: 100%;
-    }
-    button {
-      background-color: #2f855a;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background-color: #276749;
-    }
-    .admin-indicator {
-      margin-top: 0.5rem;
-      color: white;
-      padding: 0.3rem 0.6rem;
-      background-color: red;
-      border-radius: 4px;
-      display: inline-block;
-    }
-    .admin-indicator.active {
-      background-color: green;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
-      margin-bottom: 0.4rem;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; color: #333; }
+    header { background: #333; color: #fff; padding: 10px; position: relative; }
+    h1 { margin: 0; font-size: 1.5rem; }
+    .admin-btn { position: absolute; top: 10px; left: 10px; background: red; color: #fff; border: none; padding: 5px 10px; cursor: pointer; }
+    .admin-btn.active { background: green; }
+    main { padding: 20px; max-width: 600px; margin: auto; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .section { margin-bottom: 20px; }
+    .section h2 { font-size: 1.2rem; }
+    button { padding: 6px 10px; margin: 2px; }
+    input[type="text"], input[type="number"] { padding: 6px; margin: 2px; width: 100%; box-sizing: border-box; }
+    .chat { border: 1px solid #ccc; height: 150px; overflow-y: auto; margin-bottom: 10px; padding: 5px; background: #f9f9f9; }
+    .chat input { width: 80%; }
+    .chat button { width: 18%; }
   </style>
 </head>
 <body>
-  <header>UANGDUTY</header>
-  <div class="container">
-    <div id="adminModeSection" class="section">
-      <button onclick="toggleAdmin()">Mode Admin</button>
-      <span id="adminStatus" class="admin-indicator">Nonaktif</span>
-    </div><div id="createAccountSection" class="section">
-  <h2>Buat Akun</h2>
-  <input type="text" id="firstName" placeholder="Nama Depan">
-  <input type="text" id="lastName" placeholder="Nama Belakang">
+  <header>
+    <button class="admin-btn" onclick="toggleAdmin()" id="adminToggle">Admin Mode</button>
+    <h1 style="text-align: center;">UANGDUTY</h1>
+  </header>
+  <main>
+    <div id="adminPasswordPrompt" style="display:none;">
+      <input type="password" id="adminPass" placeholder="Masukkan password admin">
+      <button onclick="activateAdmin()">Masuk</button>
+    </div><div class="section" id="accountSection">
+  <h2>Akun</h2>
+  <input type="text" id="username" placeholder="Masukkan nama akun">
   <button onclick="createAccount()">Buat Akun</button>
+  <p id="accountInfo"></p>
 </div>
 
-<div id="accountSection" class="section" style="display:none">
-  <h2>Halo, <span id="displayName"></span></h2>
-  <p>Uang kamu: <span id="money" style="color:green; font-weight:bold"></span></p>
-  <input type="number" id="amount" placeholder="Jumlah">
-  <button onclick="addMoney()">Tambah Uang</button>
-  <button onclick="takeMoney()">Ambil Uang</button>
-  <button onclick="resetMoney()">Reset Uang</button>
-
-  <div class="section">
-    <h2>Riwayat Transaksi</h2>
-    <ul id="history"></ul>
-  </div>
-
-  <div class="section">
-    <h2>Forum Chat</h2>
-    <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 0.5rem; border-radius: 4px;">
-      <ul id="chatBox"></ul>
-    </div>
-    <input type="text" id="chatInput" placeholder="Ketik pesan...">
-    <button onclick="sendChat()">Kirim</button>
-  </div>
+<div class="section" id="balanceSection" style="display:none;">
+  <h2>Saldo: <span id="saldo" style="color:green">0</span>rb</h2>
+  <input type="number" id="amountInput" placeholder="Jumlah">
+  <button onclick="tambahUang()">Tambah</button>
+  <button onclick="ambilUang()">Ambil</button>
+  <button onclick="resetUang()">Setor (Reset)</button>
 </div>
 
-<div id="adminPanel" class="section" style="display:none">
+<div class="section" id="historySection" style="display:none;">
+  <h2>Riwayat</h2>
+  <ul id="historyList"></ul>
+</div>
+
+<div class="section">
+  <h2>Forum Chat</h2>
+  <div class="chat" id="chatBox"></div>
+  <input type="text" id="chatInput" placeholder="Ketik pesan">
+  <button onclick="kirimChat()">Kirim</button>
+</div>
+
+<div class="section" id="adminPanel" style="display:none;">
   <h2>Panel Admin</h2>
-  <button onclick="toggleAccountCreation()" id="accountToggleBtn"></button>
-  <h3>Daftar Akun</h3>
-  <ul id="userList"></ul>
+  <button onclick="toggleAccountCreation()" id="toggleAccount">Tutup Pembuatan Akun</button>
+  <div id="adminInfo"></div>
 </div>
 
-  </div>  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let currentUser = localStorage.getItem('currentUser');
+  </main>  <script>
     let isAdmin = false;
+    let akun = localStorage.getItem('akun') || null;
+    let saldo = parseInt(localStorage.getItem('saldo') || '0');
+    let riwayat = JSON.parse(localStorage.getItem('riwayat') || '[]');
+    let chatLog = JSON.parse(localStorage.getItem('chatLog') || '[]');
+    let accountCreationEnabled = JSON.parse(localStorage.getItem('accountCreationEnabled') || 'true');
 
-    function renderUI() {
-      if (currentUser) {
-        document.getElementById("accountSection").style.display = "block";
-        document.getElementById("createAccountSection").style.display = "none";
-        document.getElementById("displayName").innerText = currentUser;
-        db.ref("users/" + currentUser).on("value", snap => {
-          const data = snap.val();
-          document.getElementById("money").innerText = formatMoney(data.money || 0);
-          updateHistory(data.history || []);
-        });
+    document.addEventListener('DOMContentLoaded', () => {
+      updateView();
+      updateChat();
+    });
+
+    function updateView() {
+      document.getElementById('adminToggle').classList.toggle('active', isAdmin);
+      document.getElementById('adminPanel').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('balanceSection').style.display = akun ? 'block' : 'none';
+      document.getElementById('historySection').style.display = akun ? 'block' : 'none';
+      document.getElementById('accountSection').style.display = akun ? 'none' : 'block';
+      document.getElementById('accountInfo').innerText = !accountCreationEnabled ? 'Pembuatan akun ditutup oleh Admin.' : '';
+      document.getElementById('saldo').innerText = saldo.toLocaleString('id-ID');
+      document.getElementById('historyList').innerHTML = riwayat.map(i => `<li>${i}</li>`).join('');
+    }
+
+    function toggleAdmin() {
+      document.getElementById('adminPasswordPrompt').style.display = 'block';
+    }
+
+    function activateAdmin() {
+      const pass = document.getElementById('adminPass').value;
+      if (pass === 'RFD1') {
+        isAdmin = true;
+        updateView();
+        document.getElementById('adminPasswordPrompt').style.display = 'none';
+      } else {
+        alert('Password salah');
       }
     }
 
-    function formatMoney(amount) {
-      return parseInt(amount).toLocaleString("id-ID") + 'rb';
+    function toggleAccountCreation() {
+      accountCreationEnabled = !accountCreationEnabled;
+      document.getElementById('toggleAccount').innerText = accountCreationEnabled ? 'Tutup Pembuatan Akun' : 'Buka Pembuatan Akun';
+      localStorage.setItem('accountCreationEnabled', JSON.stringify(accountCreationEnabled));
+      updateView();
     }
 
     function createAccount() {
-      if (!accountCreationOpen) {
-        alert("Pembuatan akun sedang ditutup oleh admin.");
-        return;
-      }
-      const f = document.getElementById("firstName").value;
-      const l = document.getElementById("lastName").value;
-      const name = f + " " + l;
-      db.ref("users/" + name).once("value", snap => {
-        if (snap.exists()) {
-          alert("Akun sudah ada.");
-        } else {
-          db.ref("users/" + name).set({money: 0, history: []});
-          localStorage.setItem("currentUser", name);
-          currentUser = name;
-          renderUI();
-        }
-      });
+      if (!accountCreationEnabled) return alert('Pembuatan akun sedang ditutup.');
+      if (akun) return alert('Akun sudah dibuat.');
+      const name = document.getElementById('username').value;
+      if (!name) return alert('Nama tidak boleh kosong.');
+      akun = name;
+      localStorage.setItem('akun', akun);
+      updateView();
     }
 
-    function addMoney() {
-      const amount = parseInt(document.getElementById("amount").value);
-      if (isNaN(amount)) return;
-      db.ref("users/" + currentUser).once("value", snap => {
-        const val = snap.val();
-        const newMoney = (val.money || 0) + amount;
-        const history = (val.history || []).slice(-4);
-        history.push("+" + formatMoney(amount));
-        db.ref("users/" + currentUser).update({money: newMoney, history});
-      });
+    function tambahUang() {
+      const jumlah = parseInt(document.getElementById('amountInput').value);
+      if (isNaN(jumlah) || jumlah <= 0) return;
+      saldo += jumlah;
+      pushHistory(`Menambah ${jumlah.toLocaleString('id-ID')}rb`);
+      simpan();
     }
 
-    function takeMoney() {
-      const amount = parseInt(document.getElementById("amount").value);
-      if (isNaN(amount)) return;
-      db.ref("users/" + currentUser).once("value", snap => {
-        const val = snap.val();
-        const newMoney = Math.max((val.money || 0) - amount, 0);
-        const history = (val.history || []).slice(-4);
-        history.push("-" + formatMoney(amount));
-        db.ref("users/" + currentUser).update({money: newMoney, history});
-      });
+    function ambilUang() {
+      const jumlah = parseInt(document.getElementById('amountInput').value);
+      if (isNaN(jumlah) || jumlah <= 0) return;
+      if (jumlah > saldo) return alert('Saldo tidak cukup.');
+      saldo -= jumlah;
+      pushHistory(`Mengambil ${jumlah.toLocaleString('id-ID')}rb`);
+      simpan();
     }
 
-    function resetMoney() {
-      db.ref("users/" + currentUser).update({money: 0, history: []});
+    function resetUang() {
+      saldo = 0;
+      pushHistory('Menyetor semua uang (reset saldo)');
+      simpan();
     }
 
-    function updateHistory(hist) {
-      const ul = document.getElementById("history");
-      ul.innerHTML = "";
-      hist.forEach(item => {
-        const li = document.createElement("li");
-        li.innerText = item;
-        ul.appendChild(li);
-      });
+    function pushHistory(teks) {
+      riwayat.unshift(`${new Date().toLocaleTimeString()} - ${teks}`);
+      if (riwayat.length > 5) riwayat.pop();
     }
 
-    function sendChat() {
-      const msg = document.getElementById("chatInput").value;
-      db.ref("chat").push(currentUser + ": " + msg);
-      document.getElementById("chatInput").value = "";
+    function simpan() {
+      localStorage.setItem('saldo', saldo);
+      localStorage.setItem('riwayat', JSON.stringify(riwayat));
+      updateView();
     }
 
-    db.ref("chat").on("child_added", snap => {
-      const li = document.createElement("li");
-      li.innerText = snap.val();
-      document.getElementById("chatBox").appendChild(li);
-    });
-
-    function toggleAdmin() {
-      if (!isAdmin) {
-        const pw = prompt("Masukkan password admin:");
-        if (pw === "RFD1") {
-          isAdmin = true;
-          document.getElementById("adminStatus").innerText = "Aktif";
-          document.getElementById("adminStatus").classList.add("active");
-          document.getElementById("adminPanel").style.display = "block";
-          loadUsers();
-          updateAccountToggleBtn();
-        } else {
-          alert("Password salah!");
-        }
-      } else {
-        isAdmin = false;
-        document.getElementById("adminStatus").innerText = "Nonaktif";
-        document.getElementById("adminStatus").classList.remove("active");
-        document.getElementById("adminPanel").style.display = "none";
-      }
+    function kirimChat() {
+      const isi = document.getElementById('chatInput').value;
+      if (!isi) return;
+      chatLog.push(`${akun || 'Anon'}: ${isi}`);
+      if (chatLog.length > 50) chatLog.shift();
+      localStorage.setItem('chatLog', JSON.stringify(chatLog));
+      document.getElementById('chatInput').value = '';
+      updateChat();
     }
 
-    function loadUsers() {
-      db.ref("users").once("value", snap => {
-        const ul = document.getElementById("userList");
-        ul.innerHTML = "";
-        snap.forEach(child => {
-          const li = document.createElement("li");
-          li.innerHTML = `${child.key} (${formatMoney(child.val().money || 0)})
-            <button onclick="renameUser('${child.key}')">Rename</button>
-            <button onclick="deleteUser('${child.key}')">Hapus</button>`;
-          ul.appendChild(li);
-        });
-      });
+    function updateChat() {
+      const box = document.getElementById('chatBox');
+      box.innerHTML = chatLog.map(msg => `<div>${msg}</div>`).join('');
+      box.scrollTop = box.scrollHeight;
     }
-
-    function renameUser(oldName) {
-      const newName = prompt("Nama baru:", oldName);
-      if (newName && newName !== oldName) {
-        db.ref("users/" + oldName).once("value", snap => {
-          const data = snap.val();
-          db.ref("users/" + oldName).remove();
-          db.ref("users/" + newName).set(data);
-          loadUsers();
-        });
-      }
-    }
-
-    function deleteUser(name) {
-      if (confirm("Yakin ingin hapus?")) {
-        db.ref("users/" + name).remove();
-        loadUsers();
-      }
-    }
-
-    let accountCreationOpen = true;
-    function toggleAccountCreation() {
-      accountCreationOpen = !accountCreationOpen;
-      updateAccountToggleBtn();
-    }
-
-    function updateAccountToggleBtn() {
-      const btn = document.getElementById("accountToggleBtn");
-      btn.innerText = accountCreationOpen ? "Tutup Pembuatan Akun" : "Buka Pembuatan Akun";
-    }
-
-    renderUI();
   </script></body>
-  </html>
+</html>
