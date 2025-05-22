@@ -15,6 +15,10 @@
     .admin-tag { color: red; font-weight: bold; }
     input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
     .hidden { display: none; }
+    .admin-panel { background: #f4f4f4; padding: 15px; border: 1px solid #ccc; margin-top: 20px; }
+    .admin-panel h3 { margin-top: 0; }
+    .admin-panel ul { list-style-type: none; padding: 0; }
+    .admin-panel li { margin-bottom: 5px; }
   </style>
 </head>
 <body>
@@ -32,6 +36,16 @@
       <div class="chat-box" id="chatBox"></div>
       <textarea id="messageInput" placeholder="Ketik pesan Anda..."></textarea>
       <button id="sendBtn">Kirim</button>
+    </div>
+
+    <div id="admin-section" class="hidden">
+      <h2>Panel Admin</h2>
+      <div class="admin-panel">
+        <p><strong>Admin:</strong> RFD1</p>
+        <div id="adminData"></div>
+        <h3>Top Tier</h3>
+        <ul id="topTier"></ul>
+      </div>
     </div>
   </div>
 
@@ -56,10 +70,28 @@
 
     const registerSection = document.getElementById("register-section");
     const chatSection = document.getElementById("chat-section");
+    const adminSection = document.getElementById("admin-section");
     const chatBox = document.getElementById("chatBox");
     const messageInput = document.getElementById("messageInput");
 
-    // Cek apakah user sudah punya akun
+    function showRegister() {
+      registerSection.classList.remove("hidden");
+      chatSection.classList.add("hidden");
+      adminSection.classList.add("hidden");
+    }
+
+    function showChat() {
+      registerSection.classList.add("hidden");
+      chatSection.classList.remove("hidden");
+      if (isAdmin) {
+        adminSection.classList.remove("hidden");
+        loadAdminPanel();
+      } else {
+        adminSection.classList.add("hidden");
+      }
+      listenForMessages();
+    }
+
     function checkAccount() {
       if (userKey && fullName) {
         db.ref(`users/${userKey}`).once("value").then(snapshot => {
@@ -73,7 +105,6 @@
             showRegister();
           }
         }).catch(() => {
-          // Jika error Firebase, tampilkan form daftar juga
           showRegister();
         });
       } else {
@@ -81,20 +112,6 @@
       }
     }
 
-    // Tampilkan bagian register
-    function showRegister() {
-      registerSection.classList.remove("hidden");
-      chatSection.classList.add("hidden");
-    }
-
-    // Tampilkan bagian chat
-    function showChat() {
-      registerSection.classList.add("hidden");
-      chatSection.classList.remove("hidden");
-      listenForMessages();
-    }
-
-    // Fungsi untuk daftar akun
     function registerAccount() {
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
@@ -118,7 +135,6 @@
       });
     }
 
-    // Fungsi untuk kirim pesan chat
     function sendMessage() {
       const message = messageInput.value.trim();
       if (!message) return;
@@ -134,9 +150,8 @@
       });
     }
 
-    // Fungsi listen chat baru
     function listenForMessages() {
-      db.ref("messages").off(); // Hapus listener sebelumnya (jika ada)
+      db.ref("messages").off();
       chatBox.innerHTML = "";
       db.ref("messages").orderByChild("timestamp").limitToLast(100).on("child_added", snapshot => {
         const data = snapshot.val();
@@ -149,7 +164,41 @@
       });
     }
 
-    // Pasang event listener tombol setelah DOM siap
+    function loadAdminPanel() {
+      const adminData = document.getElementById("adminData");
+      const topList = document.getElementById("topTier");
+      db.ref("users").once("value").then(snapshot => {
+        const data = snapshot.val();
+        adminData.innerHTML = "";
+        let top = [];
+        for (let key in data) {
+          const user = data[key];
+          adminData.innerHTML += `
+            <p><strong>${user.name}</strong>
+              <br><button onclick="changeName('${key}')">Ubah Nama</button>
+              <button onclick="deleteUser('${key}')">Hapus Akun</button>
+            </p>`;
+          top.push({ name: user.name });
+        }
+        topList.innerHTML = "";
+        top.slice(0, 3).forEach((d, i) => {
+          topList.innerHTML += `<li>#${i + 1} ${d.name}</li>`;
+        });
+      });
+    }
+
+    function changeName(key) {
+      const newName = prompt("Masukkan nama baru:");
+      if (newName) db.ref(`users/${key}`).update({ name: newName });
+    }
+
+    function deleteUser(key) {
+      if (confirm("Yakin ingin menghapus akun ini?")) {
+        db.ref(`users/${key}`).remove();
+        loadAdminPanel();
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("registerBtn").addEventListener("click", registerAccount);
       document.getElementById("sendBtn").addEventListener("click", sendMessage);
