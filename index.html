@@ -1,201 +1,103 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forum Pekerja - Uang & Chat</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <title>UANGDUTY SAFD</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .section { margin-bottom: 30px; }
-    input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; }
-    .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; }
-    .message { margin-bottom: 10px; }
-    .right { text-align: right; }
-    .admin-panel { background: #f4f4f4; padding: 15px; border: 1px solid #ccc; }
+    body { font-family: sans-serif; background: #111; color: #eee; padding: 20px; }
+    #chat { border: 1px solid #555; padding: 10px; max-width: 600px; height: 300px; overflow-y: scroll; background: #222; margin-bottom: 10px; }
+    #input { width: 80%; padding: 5px; }
+    #send { padding: 5px 10px; }
   </style>
 </head>
 <body>
-  <h1>Forum Pekerja - Uang & Chat</h1>
+  <h1>UANGDUTY SAFD - Forum Pekerja Uang & Chat</h1>
 
-  <div class="section" id="akunSection">
-    <h2>Akun Anda</h2>
-    <input type="text" id="namaDepan" placeholder="Nama Depan">
-    <input type="text" id="namaBelakang" placeholder="Nama Belakang">
-    <button onclick="buatAkun()">Buat Forum Anda</button>
-    <p id="infoPengguna"></p>
+  <div id="container" style="display:none;">
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="Ketik pesan...">
+    <button id="send">Kirim</button>
   </div>
 
-  <div class="section" id="forumSection" style="display:none">
-    <h2>Forum Anda</h2>
-    <p><strong>Saldo:</strong> <span id="saldo">Rp 0</span></p>
-    <input type="number" id="jumlah" placeholder="Jumlah Uang">
-    <button onclick="tambahUang()">Tambah</button>
-    <button onclick="ambilUang()">Ambil</button>
-    <button onclick="setorUang()">Setor (Reset)</button>
-    <div id="riwayat"></div>
-  </div>
-
-  <div class="section">
-    <h2>Obrolan</h2>
-    <div class="chat-box" id="chatBox"></div>
-    <textarea id="pesan" placeholder="Ketik pesan Anda"></textarea>
-    <button onclick="kirimPesan()">Kirim</button>
-  </div>
-
-  <div class="section">
-    <h2>Admin Panel</h2>
-    <button onclick="aksesAdmin()">Akses Admin</button>
-    <div id="adminPanel" class="admin-panel" style="display:none">
-      <p><strong>Admin:</strong> RFD1</p>
-      <div id="adminData"></div>
-      <h3>Top Tier</h3>
-      <ul id="topTier"></ul>
-    </div>
-  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-      measurementId: "G-YXZPEVYBDR"
+    // GANTI DENGAN FIREBASE KONFIGURASI PUNYAMU
+    var firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let userKey = localStorage.getItem("userKey");
-    let fullName = localStorage.getItem("fullName");
+    let userId = localStorage.getItem("userId");
+    let fullName = "";
+    let isAdmin = false;
 
-    if (userKey && fullName) {
-      document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
-      document.getElementById("forumSection").style.display = "block";
-      document.getElementById("akunSection").style.display = "none";
-      pantauSaldo();
-      pantauRiwayat();
-    }
-
-    function buatAkun() {
-      const depan = document.getElementById("namaDepan").value;
-      const belakang = document.getElementById("namaBelakang").value;
-      const nama = `${depan} ${belakang}`;
-      if (!depan || !belakang) return alert("Lengkapi nama Anda.");
-      if (!userKey) {
-        const ref = db.ref("forum").push();
-        ref.set({ nama, saldo: 0 });
-        userKey = ref.key;
-        fullName = nama;
-        localStorage.setItem("userKey", userKey);
-        localStorage.setItem("fullName", nama);
-        location.reload();
-      }
-    }
-
-    function pantauSaldo() {
-      db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-        const val = snap.val() || 0;
-        document.getElementById("saldo").innerText = formatRupiah(val);
-      });
-    }
-
-    function pantauRiwayat() {
-      db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
-        const riw = snap.val();
-        const el = document.getElementById("riwayat");
-        el.innerHTML = "<h4>Riwayat:</h4>";
-        for (let key in riw) {
-          el.innerHTML += `<p>${riw[key]}</p>`;
+    function initAkun() {
+      if (!userId) return daftarAkunBaru();
+      db.ref("pengguna/" + userId).once("value", snap => {
+        if (snap.exists()) {
+          fullName = snap.val().nama;
+          isAdmin = snap.val().isAdmin;
+          mulaiApp();
+        } else {
+          alert("Akun Anda telah dihapus admin. Silakan daftar ulang.");
+          localStorage.removeItem("userId");
+          daftarAkunBaru();
         }
       });
     }
 
-    function tambahUang() { ubahSaldo("tambah"); }
-    function ambilUang() { ubahSaldo("ambil"); }
-    function setorUang() {
-      db.ref(`forum/${userKey}`).update({ saldo: 0 });
-      tambahRiwayat("Setor semua saldo ke 0");
-    }
-
-    function ubahSaldo(tipe) {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
-      if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah valid.");
-      const saldoRef = db.ref(`forum/${userKey}/saldo`);
-      saldoRef.once("value").then(snap => {
-        let saldo = snap.val() || 0;
-        if (tipe === "tambah") saldo += jumlah;
-        if (tipe === "ambil") saldo -= jumlah;
-        saldoRef.set(saldo);
-        tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil"} ${formatRupiah(jumlah)}`);
+    function daftarAkunBaru() {
+      const nama = prompt("Masukkan nama Anda:");
+      if (!nama) return alert("Nama tidak boleh kosong.");
+      const ref = db.ref("pengguna").push();
+      userId = ref.key;
+      fullName = nama;
+      isAdmin = false;
+      ref.set({
+        nama: nama,
+        waktuDaftar: new Date().toISOString(),
+        isAdmin: false
       });
+      localStorage.setItem("userId", userId);
+      mulaiApp();
     }
 
-    function tambahRiwayat(teks) {
-      db.ref(`forum/${userKey}/riwayat`).push(teks);
+    function mulaiApp() {
+      document.getElementById("container").style.display = "block";
+      loadChat();
     }
 
-    function kirimPesan() {
-      const teks = document.getElementById("pesan").value;
-      if (!teks || !fullName) return;
-      db.ref("chat").push({ nama: fullName, pesan: teks });
-      document.getElementById("pesan").value = "";
-    }
+    document.getElementById("send").onclick = () => {
+      const msg = document.getElementById("input").value.trim();
+      if (!msg) return;
+      db.ref("chat").push({
+        nama: fullName,
+        pesan: msg,
+        isAdmin: isAdmin,
+        waktu: Date.now()
+      });
+      document.getElementById("input").value = "";
+    };
 
-    db.ref("chat").on("child_added", snap => {
-      const { nama, pesan } = snap.val();
-      const div = document.createElement("div");
-      div.className = "message" + (nama === fullName ? " right" : "");
-      div.innerText = `${nama}: ${pesan}`;
-      document.getElementById("chatBox").appendChild(div);
-      document.getElementById("chatBox").scrollTop = 99999;
-    });
-
-    function aksesAdmin() {
-      const pass = prompt("Masukkan password admin:");
-      if (pass !== "RFD1") return alert("Password salah.");
-      document.getElementById("adminPanel").style.display = "block";
-      db.ref("forum").once("value").then(snap => {
+    function loadChat() {
+      db.ref("chat").limitToLast(100).on("child_added", snap => {
         const data = snap.val();
-        const adminData = document.getElementById("adminData");
-        adminData.innerHTML = "";
-        let top = [];
-        for (let key in data) {
-          const akun = data[key];
-          adminData.innerHTML += `
-            <p><strong>${akun.nama}</strong> - Saldo: ${formatRupiah(akun.saldo || 0)}
-              <br><button onclick="ubahNama('${key}')">Ubah Nama</button>
-              <button onclick="hapusAkun('${key}')">Hapus Akun</button>
-            </p>`;
-          top.push({ nama: akun.nama, saldo: akun.saldo || 0 });
-        }
-        top.sort((a, b) => b.saldo - a.saldo);
-        const topList = document.getElementById("topTier");
-        topList.innerHTML = "";
-        top.slice(0, 3).forEach((d, i) => {
-          topList.innerHTML += `<li>#${i + 1} ${d.nama} - ${formatRupiah(d.saldo)}</li>`;
-        });
+        const tag = data.isAdmin ? "(ADMIN)" : "";
+        const line = `<div><strong>${tag} ${data.nama}:</strong> ${data.pesan}</div>`;
+        document.getElementById("chat").innerHTML += line;
+        document.getElementById("chat").scrollTop = 9999;
       });
     }
 
-    function ubahNama(key) {
-      const baru = prompt("Masukkan nama baru:");
-      if (baru) db.ref(`forum/${key}`).update({ nama: baru });
-    }
-
-    function hapusAkun(key) {
-      if (confirm("Yakin ingin menghapus akun ini?")) {
-        db.ref(`forum/${key}`).remove();
-        aksesAdmin(); // refresh
-      }
-    }
-
-    function formatRupiah(angka) {
-      return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+    initAkun();
   </script>
 </body>
-        </html>
+</html>
