@@ -33,7 +33,7 @@
     <button onclick="tambahUang()">Tambah</button>
     <button onclick="ambilUang()">Ambil</button>
     <button onclick="setorUang()">Setor (Reset)</button>
-    <div id="riwayat"></div>
+    <div id="riwayat"><h4>Riwayat:</h4></div>
   </div>
 
   <div class="section">
@@ -50,38 +50,38 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-      measurementId: "G-YXZPEVYBDR"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    window.onload = function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+        authDomain: "uangduty.firebaseapp.com",
+        databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "uangduty",
+        storageBucket: "uangduty.appspot.com",
+        messagingSenderId: "598905752132",
+        appId: "1:598905752132:web:9b764840e51c13a3044a11",
+        measurementId: "G-YXZPEVYBDR"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
 
-    let userKey = localStorage.getItem("userKey");
-    let fullName = localStorage.getItem("fullName");
+      let userKey = localStorage.getItem("userKey");
+      let fullName = localStorage.getItem("fullName");
 
-    if (userKey && fullName) {
-      document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
-      document.getElementById("forumSection").style.display = "block";
-      document.getElementById("akunSection").style.display = "none";
-      pantauSaldo();
-      pantauRiwayat();
-    }
+      if (userKey && fullName) {
+        document.getElementById("infoPengguna").innerText = `Selamat datang, ${fullName}`;
+        document.getElementById("forumSection").style.display = "block";
+        document.getElementById("akunSection").style.display = "none";
+        pantauSaldo();
+        pantauRiwayat();
+      }
 
-    function buatAkun() {
-      const depan = document.getElementById("namaDepan").value;
-      const belakang = document.getElementById("namaBelakang").value;
-      const nama = `${depan} ${belakang}`;
+      window.buatAkun = function () {
+        const depan = document.getElementById("namaDepan").value.trim();
+        const belakang = document.getElementById("namaBelakang").value.trim();
+        const nama = `${depan} ${belakang}`;
 
-      if (!depan || !belakang) return alert("Lengkapi nama Anda.");
+        if (!depan || !belakang) return alert("Lengkapi nama Anda.");
 
-      if (!userKey) {
         const ref = db.ref("forum").push();
         ref.set({ nama, saldo: 0 });
         userKey = ref.key;
@@ -92,84 +92,84 @@
         document.getElementById("infoPengguna").innerText = `Selamat datang, ${nama}`;
         pantauSaldo();
         pantauRiwayat();
+      };
+
+      function pantauSaldo() {
+        db.ref(`forum/${userKey}/saldo`).on("value", snap => {
+          document.getElementById("saldo").innerText = snap.val() ?? 0;
+        });
       }
-    }
 
-    function pantauSaldo() {
-      db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-        document.getElementById("saldo").innerText = snap.val();
+      function pantauRiwayat() {
+        db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
+          const riw = snap.val();
+          const el = document.getElementById("riwayat");
+          el.innerHTML = "<h4>Riwayat:</h4>";
+          if (riw) {
+            for (let key in riw) {
+              el.innerHTML += `<p>${riw[key]}</p>`;
+            }
+          }
+        });
+      }
+
+      window.tambahUang = function () { ubahSaldo("tambah"); };
+      window.ambilUang = function () { ubahSaldo("ambil"); };
+      window.setorUang = function () {
+        db.ref(`forum/${userKey}`).update({ saldo: 0 });
+        tambahRiwayat("Setor semua saldo ke 0");
+      };
+
+      function ubahSaldo(tipe) {
+        const jumlah = parseInt(document.getElementById("jumlah").value);
+        if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah valid.");
+        const saldoRef = db.ref(`forum/${userKey}/saldo`);
+        saldoRef.once("value").then(snap => {
+          let saldo = snap.val() || 0;
+          if (tipe === "tambah") saldo += jumlah;
+          if (tipe === "ambil") saldo -= jumlah;
+          saldoRef.set(saldo);
+          tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil"} ${jumlah} Rupiah`);
+        });
+      }
+
+      function tambahRiwayat(teks) {
+        db.ref(`forum/${userKey}/riwayat`).push(teks);
+      }
+
+      db.ref("chat").on("child_added", snap => {
+        const { nama, pesan } = snap.val();
+        const div = document.createElement("div");
+        div.className = "message" + (nama === fullName ? " right" : "");
+        div.innerText = `${nama}: ${pesan}`;
+        const chatBox = document.getElementById("chatBox");
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
       });
-    }
 
-    function pantauRiwayat() {
-      db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
-        const riw = snap.val();
-        const el = document.getElementById("riwayat");
-        el.innerHTML = "<h4>Riwayat:</h4>";
-        for (let key in riw) {
-          el.innerHTML += `<p>${riw[key]}</p>`;
-        }
-      });
-    }
+      window.kirimPesan = function () {
+        const teks = document.getElementById("pesan").value.trim();
+        if (!teks || !fullName) return;
+        db.ref("chat").push({ nama: fullName, pesan: teks });
+        document.getElementById("pesan").value = "";
+      };
 
-    function tambahUang() { ubahSaldo("tambah"); }
-    function ambilUang() { ubahSaldo("ambil"); }
+      window.aksesAdmin = function () {
+        const pw = prompt("Masukkan password admin:");
+        if (pw !== "RFD1") return alert("Password salah!");
 
-    function setorUang() {
-      db.ref(`forum/${userKey}`).update({ saldo: 0 });
-      tambahRiwayat("Setor semua saldo ke 0");
-    }
-
-    function ubahSaldo(tipe) {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
-      if (isNaN(jumlah) || jumlah <= 0) return alert("Masukkan jumlah valid.");
-      const saldoRef = db.ref(`forum/${userKey}/saldo`);
-      saldoRef.once("value").then(snap => {
-        let saldo = snap.val() || 0;
-        if (tipe === "tambah") saldo += jumlah;
-        if (tipe === "ambil") saldo -= jumlah;
-        saldoRef.set(saldo);
-        tambahRiwayat(`${tipe === "tambah" ? "Tambah" : "Ambil"} ${jumlah} Rupiah`);
-      });
-    }
-
-    function tambahRiwayat(teks) {
-      db.ref(`forum/${userKey}/riwayat`).push(teks);
-    }
-
-    // Chat
-    db.ref("chat").on("child_added", snap => {
-      const { nama, pesan } = snap.val();
-      const div = document.createElement("div");
-      div.className = "message" + (nama === fullName ? " right" : "");
-      div.innerText = `${nama}: ${pesan}`;
-      document.getElementById("chatBox").appendChild(div);
-      document.getElementById("chatBox").scrollTop = 99999;
-    });
-
-    function kirimPesan() {
-      const teks = document.getElementById("pesan").value;
-      if (!teks || !fullName) return;
-      db.ref("chat").push({ nama: fullName, pesan: teks });
-      document.getElementById("pesan").value = "";
-    }
-
-    // Admin
-    function aksesAdmin() {
-      const pw = prompt("Masukkan password admin:");
-      if (pw !== "RFD1") return alert("Password salah!");
-
-      db.ref("forum").once("value").then(snap => {
-        const data = snap.val();
-        const container = document.getElementById("adminData");
-        container.innerHTML = "<h3>Data Anggota:</h3>";
-        for (let key in data) {
-          const u = data[key];
-          container.innerHTML += `<p><strong>${u.nama}</strong> - Saldo: ${u.saldo}</p>`;
-        }
-        container.style.display = "block";
-      });
-    }
+        db.ref("forum").once("value").then(snap => {
+          const data = snap.val();
+          const container = document.getElementById("adminData");
+          container.innerHTML = "<h3>Data Anggota:</h3>";
+          for (let key in data) {
+            const u = data[key];
+            container.innerHTML += `<p><strong>${u.nama}</strong> - Saldo: ${u.saldo}</p>`;
+          }
+          container.style.display = "block";
+        });
+      };
+    };
   </script>
 </body>
 </html>
