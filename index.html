@@ -1,116 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<title>Fishing Simulator dengan Gambar</title>
-<style>
-  body { text-align: center; font-family: Arial, sans-serif; background: #a0d8f7; }
-  canvas { background: #87ceeb; display: block; margin: 20px auto; border: 2px solid #004466; }
-  button { padding: 10px 20px; font-size: 16px; }
-</style>
+  <title>Chat Realtime Firebase Realtime DB</title>
+  <style>
+    body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+    #login { margin-bottom: 20px; }
+    #chat { display: none; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
+    #messages { list-style: none; padding: 0; }
+    #messages li { margin: 5px 0; }
+    .me { text-align: right; color: green; }
+    .other { text-align: left; color: blue; }
+  </style>
 </head>
 <body>
 
-<h1>Fishing Simulator dengan Gambar</h1>
-<canvas id="gameCanvas" width="600" height="400"></canvas>
-<p>Score: <span id="score">0</span></p>
-<button id="castBtn">Lempar Joran</button>
+<h2>Chat Realtime Firebase Realtime Database</h2>
+
+<div id="login">
+  <input type="text" id="userId" placeholder="Masukkan ID (misal: user123)" />
+  <input type="text" id="chatWith" placeholder="Chat dengan ID (misal: user456)" />
+  <button id="btnLogin">Login & Mulai Chat</button>
+</div>
+
+<div id="chat">
+  <ul id="messages"></ul>
+  <input type="text" id="inputMsg" placeholder="Ketik pesan..." style="width:80%" />
+  <button id="btnSend">Kirim</button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// Load gambar ikan dan joran
-const fishImg = new Image();
-fishImg.src = 'https://i.imgur.com/JhxNu0B.png'; // contoh gambar ikan
+  // Config Firebase Realtime Database kamu
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.firebasestorage.app",
+    messagingSenderId: "598905752132",
+    appId: "1:598905752132:web:7be400c23de21665044a11",
+    measurementId: "G-TJL9K6YDL9"
+  };
 
-const rodImg = new Image();
-rodImg.src = 'https://i.imgur.com/MhG63ZV.png'; // contoh gambar joran
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('score');
-const castBtn = document.getElementById('castBtn');
+  let currentUser = null;
+  let chatWithUser = null;
+  let chatId = null;
 
-let score = 0;
-let fishing = false;
-let fishAppeared = false;
-let fishX = 0;
-let fishY = 0;
-let fishWidth = 80;
-let fishHeight = 40;
-
-function drawWater() {
-  ctx.fillStyle = '#3399ff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function drawFish() {
-  ctx.drawImage(fishImg, fishX, fishY, fishWidth, fishHeight);
-}
-
-function drawRod() {
-  // Gambar joran di sisi kanan bawah
-  ctx.drawImage(rodImg, canvas.width - 150, canvas.height - 150, 100, 100);
-}
-
-function clear() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-function appearFish() {
-  fishX = Math.random() * (canvas.width - fishWidth);
-  fishY = Math.random() * (canvas.height - fishHeight);
-  fishAppeared = true;
-  drawFish();
-}
-
-function update() {
-  clear();
-  drawWater();
-  drawRod();
-
-  if (fishAppeared) {
-    drawFish();
-  }
-}
-
-castBtn.addEventListener('click', () => {
-  if (!fishing) {
-    fishing = true;
-    fishAppeared = false;
-    scoreDisplay.textContent = score;
-    update();
-
-    const waitTime = Math.random() * 2000 + 1000;
-    setTimeout(() => {
-      if (fishing) {
-        appearFish();
-      }
-    }, waitTime);
-  }
-});
-
-canvas.addEventListener('click', (e) => {
-  if (fishing && fishAppeared) {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    if (mouseX > fishX && mouseX < fishX + fishWidth && mouseY > fishY && mouseY < fishY + fishHeight) {
-      score++;
-      scoreDisplay.textContent = score;
-      fishing = false;
-      fishAppeared = false;
-      update();
-      alert('Ikan tertangkap!');
+  document.getElementById('btnLogin').onclick = () => {
+    const userId = document.getElementById('userId').value.trim();
+    const chatWithId = document.getElementById('chatWith').value.trim();
+    if (!userId || !chatWithId) {
+      alert("Isi kedua ID dulu ya!");
+      return;
     }
+    currentUser = userId;
+    chatWithUser = chatWithId;
+    chatId = userId < chatWithId ? userId + '_' + chatWithId : chatWithId + '_' + userId;
+
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('chat').style.display = 'block';
+
+    loadMessages();
+  };
+
+  function loadMessages() {
+    const messagesRef = db.ref('chats/' + chatId);
+    messagesRef.off();
+    messagesRef.on('value', snapshot => {
+      const messagesList = document.getElementById('messages');
+      messagesList.innerHTML = "";
+      const data = snapshot.val();
+      if (!data) return;
+      Object.entries(data).forEach(([key, msg]) => {
+        const li = document.createElement('li');
+        li.textContent = msg.from + ": " + msg.text;
+        li.className = msg.from === currentUser ? 'me' : 'other';
+        messagesList.appendChild(li);
+      });
+      messagesList.scrollTop = messagesList.scrollHeight;
+    });
   }
-});
 
-function gameLoop() {
-  update();
-  requestAnimationFrame(gameLoop);
-}
+  document.getElementById('btnSend').onclick = sendMessage;
+  document.getElementById('inputMsg').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
 
-gameLoop();
+  function sendMessage() {
+    const input = document.getElementById('inputMsg');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const messagesRef = db.ref('chats/' + chatId);
+    const newMsgRef = messagesRef.push();
+    newMsgRef.set({
+      from: currentUser,
+      to: chatWithUser,
+      text: text,
+      createdAt: Date.now()
+    });
+
+    input.value = '';
+  }
 </script>
 
 </body>
