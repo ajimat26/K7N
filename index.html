@@ -13,8 +13,6 @@
     .admin-tag { color: red; font-weight: bold; }
     .chat-box { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; background: #f9f9f9; }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -22,7 +20,7 @@
 <div id="login">
   <input id="name" placeholder="Nama Lengkap"><br>
   <input id="badge" placeholder="Badge (cth: #123)"><br>
-  <button onclick="login()">Login</button>
+  <button id="loginBtn">Login</button>
 </div>
 
 <div id="main" class="hidden">
@@ -30,23 +28,26 @@
 
   <h4>Uang kamu: Rp <span id="money">0</span></h4>
   <input id="amount" placeholder="Jumlah uang"><br>
-  <button onclick="tambahUang()">Tambah Uang</button>
-  <button onclick="ambilUang()">Ambil Uang</button>
-  <button onclick="resetUang()">Setor / Reset Uang</button>
+  <button id="tambahBtn">Tambah Uang</button>
+  <button id="ambilBtn">Ambil Uang</button>
+  <button id="resetBtn">Setor / Reset Uang</button>
 
   <hr>
   <h4>Chat:</h4>
   <div class="chat-box" id="chatBox"></div>
-  <input id="chatInput" placeholder="Ketik pesan"><button onclick="sendChat()">Kirim</button>
+  <input id="chatInput" placeholder="Ketik pesan"><button id="kirimBtn">Kirim</button>
 
   <hr>
-  <button onclick="toggleAdmin()">Akses Admin</button>
+  <button id="adminToggleBtn">Akses Admin</button>
   <div id="adminPanel" class="hidden">
     <input id="adminPass" type="password" placeholder="Password Admin">
-    <button onclick="masukAdmin()">Masuk Admin</button>
+    <button id="adminMasukBtn">Masuk Admin</button>
   </div>
 </div>
 
+<!-- Firebase & Script di bawah body agar tombol dikenali -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
@@ -64,10 +65,10 @@
   let userFull = "";
   let isAdmin = false;
 
-  function login() {
-    const name = document.getElementById("name").value;
-    const badge = document.getElementById("badge").value;
-    if (!name || !badge) return alert("Isi semua kolom");
+  document.getElementById("loginBtn").onclick = function() {
+    const name = document.getElementById("name").value.trim();
+    const badge = document.getElementById("badge").value.trim();
+    if (!name || !badge) return alert("Isi semua kolom!");
 
     userKey = badge + "_" + name.replace(/\s/g, "_");
     userFull = badge + " " + name;
@@ -82,7 +83,7 @@
       listenMoney();
       listenChat();
     });
-  }
+  };
 
   function listenMoney() {
     db.ref("users/" + userKey + "/uang").on("value", snap => {
@@ -90,27 +91,27 @@
     });
   }
 
-  function tambahUang() {
+  document.getElementById("tambahBtn").onclick = function() {
     const val = parseInt(document.getElementById("amount").value);
     if (isNaN(val)) return;
     db.ref("users/" + userKey + "/uang").once("value", snap => {
       let total = (snap.val() || 0) + val;
       db.ref("users/" + userKey + "/uang").set(total);
     });
-  }
+  };
 
-  function ambilUang() {
+  document.getElementById("ambilBtn").onclick = function() {
     const val = parseInt(document.getElementById("amount").value);
     if (isNaN(val)) return;
     db.ref("users/" + userKey + "/uang").once("value", snap => {
       let total = (snap.val() || 0) - val;
       db.ref("users/" + userKey + "/uang").set(total);
     });
-  }
+  };
 
-  function resetUang() {
+  document.getElementById("resetBtn").onclick = function() {
     db.ref("users/" + userKey + "/uang").set(0);
-  }
+  };
 
   function listenChat() {
     db.ref("chat").limitToLast(20).on("child_added", snap => {
@@ -122,7 +123,7 @@
     });
   }
 
-  function sendChat() {
+  document.getElementById("kirimBtn").onclick = function() {
     const pesan = document.getElementById("chatInput").value;
     if (!pesan) return;
     db.ref("chat").push({
@@ -131,13 +132,13 @@
       admin: isAdmin
     });
     document.getElementById("chatInput").value = "";
-  }
+  };
 
-  function toggleAdmin() {
+  document.getElementById("adminToggleBtn").onclick = function() {
     document.getElementById("adminPanel").classList.toggle("hidden");
-  }
+  };
 
-  function masukAdmin() {
+  document.getElementById("adminMasukBtn").onclick = function() {
     const pw = document.getElementById("adminPass").value;
     if (pw === "RFD1") {
       isAdmin = true;
@@ -146,7 +147,7 @@
     } else {
       alert("Password salah.");
     }
-  }
+  };
 </script>
 
 </body>
