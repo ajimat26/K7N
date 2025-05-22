@@ -3,211 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <title>UANGDUTY SAFD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
-    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
-    .hidden { display: none; }
-    .chat-box { height: 300px; overflow-y: auto; background: #eee; padding: 10px; margin-bottom: 10px; }
-    .message { margin-bottom: 5px; }
-    input, button, textarea { width: 100%; margin: 5px 0; padding: 10px; }
-    .admin-tag { color: red; font-weight: bold; }
+    body { font-family: Arial; margin: 0; padding: 0; background: #111; color: white; }
+    .panel { display: none; padding: 20px; }
+    .active { display: block; }
+    input, button { margin: 5px 0; padding: 10px; width: 100%; }
+    #chatBox { height: 250px; overflow-y: scroll; background: #222; margin-top: 10px; padding: 10px; }
+    .adminTag { color: orange; font-weight: bold; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>UANGDUTY SAFD</h2>
 
-  <!-- REGISTER -->
-  <div id="registerSection">
-    <h3>Daftar Akun</h3>
-    <input id="regName" placeholder="Nama Lengkap">
-    <input id="regPass" type="password" placeholder="Password">
-    <button onclick="register()">Daftar</button>
-    <p>Sudah punya akun? <a href="#" onclick="showLogin()">Login</a></p>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="loginSection" class="hidden">
-    <h3>Login Akun</h3>
-    <input id="loginName" placeholder="Nama Lengkap">
-    <input id="loginPass" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>
-
-  <!-- CHAT -->
-  <div id="chatSection" class="hidden">
-    <h3>Forum Chat</h3>
-    <div class="chat-box" id="chatBox"></div>
-    <textarea id="messageInput" placeholder="Tulis pesan..."></textarea>
-    <button onclick="sendMessage()">Kirim</button>
-    <div id="adminPanel" class="hidden">
-      <h4>Panel Admin</h4>
-      <div id="userList"></div>
-      <h5>Top Tier</h5>
-      <ul id="topTierList"></ul>
-    </div>
-  </div>
+<div id="loginPanel" class="panel active">
+  <h2>Login</h2>
+  <input id="loginName" placeholder="Nama Lengkap">
+  <input id="loginPass" placeholder="Password" type="password">
+  <button onclick="login()">Login</button>
+  <p>Belum punya akun? <a href="#" onclick="showPanel('registerPanel')">Daftar</a></p>
 </div>
 
+<div id="registerPanel" class="panel">
+  <h2>Register</h2>
+  <input id="regName" placeholder="Nama Lengkap">
+  <input id="regPass" placeholder="Password" type="password">
+  <button onclick="register()">Daftar</button>
+  <p>Sudah punya akun? <a href="#" onclick="showPanel('loginPanel')">Login</a></p>
+</div>
+
+<div id="chatPanel" class="panel">
+  <h2>Chat UANGDUTY SAFD</h2>
+  <div id="chatBox"></div>
+  <input id="chatMsg" placeholder="Ketik pesan...">
+  <button onclick="sendMsg()">Kirim</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script>
-  // GANTI DENGAN FIREBASE MILIKMU
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.firebasestorage.app",
+    messagingSenderId: "598905752132",
+    appId: "1:598905752132:web:9b764840e51c13a3044a11"
   };
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
+  const auth = firebase.auth();
 
-  let currentUserKey = localStorage.getItem("userKey");
-  let currentUserName = localStorage.getItem("userName");
-  let isAdmin = false;
+  let currentUser = null;
+  let userData = null;
 
-  const regSec = document.getElementById("registerSection");
-  const loginSec = document.getElementById("loginSection");
-  const chatSec = document.getElementById("chatSection");
-  const chatBox = document.getElementById("chatBox");
-  const adminPanel = document.getElementById("adminPanel");
+  const loginPanel = document.getElementById('loginPanel');
+  const registerPanel = document.getElementById('registerPanel');
+  const chatPanel = document.getElementById('chatPanel');
+  const chatBox = document.getElementById('chatBox');
 
-  function showLogin() {
-    regSec.classList.add("hidden");
-    loginSec.classList.remove("hidden");
-  }
-
-  function showChat() {
-    regSec.classList.add("hidden");
-    loginSec.classList.add("hidden");
-    chatSec.classList.remove("hidden");
-    if (isAdmin) adminPanel.classList.remove("hidden");
-    listenMessages();
-    if (isAdmin) loadUsers();
+  function showPanel(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
 
   function register() {
-    const name = document.getElementById("regName").value.trim();
-    const pass = document.getElementById("regPass").value.trim();
-    if (!name || !pass) return alert("Isi semua data.");
+    const name = document.getElementById('regName').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const email = name.replace(/\s+/g, '').toLowerCase() + "@uangduty.com";
 
-    db.ref("users").orderByChild("name").equalTo(name).once("value", snap => {
-      if (snap.exists()) return alert("Nama sudah terdaftar.");
-
-      const newRef = db.ref("users").push();
-      newRef.set({ name, pass, isAdmin: false });
-      localStorage.setItem("userKey", newRef.key);
-      localStorage.setItem("userName", name);
-      isAdmin = false;
-      currentUserKey = newRef.key;
-      currentUserName = name;
-      showChat();
-    });
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then(cred => {
+        return db.ref('users/' + cred.user.uid).set({ name, admin: false });
+      })
+      .then(() => {
+        alert("Akun berhasil dibuat.");
+        showPanel('loginPanel');
+      })
+      .catch(err => alert(err.message));
   }
 
   function login() {
-    const name = document.getElementById("loginName").value.trim();
-    const pass = document.getElementById("loginPass").value.trim();
-    if (!name || !pass) return alert("Isi semua data.");
+    const name = document.getElementById('loginName').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const email = name.replace(/\s+/g, '').toLowerCase() + "@uangduty.com";
 
-    db.ref("users").orderByChild("name").equalTo(name).once("value", snap => {
-      if (!snap.exists()) return alert("Akun tidak ditemukan.");
-      const userKey = Object.keys(snap.val())[0];
-      const user = snap.val()[userKey];
-      if (user.pass !== pass) return alert("Password salah.");
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(cred => {
+        currentUser = cred.user;
+        return db.ref('users/' + currentUser.uid).once('value');
+      })
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          alert("Akun ini telah dihapus admin. Silakan daftar ulang.");
+          auth.signOut();
+          return showPanel('registerPanel');
+        }
+        userData = snapshot.val();
+        showPanel('chatPanel');
+        listenChat();
+      })
+      .catch(err => alert("Login gagal: " + err.message));
+  }
 
-      localStorage.setItem("userKey", userKey);
-      localStorage.setItem("userName", name);
-      currentUserKey = userKey;
-      currentUserName = name;
-      isAdmin = user.isAdmin || false;
-      showChat();
+  function logout() {
+    auth.signOut().then(() => {
+      showPanel('loginPanel');
     });
   }
 
-  function sendMessage() {
-    const text = document.getElementById("messageInput").value.trim();
-    if (!text) return;
-    db.ref("messages").push({
-      name: currentUserName,
-      message: text,
-      isAdmin: isAdmin,
-      timestamp: Date.now()
-    });
-    document.getElementById("messageInput").value = "";
+  function sendMsg() {
+    const msg = document.getElementById('chatMsg').value.trim();
+    if (!msg) return;
+
+    const chatData = {
+      user: userData.name,
+      tag: userData.admin ? "(ADMIN)" : "",
+      message: msg,
+      time: Date.now()
+    };
+
+    db.ref("chats").push(chatData);
+    document.getElementById('chatMsg').value = "";
   }
 
-  function listenMessages() {
-    chatBox.innerHTML = "";
-    db.ref("messages").orderByChild("timestamp").limitToLast(50).on("child_added", snap => {
-      const d = snap.val();
-      const tag = d.isAdmin ? `<span class="admin-tag">(ADMIN)</span> ` : "";
+  function listenChat() {
+    db.ref("chats").limitToLast(50).on("child_added", snapshot => {
+      const data = snapshot.val();
       const div = document.createElement("div");
-      div.className = "message";
-      div.innerHTML = `${tag}<strong>${d.name}:</strong> ${d.message}`;
+      div.innerHTML = `<span class="${data.tag ? 'adminTag' : ''}">${data.tag} ${data.user}:</span> ${data.message}`;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     });
   }
-
-  function loadUsers() {
-    db.ref("users").once("value", snap => {
-      const list = document.getElementById("userList");
-      list.innerHTML = "";
-      const topList = document.getElementById("topTierList");
-      topList.innerHTML = "";
-
-      const users = [];
-      snap.forEach(child => {
-        const user = child.val();
-        const key = child.key;
-        users.push({ name: user.name });
-        const div = document.createElement("div");
-        div.innerHTML = `<b>${user.name}</b>
-          <button onclick="renameUser('${key}')">Ubah Nama</button>
-          <button onclick="deleteUser('${key}')">Hapus</button>`;
-        list.appendChild(div);
-      });
-
-      users.slice(0, 3).forEach((u, i) => {
-        const li = document.createElement("li");
-        li.innerText = `#${i + 1} ${u.name}`;
-        topList.appendChild(li);
-      });
-    });
-  }
-
-  function renameUser(key) {
-    const newName = prompt("Nama baru:");
-    if (newName) db.ref("users/" + key).update({ name: newName });
-  }
-
-  function deleteUser(key) {
-    if (confirm("Hapus akun ini?")) {
-      db.ref("users/" + key).remove();
-      loadUsers();
-    }
-  }
-
-  // Auto-login jika ada
-  window.onload = function () {
-    if (currentUserKey && currentUserName) {
-      db.ref("users/" + currentUserKey).once("value", snap => {
-        if (!snap.exists()) {
-          alert("Akun dihapus admin.");
-          localStorage.clear();
-          return;
-        }
-        const d = snap.val();
-        isAdmin = d.isAdmin || false;
-        showChat();
-      });
-    }
-  };
 </script>
 </body>
 </html>
