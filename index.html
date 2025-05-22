@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forum Pekerja - Uang & Chat</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forum Pekerja - Admin & Top Tier</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
@@ -13,6 +13,7 @@
     .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; }
     .message { margin-bottom: 10px; }
     .right { text-align: right; }
+    .admin-akun { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -45,8 +46,10 @@
 
   <div class="section">
     <h2>Admin Panel</h2>
-    <button onclick="aksesAdmin()">Lihat Semua Anggota</button>
+    <button onclick="aksesAdmin()">Masuk Admin</button>
     <div id="adminData" style="display:none"></div>
+    <h3>Top Tier (3 Saldo Tertinggi)</h3>
+    <div id="topTier"></div>
   </div>
 
   <script>
@@ -57,8 +60,7 @@
       projectId: "uangduty",
       storageBucket: "uangduty.appspot.com",
       messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11",
-      measurementId: "G-YXZPEVYBDR"
+      appId: "1:598905752132:web:9b764840e51c13a3044a11"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -78,9 +80,7 @@
       const depan = document.getElementById("namaDepan").value;
       const belakang = document.getElementById("namaBelakang").value;
       const nama = `${depan} ${belakang}`;
-
       if (!depan || !belakang) return alert("Lengkapi nama Anda.");
-
       if (!userKey) {
         const ref = db.ref("forum").push();
         ref.set({ nama, saldo: 0 });
@@ -147,29 +147,52 @@
       document.getElementById("chatBox").scrollTop = 99999;
     });
 
-    function kirimPesan() {
-      const teks = document.getElementById("pesan").value;
-      if (!teks || !fullName) return;
-      db.ref("chat").push({ nama: fullName, pesan: teks });
-      document.getElementById("pesan").value = "";
-    }
-
-    // Admin
+    // Admin Panel
     function aksesAdmin() {
       const pw = prompt("Masukkan password admin:");
       if (pw !== "RFD1") return alert("Password salah!");
-
+      const adminData = document.getElementById("adminData");
       db.ref("forum").once("value").then(snap => {
         const data = snap.val();
-        const container = document.getElementById("adminData");
-        container.innerHTML = "<h3>Data Anggota:</h3>";
+        adminData.innerHTML = "<h3>Semua Akun</h3>";
+        const top = [];
         for (let key in data) {
-          const u = data[key];
-          container.innerHTML += `<p><strong>${u.nama}</strong> - Saldo: ${u.saldo}</p>`;
+          const akun = data[key];
+          top.push({ nama: akun.nama, saldo: akun.saldo });
+          adminData.innerHTML += `
+            <div class="admin-akun">
+              <p><strong>Nama:</strong> <input type="text" value="${akun.nama}" id="nama-${key}"></p>
+              <p><strong>Saldo:</strong> ${akun.saldo} Rupiah</p>
+              <button onclick="updateNama('${key}')">Ubah Nama</button>
+              <button onclick="hapusAkun('${key}')">Hapus Akun</button>
+            </div>
+          `;
         }
-        container.style.display = "block";
+        adminData.style.display = "block";
+
+        // Top Tier
+        top.sort((a, b) => b.saldo - a.saldo);
+        const top3 = top.slice(0, 3);
+        const tierDiv = document.getElementById("topTier");
+        tierDiv.innerHTML = top3.map((t, i) => `<p>#${i + 1}: ${t.nama} - ${t.saldo} Rupiah</p>`).join("");
       });
+    }
+
+    function updateNama(key) {
+      const newNama = document.getElementById(`nama-${key}`).value;
+      if (newNama.trim() === "") return alert("Nama tidak boleh kosong.");
+      db.ref(`forum/${key}`).update({ nama: newNama });
+      alert("Nama berhasil diperbarui!");
+    }
+
+    function hapusAkun(key) {
+      if (confirm("Yakin ingin menghapus akun ini?")) {
+        db.ref(`forum/${key}`).remove();
+        alert("Akun berhasil dihapus.");
+        aksesAdmin(); // Refresh admin view
+      }
     }
   </script>
 </body>
-</html>
+  </html>
+  
