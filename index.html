@@ -12,7 +12,6 @@
   input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; }
   .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; }
   .message { margin-bottom: 10px; }
-  .right { text-align: right; }
   #saldo { color: green; font-weight: bold; }
   #adminPanel { display:none; border: 1px solid #444; padding: 10px; background: #f9f9f9; }
   table { width: 100%; border-collapse: collapse; margin-top:10px; }
@@ -23,10 +22,10 @@
 <h1>SAFD MONEY</h1>
 
 <div class="section" id="accountSection">
-  <h2>Akun Anda</h2>
+  <h2>Buat Forum Anda</h2>
   <input type="text" id="namaDepan" placeholder="Nama Depan" />
   <input type="text" id="namaBelakang" placeholder="Nama Belakang" />
-  <button id="buatAkunBtn">Buat Forum Anda</button>
+  <button id="buatAkunBtn">Buat Forum</button>
   <p id="infoPengguna"></p>
 </div>
 
@@ -36,7 +35,7 @@
   <input type="number" id="jumlah" placeholder="Jumlah Uang" />
   <button id="tambahBtn">Tambah</button>
   <button id="ambilBtn">Ambil</button>
-  <button id="setorBtn">Setor (Reset)</button>
+  <button id="setorBtn">Setor (Reset Saldo)</button>
   <div id="riwayat"></div>
 </div>
 
@@ -53,8 +52,11 @@
 
 <div id="adminPanel">
   <h2>Panel Admin</h2>
-  <p><strong>Login sebagai Admin:</strong> <input type="password" id="adminPass" placeholder="Masukkan password admin" />
-  <button id="loginAdminBtn">Login</button></p>
+  <p>
+    <strong>Masukkan Password Admin:</strong>
+    <input type="password" id="adminPass" placeholder="Password" />
+    <button id="loginAdminBtn">Login</button>
+  </p>
   <div id="adminContent" style="display:none;">
     <h3>Daftar Akun</h3>
     <table id="adminTable">
@@ -63,12 +65,15 @@
     </table>
     <h3>Top Tier (3 Teratas)</h3>
     <ol id="topTierList"></ol>
+    <p>
+      <label>Ubah Nama Admin: <input type="text" id="adminNameInput" value="Admin" /></label>
+    </p>
     <button id="logoutAdminBtn">Logout Admin</button>
   </div>
 </div>
 
 <script>
-  // Firebase Config dan Init
+  // Inisialisasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
     authDomain: "uangduty.firebaseapp.com",
@@ -82,13 +87,13 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // Variabel Global
+  // Variabel global
   let userKey = localStorage.getItem("userKey");
   let fullName = localStorage.getItem("fullName");
   let isAdmin = false;
   let adminName = "Admin";
 
-  // Elemen
+  // Elemen HTML
   const accountSection = document.getElementById("accountSection");
   const forumSection = document.getElementById("forumSection");
   const infoPengguna = document.getElementById("infoPengguna");
@@ -101,114 +106,107 @@
   const adminContent = document.getElementById("adminContent");
   const adminTableBody = document.querySelector("#adminTable tbody");
   const topTierList = document.getElementById("topTierList");
+  const adminNameInput = document.getElementById("adminNameInput");
 
-  // Fungsi Format Rupiah
+  // Fungsi format rupiah
   function formatRupiah(angka) {
+    if(!angka) return "Rp 0";
     return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 
-  // Tampilkan saldo dengan format dan warna hijau
+  // Tampilkan saldo
   function tampilkanSaldo(saldo) {
-    saldoEl.innerText = formatRupiah(saldo || 0);
+    saldoEl.innerText = formatRupiah(saldo);
   }
 
-  // Fungsi untuk refresh riwayat
-  function refreshRiwayat(riwayat) {
-    riwayatEl.innerHTML = "<h4>Riwayat:</h4>";
-    if (!riwayat) return;
-    Object.values(riwayat).forEach(item => {
-      const p = document.createElement("p");
-      p.textContent = item;
-      riwayatEl.appendChild(p);
-    });
-  }
-
-  // Fungsi refresh daftar akun di admin
-  function refreshAdminTable(akunData) {
-    adminTableBody.innerHTML = "";
-    for (const key in akunData) {
-      const akun = akunData[key];
-      const tr = document.createElement("tr");
-      const namaTd = document.createElement("td");
-      const inputNama = document.createElement("input");
-      inputNama.type = "text";
-      inputNama.value = akun.nama;
-      inputNama.style.width = "90%";
-      namaTd.appendChild(inputNama);
-
-      const saldoTd = document.createElement("td");
-      saldoTd.innerText = formatRupiah(akun.saldo || 0);
-
-      const aksiTd = document.createElement("td");
-
-      // Tombol simpan nama
-      const btnSimpan = document.createElement("button");
-      btnSimpan.innerText = "Simpan Nama";
-      btnSimpan.onclick = () => {
-        const namaBaru = inputNama.value.trim();
-        if (!namaBaru) {
-          alert("Nama tidak boleh kosong!");
-          return;
-        }
-        db.ref(`forum/${key}`).update({ nama: namaBaru });
-        alert("Nama berhasil diubah");
-        loadTopTier();
-      };
-
-      // Tombol hapus akun
-      const btnHapus = document.createElement("button");
-      btnHapus.innerText = "Hapus Akun";
-      btnHapus.style.marginLeft = "5px";
-      btnHapus.onclick = () => {
-        if (confirm(`Yakin hapus akun ${akun.nama}?`)) {
-          db.ref(`forum/${key}`).remove();
-          alert("Akun berhasil dihapus");
-          if (key === userKey) {
-            userKey = null;
-            fullName = null;
-            localStorage.removeItem("userKey");
-            localStorage.removeItem("fullName");
-            location.reload();
-          }
-          loadTopTier();
-        }
-      };
-
-      aksiTd.appendChild(btnSimpan);
-      aksiTd.appendChild(btnHapus);
-
-      tr.appendChild(namaTd);
-      tr.appendChild(saldoTd);
-      tr.appendChild(aksiTd);
-      adminTableBody.appendChild(tr);
+  // Update status tampilan akun atau forum
+  function updateDisplay() {
+    if(userKey && fullName) {
+      accountSection.style.display = "none";
+      forumSection.style.display = "block";
+      infoPengguna.innerText = `Selamat datang, ${fullName}${isAdmin ? " (Admin: "+adminName+")" : ""}`;
+      pantauSaldo();
+      pantauRiwayat();
+    } else {
+      accountSection.style.display = "block";
+      forumSection.style.display = "none";
+      infoPengguna.innerText = "";
     }
   }
 
-  // Load data forum dan tampilkan Top Tier (3 teratas)
-  function loadTopTier() {
-    db.ref("forum").once("value").then(snap => {
-      const data = snap.val() || {};
-      // Top tier 3 besar berdasarkan saldo
-      const arr = [];
-      for (const k in data) {
-        arr.push({ nama: data[k].nama, saldo: data[k].saldo || 0 });
-      }
-      arr.sort((a,b) => b.saldo - a.saldo);
-      topTierList.innerHTML = "";
-      for (let i=0; i < Math.min(3, arr.length); i++) {
-        const li = document.createElement("li");
-        li.textContent = `${arr[i].nama} - ${formatRupiah(arr[i].saldo)}`;
-        topTierList.appendChild(li);
+  // Pantau saldo realtime
+  function pantauSaldo() {
+    if (!userKey) return;
+    db.ref(`forum/${userKey}/saldo`).on("value", snap => {
+      tampilkanSaldo(snap.val());
+    });
+  }
+
+  // Pantau riwayat realtime
+  function pantauRiwayat() {
+    if (!userKey) return;
+    db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
+      const val = snap.val();
+      riwayatEl.innerHTML = "<h4>Riwayat:</h4>";
+      if(val) {
+        Object.values(val).forEach(item => {
+          const p = document.createElement("p");
+          p.textContent = item;
+          riwayatEl.appendChild(p);
+        });
       }
     });
   }
 
-  // Inisialisasi: cek sudah login?
-  if (userKey && fullName) {
-    infoPengguna.innerText = `Selamat datang, ${fullName}${isAdmin ? " (Admin)" : ""}`;
-    accountSection.style.display = "none";
-    forumSection.style.display = "block";
-    pantauSaldo();
-    pantauRiwayat();
-  } else {
-    accountSection.style.display = "block
+  // Buat akun baru
+  document.getElementById("buatAkunBtn").onclick = () => {
+    const depan = document.getElementById("namaDepan").value.trim();
+    const belakang = document.getElementById("namaBelakang").value.trim();
+    if(!depan || !belakang) {
+      alert("Nama depan dan belakang wajib diisi!");
+      return;
+    }
+    const namaLengkap = depan + " " + belakang;
+    // Simpan ke Firebase
+    const newRef = db.ref("forum").push();
+    newRef.set({
+      nama: namaLengkap,
+      saldo: 0,
+      riwayat: {}
+    }).then(() => {
+      userKey = newRef.key;
+      fullName = namaLengkap;
+      localStorage.setItem("userKey", userKey);
+      localStorage.setItem("fullName", fullName);
+      updateDisplay();
+      loadTopTier();
+    });
+  };
+
+  // Fungsi tambah saldo
+  document.getElementById("tambahBtn").onclick = () => {
+    const jml = Number(document.getElementById("jumlah").value);
+    if(!jml || jml <= 0) {
+      alert("Masukkan jumlah uang valid!");
+      return;
+    }
+    db.ref(`forum/${userKey}`).once("value").then(snap => {
+      const data = snap.val();
+      const saldoBaru = (data.saldo || 0) + jml;
+      db.ref(`forum/${userKey}`).update({ saldo: saldoBaru });
+      const waktu = new Date().toLocaleString();
+      const riwayatBaru = (data.riwayat || {});
+      riwayatBaru[waktu] = `Tambah ${formatRupiah(jml)}`;
+      db.ref(`forum/${userKey}/riwayat`).set(riwayatBaru);
+      document.getElementById("jumlah").value = "";
+    });
+  };
+
+  // Fungsi ambil saldo
+  document.getElementById("ambilBtn").onclick = () => {
+    const jml = Number(document.getElementById("jumlah").value);
+    if(!jml || jml <= 0) {
+      alert("Masukkan jumlah uang valid!");
+      return;
+    }
+    db.ref(`forum/${userKey}`).once("value").then(snap => {
