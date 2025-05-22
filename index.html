@@ -1,209 +1,213 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>UANGDUTY SAFD – Forum Pekerja Uang & Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>UANGDUTY SAFD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
-    h1 { text-align: center; }
+    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
-    .chat-box { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; margin-bottom: 10px; background: #fafafa; }
-    .message { margin-bottom: 10px; }
-    .admin-tag { color: red; font-weight: bold; }
-    input, textarea, button { width: 100%; padding: 10px; margin: 5px 0; }
     .hidden { display: none; }
-    .admin-panel { background: #f4f4f4; padding: 15px; border: 1px solid #ccc; margin-top: 20px; }
-    .admin-panel h3 { margin-top: 0; }
-    .admin-panel ul { list-style-type: none; padding: 0; }
-    .admin-panel li { margin-bottom: 5px; }
+    .chat-box { height: 300px; overflow-y: auto; background: #eee; padding: 10px; margin-bottom: 10px; }
+    .message { margin-bottom: 5px; }
+    input, button, textarea { width: 100%; margin: 5px 0; padding: 10px; }
+    .admin-tag { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>UANGDUTY SAFD</h1>
-    <div id="register-section">
-      <h2>Daftar Akun</h2>
-      <input type="text" id="firstName" placeholder="Nama Depan" />
-      <input type="text" id="lastName" placeholder="Nama Belakang" />
-      <button id="registerBtn">Daftar</button>
-    </div>
+<div class="container">
+  <h2>UANGDUTY SAFD</h2>
 
-    <div id="chat-section" class="hidden">
-      <h2>Forum Chat</h2>
-      <div class="chat-box" id="chatBox"></div>
-      <textarea id="messageInput" placeholder="Ketik pesan Anda..."></textarea>
-      <button id="sendBtn">Kirim</button>
-    </div>
-
-    <div id="admin-section" class="hidden">
-      <h2>Panel Admin</h2>
-      <div class="admin-panel">
-        <p><strong>Admin:</strong> RFD1</p>
-        <div id="adminData"></div>
-        <h3>Top Tier</h3>
-        <ul id="topTier"></ul>
-      </div>
-    </div>
+  <!-- REGISTER -->
+  <div id="registerSection">
+    <h3>Daftar Akun</h3>
+    <input id="regName" placeholder="Nama Lengkap">
+    <input id="regPass" type="password" placeholder="Password">
+    <button onclick="register()">Daftar</button>
+    <p>Sudah punya akun? <a href="#" onclick="showLogin()">Login</a></p>
   </div>
 
-  <script>
-    // Ganti dengan konfigurasi Firebase Anda
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  <!-- LOGIN -->
+  <div id="loginSection" class="hidden">
+    <h3>Login Akun</h3>
+    <input id="loginName" placeholder="Nama Lengkap">
+    <input id="loginPass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  <!-- CHAT -->
+  <div id="chatSection" class="hidden">
+    <h3>Forum Chat</h3>
+    <div class="chat-box" id="chatBox"></div>
+    <textarea id="messageInput" placeholder="Tulis pesan..."></textarea>
+    <button onclick="sendMessage()">Kirim</button>
+    <div id="adminPanel" class="hidden">
+      <h4>Panel Admin</h4>
+      <div id="userList"></div>
+      <h5>Top Tier</h5>
+      <ul id="topTierList"></ul>
+    </div>
+  </div>
+</div>
 
-    let userKey = localStorage.getItem("userKey");
-    let fullName = localStorage.getItem("fullName");
-    let isAdmin = false;
+<script>
+  // GANTI DENGAN FIREBASE MILIKMU
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    const registerSection = document.getElementById("register-section");
-    const chatSection = document.getElementById("chat-section");
-    const adminSection = document.getElementById("admin-section");
-    const chatBox = document.getElementById("chatBox");
-    const messageInput = document.getElementById("messageInput");
+  let currentUserKey = localStorage.getItem("userKey");
+  let currentUserName = localStorage.getItem("userName");
+  let isAdmin = false;
 
-    function showRegister() {
-      registerSection.classList.remove("hidden");
-      chatSection.classList.add("hidden");
-      adminSection.classList.add("hidden");
-    }
+  const regSec = document.getElementById("registerSection");
+  const loginSec = document.getElementById("loginSection");
+  const chatSec = document.getElementById("chatSection");
+  const chatBox = document.getElementById("chatBox");
+  const adminPanel = document.getElementById("adminPanel");
 
-    function showChat() {
-      registerSection.classList.add("hidden");
-      chatSection.classList.remove("hidden");
-      if (isAdmin) {
-        adminSection.classList.remove("hidden");
-        loadAdminPanel();
-      } else {
-        adminSection.classList.add("hidden");
-      }
-      listenForMessages();
-    }
+  function showLogin() {
+    regSec.classList.add("hidden");
+    loginSec.classList.remove("hidden");
+  }
 
-    function checkAccount() {
-      if (userKey && fullName) {
-        db.ref(`users/${userKey}`).once("value").then(snapshot => {
-          if (snapshot.exists()) {
-            isAdmin = snapshot.val().isAdmin || false;
-            showChat();
-          } else {
-            alert("Akun Anda telah dihapus oleh admin. Silakan daftar ulang.");
-            localStorage.removeItem("userKey");
-            localStorage.removeItem("fullName");
-            showRegister();
-          }
-        }).catch(() => {
-          showRegister();
-        });
-      } else {
-        showRegister();
-      }
-    }
+  function showChat() {
+    regSec.classList.add("hidden");
+    loginSec.classList.add("hidden");
+    chatSec.classList.remove("hidden");
+    if (isAdmin) adminPanel.classList.remove("hidden");
+    listenMessages();
+    if (isAdmin) loadUsers();
+  }
 
-    function registerAccount() {
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName = document.getElementById("lastName").value.trim();
-      if (!firstName || !lastName) {
-        alert("Mohon isi nama depan dan belakang.");
-        return;
-      }
-      fullName = `${firstName} ${lastName}`;
-      const newUserRef = db.ref("users").push();
-      newUserRef.set({
-        name: fullName,
-        isAdmin: false
-      }).then(() => {
-        userKey = newUserRef.key;
-        localStorage.setItem("userKey", userKey);
-        localStorage.setItem("fullName", fullName);
-        isAdmin = false;
-        showChat();
-      }).catch((error) => {
-        alert("Gagal mendaftar: " + error.message);
-      });
-    }
+  function register() {
+    const name = document.getElementById("regName").value.trim();
+    const pass = document.getElementById("regPass").value.trim();
+    if (!name || !pass) return alert("Isi semua data.");
 
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      if (!message) return;
-      db.ref("messages").push({
-        name: fullName,
-        message: message,
-        isAdmin: isAdmin,
-        timestamp: Date.now()
-      }).then(() => {
-        messageInput.value = "";
-      }).catch((error) => {
-        alert("Gagal mengirim pesan: " + error.message);
-      });
-    }
+    db.ref("users").orderByChild("name").equalTo(name).once("value", snap => {
+      if (snap.exists()) return alert("Nama sudah terdaftar.");
 
-    function listenForMessages() {
-      db.ref("messages").off();
-      chatBox.innerHTML = "";
-      db.ref("messages").orderByChild("timestamp").limitToLast(100).on("child_added", snapshot => {
-        const data = snapshot.val();
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message");
-        const adminTag = data.isAdmin ? '<span class="admin-tag">(ADMIN)</span> ' : '';
-        messageDiv.innerHTML = `${adminTag}<strong>${data.name}:</strong> ${data.message}`;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-    }
-
-    function loadAdminPanel() {
-      const adminData = document.getElementById("adminData");
-      const topList = document.getElementById("topTier");
-      db.ref("users").once("value").then(snapshot => {
-        const data = snapshot.val();
-        adminData.innerHTML = "";
-        let top = [];
-        for (let key in data) {
-          const user = data[key];
-          adminData.innerHTML += `
-            <p><strong>${user.name}</strong>
-              <br><button onclick="changeName('${key}')">Ubah Nama</button>
-              <button onclick="deleteUser('${key}')">Hapus Akun</button>
-            </p>`;
-          top.push({ name: user.name });
-        }
-        topList.innerHTML = "";
-        top.slice(0, 3).forEach((d, i) => {
-          topList.innerHTML += `<li>#${i + 1} ${d.name}</li>`;
-        });
-      });
-    }
-
-    function changeName(key) {
-      const newName = prompt("Masukkan nama baru:");
-      if (newName) db.ref(`users/${key}`).update({ name: newName });
-    }
-
-    function deleteUser(key) {
-      if (confirm("Yakin ingin menghapus akun ini?")) {
-        db.ref(`users/${key}`).remove();
-        loadAdminPanel();
-      }
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("registerBtn").addEventListener("click", registerAccount);
-      document.getElementById("sendBtn").addEventListener("click", sendMessage);
-      checkAccount();
+      const newRef = db.ref("users").push();
+      newRef.set({ name, pass, isAdmin: false });
+      localStorage.setItem("userKey", newRef.key);
+      localStorage.setItem("userName", name);
+      isAdmin = false;
+      currentUserKey = newRef.key;
+      currentUserName = name;
+      showChat();
     });
-  </script>
+  }
+
+  function login() {
+    const name = document.getElementById("loginName").value.trim();
+    const pass = document.getElementById("loginPass").value.trim();
+    if (!name || !pass) return alert("Isi semua data.");
+
+    db.ref("users").orderByChild("name").equalTo(name).once("value", snap => {
+      if (!snap.exists()) return alert("Akun tidak ditemukan.");
+      const userKey = Object.keys(snap.val())[0];
+      const user = snap.val()[userKey];
+      if (user.pass !== pass) return alert("Password salah.");
+
+      localStorage.setItem("userKey", userKey);
+      localStorage.setItem("userName", name);
+      currentUserKey = userKey;
+      currentUserName = name;
+      isAdmin = user.isAdmin || false;
+      showChat();
+    });
+  }
+
+  function sendMessage() {
+    const text = document.getElementById("messageInput").value.trim();
+    if (!text) return;
+    db.ref("messages").push({
+      name: currentUserName,
+      message: text,
+      isAdmin: isAdmin,
+      timestamp: Date.now()
+    });
+    document.getElementById("messageInput").value = "";
+  }
+
+  function listenMessages() {
+    chatBox.innerHTML = "";
+    db.ref("messages").orderByChild("timestamp").limitToLast(50).on("child_added", snap => {
+      const d = snap.val();
+      const tag = d.isAdmin ? `<span class="admin-tag">(ADMIN)</span> ` : "";
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `${tag}<strong>${d.name}:</strong> ${d.message}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  }
+
+  function loadUsers() {
+    db.ref("users").once("value", snap => {
+      const list = document.getElementById("userList");
+      list.innerHTML = "";
+      const topList = document.getElementById("topTierList");
+      topList.innerHTML = "";
+
+      const users = [];
+      snap.forEach(child => {
+        const user = child.val();
+        const key = child.key;
+        users.push({ name: user.name });
+        const div = document.createElement("div");
+        div.innerHTML = `<b>${user.name}</b>
+          <button onclick="renameUser('${key}')">Ubah Nama</button>
+          <button onclick="deleteUser('${key}')">Hapus</button>`;
+        list.appendChild(div);
+      });
+
+      users.slice(0, 3).forEach((u, i) => {
+        const li = document.createElement("li");
+        li.innerText = `#${i + 1} ${u.name}`;
+        topList.appendChild(li);
+      });
+    });
+  }
+
+  function renameUser(key) {
+    const newName = prompt("Nama baru:");
+    if (newName) db.ref("users/" + key).update({ name: newName });
+  }
+
+  function deleteUser(key) {
+    if (confirm("Hapus akun ini?")) {
+      db.ref("users/" + key).remove();
+      loadUsers();
+    }
+  }
+
+  // Auto-login jika ada
+  window.onload = function () {
+    if (currentUserKey && currentUserName) {
+      db.ref("users/" + currentUserKey).once("value", snap => {
+        if (!snap.exists()) {
+          alert("Akun dihapus admin.");
+          localStorage.clear();
+          return;
+        }
+        const d = snap.val();
+        isAdmin = d.isAdmin || false;
+        showChat();
+      });
+    }
+  };
+</script>
 </body>
 </html>
