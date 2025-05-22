@@ -3,25 +3,27 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SAFD MONEY</title>
+<title>SAFD MONEY - Fix Bug</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
+  body { font-family: Arial, sans-serif; padding: 20px; }
   .section { margin-bottom: 30px; }
-  input, button, textarea { margin: 5px 0; padding: 10px; width: 100%; }
-  .chat-box { border: 1px solid #ccc; padding: 10px; max-height: 200px; overflow-y: scroll; }
-  .message { margin-bottom: 10px; }
-  #saldo { color: green; font-weight: bold; }
-  #adminPanel { display:none; border: 1px solid #444; padding: 10px; background: #f9f9f9; }
-  table { width: 100%; border-collapse: collapse; margin-top:10px; }
-  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  input, button, textarea { width: 100%; margin: 6px 0; padding: 10px; font-size: 16px; }
+  button { cursor: pointer; }
+  #forumSection, #adminPanel, #adminContent { display: none; }
+  #saldo { color: green; font-weight: bold; font-size: 18px; }
+  .chat-box { border: 1px solid #ccc; height: 150px; overflow-y: auto; padding: 8px; background: #f9f9f9; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
 </style>
 </head>
 <body>
+
 <h1>SAFD MONEY</h1>
 
-<div class="section" id="accountSection">
+<!-- Buat Akun -->
+<div id="accountSection" class="section">
   <h2>Buat Forum Anda</h2>
   <input type="text" id="namaDepan" placeholder="Nama Depan" />
   <input type="text" id="namaBelakang" placeholder="Nama Belakang" />
@@ -29,16 +31,18 @@
   <p id="infoPengguna"></p>
 </div>
 
-<div class="section" id="forumSection" style="display:none;">
+<!-- Forum -->
+<div id="forumSection" class="section">
   <h2>Forum Anda</h2>
-  <p><strong>Saldo:</strong> <span id="saldo">Rp 0</span></p>
+  <p>Saldo: <span id="saldo">Rp 0</span></p>
   <input type="number" id="jumlah" placeholder="Jumlah Uang" />
   <button id="tambahBtn">Tambah</button>
   <button id="ambilBtn">Ambil</button>
-  <button id="setorBtn">Setor (Reset Saldo)</button>
+  <button id="setorBtn">Reset Saldo</button>
   <div id="riwayat"></div>
 </div>
 
+<!-- Chat -->
 <div class="section">
   <h2>Obrolan</h2>
   <div class="chat-box" id="chatBox"></div>
@@ -46,34 +50,29 @@
   <button id="kirimBtn">Kirim</button>
 </div>
 
+<!-- Admin Access Button -->
 <div class="section">
   <button id="btnAdminAccess">Panel Admin</button>
 </div>
 
-<div id="adminPanel">
+<!-- Admin Panel -->
+<div id="adminPanel" class="section">
   <h2>Panel Admin</h2>
-  <p>
-    <strong>Masukkan Password Admin:</strong>
-    <input type="password" id="adminPass" placeholder="Password" />
-    <button id="loginAdminBtn">Login</button>
-  </p>
-  <div id="adminContent" style="display:none;">
+  <input type="password" id="adminPass" placeholder="Masukkan Password Admin" />
+  <button id="loginAdminBtn">Login Admin</button>
+
+  <div id="adminContent">
     <h3>Daftar Akun</h3>
-    <table id="adminTable">
+    <table>
       <thead><tr><th>Nama</th><th>Saldo</th><th>Aksi</th></tr></thead>
-      <tbody></tbody>
+      <tbody id="adminTableBody"></tbody>
     </table>
-    <h3>Top Tier (3 Teratas)</h3>
-    <ol id="topTierList"></ol>
-    <p>
-      <label>Ubah Nama Admin: <input type="text" id="adminNameInput" value="Admin" /></label>
-    </p>
     <button id="logoutAdminBtn">Logout Admin</button>
   </div>
 </div>
 
 <script>
-  // Inisialisasi Firebase
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
     authDomain: "uangduty.firebaseapp.com",
@@ -84,70 +83,53 @@
     appId: "1:598905752132:web:9b764840e51c13a3044a11",
     measurementId: "G-YXZPEVYBDR"
   };
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // Variabel global
-  let userKey = localStorage.getItem("userKey");
-  let fullName = localStorage.getItem("fullName");
-  let isAdmin = false;
-  let adminName = "Admin";
-
-  // Elemen HTML
+  // Elements
   const accountSection = document.getElementById("accountSection");
   const forumSection = document.getElementById("forumSection");
   const infoPengguna = document.getElementById("infoPengguna");
   const saldoEl = document.getElementById("saldo");
   const riwayatEl = document.getElementById("riwayat");
+  const jumlahInput = document.getElementById("jumlah");
   const chatBox = document.getElementById("chatBox");
   const pesanEl = document.getElementById("pesan");
-  const adminPanel = document.getElementById("adminPanel");
-  const adminPassEl = document.getElementById("adminPass");
-  const adminContent = document.getElementById("adminContent");
-  const adminTableBody = document.querySelector("#adminTable tbody");
-  const topTierList = document.getElementById("topTierList");
-  const adminNameInput = document.getElementById("adminNameInput");
+  const btnBuatAkun = document.getElementById("buatAkunBtn");
+  const btnTambah = document.getElementById("tambahBtn");
+  const btnAmbil = document.getElementById("ambilBtn");
+  const btnSetor = document.getElementById("setorBtn");
 
-  // Fungsi format rupiah
+  const btnAdminAccess = document.getElementById("btnAdminAccess");
+  const adminPanel = document.getElementById("adminPanel");
+  const adminPassInput = document.getElementById("adminPass");
+  const loginAdminBtn = document.getElementById("loginAdminBtn");
+  const adminContent = document.getElementById("adminContent");
+  const adminTableBody = document.getElementById("adminTableBody");
+  const logoutAdminBtn = document.getElementById("logoutAdminBtn");
+
+  let userKey = localStorage.getItem("userKey");
+  let fullName = localStorage.getItem("fullName");
+  let isAdminLoggedIn = false;
+
+  // Format Rupiah
   function formatRupiah(angka) {
-    if(!angka) return "Rp 0";
+    if (!angka) return "Rp 0";
     return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 
-  // Tampilkan saldo
-  function tampilkanSaldo(saldo) {
-    saldoEl.innerText = formatRupiah(saldo);
-  }
-
-  // Update status tampilan akun atau forum
-  function updateDisplay() {
-    if(userKey && fullName) {
-      accountSection.style.display = "none";
-      forumSection.style.display = "block";
-      infoPengguna.innerText = `Selamat datang, ${fullName}${isAdmin ? " (Admin: "+adminName+")" : ""}`;
-      pantauSaldo();
-      pantauRiwayat();
-    } else {
-      accountSection.style.display = "block";
-      forumSection.style.display = "none";
-      infoPengguna.innerText = "";
-    }
-  }
-
-  // Pantau saldo realtime
-  function pantauSaldo() {
-    if (!userKey) return;
-    db.ref(`forum/${userKey}/saldo`).on("value", snap => {
-      tampilkanSaldo(snap.val());
+  // Update UI tampilkan saldo dan riwayat
+  function updateForumUI() {
+    if(!userKey) return;
+    // Pantau saldo realtime
+    db.ref("forum/" + userKey + "/saldo").on("value", snapshot => {
+      saldoEl.textContent = formatRupiah(snapshot.val() || 0);
     });
-  }
-
-  // Pantau riwayat realtime
-  function pantauRiwayat() {
-    if (!userKey) return;
-    db.ref(`forum/${userKey}/riwayat`).on("value", snap => {
-      const val = snap.val();
+    // Pantau riwayat realtime
+    db.ref("forum/" + userKey + "/riwayat").on("value", snapshot => {
       riwayatEl.innerHTML = "<h4>Riwayat:</h4>";
+      const val = snapshot.val();
       if(val) {
         Object.values(val).forEach(item => {
           const p = document.createElement("p");
@@ -158,8 +140,22 @@
     });
   }
 
+  // Update display based on user login status
+  function updateDisplay() {
+    if(userKey && fullName) {
+      accountSection.style.display = "none";
+      forumSection.style.display = "block";
+      infoPengguna.textContent = `Selamat datang, ${fullName}${isAdminLoggedIn ? " (Admin)" : ""}`;
+      updateForumUI();
+    } else {
+      accountSection.style.display = "block";
+      forumSection.style.display = "none";
+      infoPengguna.textContent = "";
+    }
+  }
+
   // Buat akun baru
-  document.getElementById("buatAkunBtn").onclick = () => {
+  btnBuatAkun.onclick = () => {
     const depan = document.getElementById("namaDepan").value.trim();
     const belakang = document.getElementById("namaBelakang").value.trim();
     if(!depan || !belakang) {
@@ -167,7 +163,6 @@
       return;
     }
     const namaLengkap = depan + " " + belakang;
-    // Simpan ke Firebase
     const newRef = db.ref("forum").push();
     newRef.set({
       nama: namaLengkap,
@@ -179,34 +174,81 @@
       localStorage.setItem("userKey", userKey);
       localStorage.setItem("fullName", fullName);
       updateDisplay();
-      loadTopTier();
-    });
+      alert("Akun berhasil dibuat!");
+    }).catch(err => alert("Error: " + err.message));
   };
 
-  // Fungsi tambah saldo
-  document.getElementById("tambahBtn").onclick = () => {
-    const jml = Number(document.getElementById("jumlah").value);
+  // Tambah saldo
+  btnTambah.onclick = () => {
+    const jml = Number(jumlahInput.value);
     if(!jml || jml <= 0) {
       alert("Masukkan jumlah uang valid!");
       return;
     }
-    db.ref(`forum/${userKey}`).once("value").then(snap => {
+    db.ref("forum/" + userKey).once("value").then(snap => {
       const data = snap.val();
       const saldoBaru = (data.saldo || 0) + jml;
-      db.ref(`forum/${userKey}`).update({ saldo: saldoBaru });
+      const riwayatBaru = data.riwayat || {};
       const waktu = new Date().toLocaleString();
-      const riwayatBaru = (data.riwayat || {});
       riwayatBaru[waktu] = `Tambah ${formatRupiah(jml)}`;
-      db.ref(`forum/${userKey}/riwayat`).set(riwayatBaru);
-      document.getElementById("jumlah").value = "";
+      return db.ref("forum/" + userKey).update({ saldo: saldoBaru, riwayat: riwayatBaru });
+    }).then(() => {
+      jumlahInput.value = "";
     });
   };
 
-  // Fungsi ambil saldo
-  document.getElementById("ambilBtn").onclick = () => {
-    const jml = Number(document.getElementById("jumlah").value);
+  // Ambil saldo
+  btnAmbil.onclick = () => {
+    const jml = Number(jumlahInput.value);
     if(!jml || jml <= 0) {
       alert("Masukkan jumlah uang valid!");
       return;
     }
-    db.ref(`forum/${userKey}`).once("value").then(snap => {
+    db.ref("forum/" + userKey).once("value").then(snap => {
+      const data = snap.val();
+      if((data.saldo || 0) < jml) {
+        alert("Saldo tidak cukup!");
+        return;
+      }
+      const saldoBaru = (data.saldo || 0) - jml;
+      const riwayatBaru = data.riwayat || {};
+      const waktu = new Date().toLocaleString();
+      riwayatBaru[waktu] = `Ambil ${formatRupiah(jml)}`;
+      return db.ref("forum/" + userKey).update({ saldo: saldoBaru, riwayat: riwayatBaru });
+    }).then(() => {
+      jumlahInput.value = "";
+    });
+  };
+
+  // Reset saldo
+  btnSetor.onclick = () => {
+    if(!confirm("Apakah Anda yakin ingin reset saldo?")) return;
+    db.ref("forum/" + userKey).once("value").then(snap => {
+      const data = snap.val();
+      const riwayatBaru = data.riwayat || {};
+      const waktu = new Date().toLocaleString();
+      riwayatBaru[waktu] = "Reset saldo ke 0";
+      return db.ref("forum/" + userKey).update({ saldo: 0, riwayat: riwayatBaru });
+    });
+  };
+
+  // Kirim chat
+  document.getElementById("kirimBtn").onclick = () => {
+    const msg = pesanEl.value.trim();
+    if(!msg) return alert("Pesan tidak boleh kosong!");
+    const chatRef = db.ref("chat").push();
+    chatRef.set({
+      user: fullName || "Anonim",
+      message: msg,
+      time: new Date().toISOString()
+    });
+    pesanEl.value = "";
+  };
+
+  // Tampilkan chat realtime
+  db.ref("chat").on("child_added", snapshot => {
+    const data = snapshot.val();
+    const p = document.createElement("p");
+    p.textContent = `[${new Date(data.time).toLocaleTimeString()}] ${data.user}: ${data.message}`;
+    chatBox.appendChild(p);
+    chatBox.scrollTop = chatBox.scroll
