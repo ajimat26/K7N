@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>UANGDUTY SAFD – Forum Pekerja Uang & Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
@@ -22,16 +22,16 @@
     <h1>UANGDUTY SAFD</h1>
     <div id="register-section">
       <h2>Daftar Akun</h2>
-      <input type="text" id="firstName" placeholder="Nama Depan">
-      <input type="text" id="lastName" placeholder="Nama Belakang">
-      <button onclick="registerAccount()">Daftar</button>
+      <input type="text" id="firstName" placeholder="Nama Depan" />
+      <input type="text" id="lastName" placeholder="Nama Belakang" />
+      <button id="registerBtn">Daftar</button>
     </div>
 
     <div id="chat-section" class="hidden">
       <h2>Forum Chat</h2>
       <div class="chat-box" id="chatBox"></div>
       <textarea id="messageInput" placeholder="Ketik pesan Anda..."></textarea>
-      <button onclick="sendMessage()">Kirim</button>
+      <button id="sendBtn">Kirim</button>
     </div>
   </div>
 
@@ -54,23 +54,47 @@
     let fullName = localStorage.getItem("fullName");
     let isAdmin = false;
 
+    const registerSection = document.getElementById("register-section");
+    const chatSection = document.getElementById("chat-section");
+    const chatBox = document.getElementById("chatBox");
+    const messageInput = document.getElementById("messageInput");
+
+    // Cek apakah user sudah punya akun
     function checkAccount() {
       if (userKey && fullName) {
         db.ref(`users/${userKey}`).once("value").then(snapshot => {
           if (snapshot.exists()) {
             isAdmin = snapshot.val().isAdmin || false;
-            document.getElementById("register-section").classList.add("hidden");
-            document.getElementById("chat-section").classList.remove("hidden");
-            listenForMessages();
+            showChat();
           } else {
             alert("Akun Anda telah dihapus oleh admin. Silakan daftar ulang.");
             localStorage.removeItem("userKey");
             localStorage.removeItem("fullName");
+            showRegister();
           }
+        }).catch(() => {
+          // Jika error Firebase, tampilkan form daftar juga
+          showRegister();
         });
+      } else {
+        showRegister();
       }
     }
 
+    // Tampilkan bagian register
+    function showRegister() {
+      registerSection.classList.remove("hidden");
+      chatSection.classList.add("hidden");
+    }
+
+    // Tampilkan bagian chat
+    function showChat() {
+      registerSection.classList.add("hidden");
+      chatSection.classList.remove("hidden");
+      listenForMessages();
+    }
+
+    // Fungsi untuk daftar akun
     function registerAccount() {
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
@@ -83,30 +107,38 @@
       newUserRef.set({
         name: fullName,
         isAdmin: false
+      }).then(() => {
+        userKey = newUserRef.key;
+        localStorage.setItem("userKey", userKey);
+        localStorage.setItem("fullName", fullName);
+        isAdmin = false;
+        showChat();
+      }).catch((error) => {
+        alert("Gagal mendaftar: " + error.message);
       });
-      userKey = newUserRef.key;
-      localStorage.setItem("userKey", userKey);
-      localStorage.setItem("fullName", fullName);
-      document.getElementById("register-section").classList.add("hidden");
-      document.getElementById("chat-section").classList.remove("hidden");
-      listenForMessages();
     }
 
+    // Fungsi untuk kirim pesan chat
     function sendMessage() {
-      const message = document.getElementById("messageInput").value.trim();
+      const message = messageInput.value.trim();
       if (!message) return;
       db.ref("messages").push({
         name: fullName,
         message: message,
         isAdmin: isAdmin,
         timestamp: Date.now()
+      }).then(() => {
+        messageInput.value = "";
+      }).catch((error) => {
+        alert("Gagal mengirim pesan: " + error.message);
       });
-      document.getElementById("messageInput").value = "";
     }
 
+    // Fungsi listen chat baru
     function listenForMessages() {
-      const chatBox = document.getElementById("chatBox");
-      db.ref("messages").on("child_added", snapshot => {
+      db.ref("messages").off(); // Hapus listener sebelumnya (jika ada)
+      chatBox.innerHTML = "";
+      db.ref("messages").orderByChild("timestamp").limitToLast(100).on("child_added", snapshot => {
         const data = snapshot.val();
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message");
@@ -117,7 +149,12 @@
       });
     }
 
-    checkAccount();
+    // Pasang event listener tombol setelah DOM siap
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("registerBtn").addEventListener("click", registerAccount);
+      document.getElementById("sendBtn").addEventListener("click", sendMessage);
+      checkAccount();
+    });
   </script>
 </body>
 </html>
