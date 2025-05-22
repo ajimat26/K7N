@@ -1,31 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Chat Realtime Firebase Realtime DB</title>
-  <style>
-    body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
-    #login { margin-bottom: 20px; }
-    #chat { display: none; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
-    #messages { list-style: none; padding: 0; }
-    #messages li { margin: 5px 0; }
-    .me { text-align: right; color: green; }
-    .other { text-align: left; color: blue; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat Mirip WhatsApp Web</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
+  }
+
+  #app {
+    display: flex;
+    height: 100vh;
+    max-width: 1200px;
+    margin: auto;
+    background: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+
+  /* Sidebar kiri (daftar chat / login) */
+  #sidebar {
+    width: 320px;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #sidebar header {
+    background: #075E54;
+    color: white;
+    padding: 15px 20px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  #loginForm {
+    padding: 20px;
+    flex-shrink: 0;
+  }
+
+  #loginForm input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #loginForm button {
+    width: 100%;
+    padding: 12px;
+    background: #25D366;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* Area chat */
+  #chatArea {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chatHeader {
+    height: 60px;
+    background: #f0f2f5;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  #messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: url('https://i.imgur.com/9p4X2bM.png') center center repeat;
+    background-size: 50px;
+  }
+
+  #messages li {
+    max-width: 70%;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    border-radius: 7.5px;
+    font-size: 15px;
+    line-height: 1.3;
+    word-wrap: break-word;
+  }
+
+  #messages li.me {
+    background: #dcf8c6;
+    margin-left: auto;
+    border-bottom-right-radius: 0;
+  }
+
+  #messages li.other {
+    background: white;
+    border-bottom-left-radius: 0;
+  }
+
+  #inputArea {
+    display: flex;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    background: #f0f2f5;
+  }
+
+  #inputMsg {
+    flex-grow: 1;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    outline: none;
+  }
+
+  #btnSend {
+    margin-left: 10px;
+    background: #25D366;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #btnSend svg {
+    fill: white;
+    width: 20px;
+    height: 20px;
+  }
+</style>
 </head>
 <body>
 
-<h2>Chat Realtime Firebase Realtime Database</h2>
+<div id="app">
+  <div id="sidebar">
+    <header>WhatsApp Web</header>
+    <div id="loginForm">
+      <input id="userId" type="text" placeholder="ID kamu (misal: user123)" />
+      <input id="chatWith" type="text" placeholder="Chat dengan ID (misal: user456)" />
+      <button id="btnLogin">Login & Mulai Chat</button>
+    </div>
+  </div>
 
-<div id="login">
-  <input type="text" id="userId" placeholder="Masukkan ID (misal: user123)" />
-  <input type="text" id="chatWith" placeholder="Chat dengan ID (misal: user456)" />
-  <button id="btnLogin">Login & Mulai Chat</button>
-</div>
-
-<div id="chat">
-  <ul id="messages"></ul>
-  <input type="text" id="inputMsg" placeholder="Ketik pesan..." style="width:80%" />
-  <button id="btnSend">Kirim</button>
+  <div id="chatArea" style="display:none;">
+    <div id="chatHeader"></div>
+    <ul id="messages"></ul>
+    <div id="inputArea">
+      <input id="inputMsg" type="text" placeholder="Ketik pesan..." autocomplete="off" />
+      <button id="btnSend" title="Kirim pesan">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Firebase SDK -->
@@ -33,7 +178,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  // Config Firebase Realtime Database kamu
+  // Config Firebase kamu
   const firebaseConfig = {
     apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
     authDomain: "uangduty.firebaseapp.com",
@@ -45,7 +190,6 @@
     measurementId: "G-TJL9K6YDL9"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
@@ -53,19 +197,26 @@
   let chatWithUser = null;
   let chatId = null;
 
+  const loginForm = document.getElementById('loginForm');
+  const chatArea = document.getElementById('chatArea');
+  const chatHeader = document.getElementById('chatHeader');
+  const messagesList = document.getElementById('messages');
+  const inputMsg = document.getElementById('inputMsg');
+
   document.getElementById('btnLogin').onclick = () => {
     const userId = document.getElementById('userId').value.trim();
     const chatWithId = document.getElementById('chatWith').value.trim();
     if (!userId || !chatWithId) {
-      alert("Isi kedua ID dulu ya!");
+      alert('Isi kedua ID dulu ya!');
       return;
     }
     currentUser = userId;
     chatWithUser = chatWithId;
     chatId = userId < chatWithId ? userId + '_' + chatWithId : chatWithId + '_' + userId;
 
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('chat').style.display = 'block';
+    loginForm.style.display = 'none';
+    chatArea.style.display = 'flex';
+    chatHeader.textContent = 'Chat dengan: ' + chatWithUser;
 
     loadMessages();
   };
@@ -74,13 +225,12 @@
     const messagesRef = db.ref('chats/' + chatId);
     messagesRef.off();
     messagesRef.on('value', snapshot => {
-      const messagesList = document.getElementById('messages');
-      messagesList.innerHTML = "";
       const data = snapshot.val();
+      messagesList.innerHTML = '';
       if (!data) return;
       Object.entries(data).forEach(([key, msg]) => {
         const li = document.createElement('li');
-        li.textContent = msg.from + ": " + msg.text;
+        li.textContent = msg.text;
         li.className = msg.from === currentUser ? 'me' : 'other';
         messagesList.appendChild(li);
       });
@@ -89,13 +239,12 @@
   }
 
   document.getElementById('btnSend').onclick = sendMessage;
-  document.getElementById('inputMsg').addEventListener('keypress', e => {
+  inputMsg.addEventListener('keypress', e => {
     if (e.key === 'Enter') sendMessage();
   });
 
   function sendMessage() {
-    const input = document.getElementById('inputMsg');
-    const text = input.value.trim();
+    const text = inputMsg.value.trim();
     if (!text) return;
 
     const messagesRef = db.ref('chats/' + chatId);
@@ -107,9 +256,9 @@
       createdAt: Date.now()
     });
 
-    input.value = '';
+    inputMsg.value = '';
   }
 </script>
 
 </body>
-</html>
+  </html>
