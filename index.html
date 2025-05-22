@@ -1,129 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Block Blast - Lanjutan</title>
-  <style>
-    body {
-      background: #222;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    #game {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(10, 30px);
-      gap: 2px;
-      margin-bottom: 10px;
-    }
-    .cell {
-      width: 30px;
-      height: 30px;
-      background: #555;
-      border-radius: 4px;
-    }
-    .filled {
-      background: #4caf50;
-    }
-    #score {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 6px 12px;
-      border: none;
-      background: #4caf50;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Multi Game Simulator</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; }
+  #menu { margin-top: 20px; }
+  button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+  #gameArea { margin-top: 20px; }
+  canvas { background: #eee; display: block; margin: 0 auto; }
+</style>
 </head>
 <body>
-  <div id="game">
-    <div id="score">Score: 0</div>
-    <div class="grid" id="grid"></div>
-    <button onclick="resetGrid()">Reset</button>
-  </div>
 
-  <script>
-    const gridSize = 10;
-    const grid = document.getElementById('grid');
-    let score = 0;
-    const scoreText = document.getElementById('score');
+<h1>Pilih Game Simulator</h1>
+<div id="menu">
+  <button onclick="startFishing()">Simulator Memancing</button>
+  <button onclick="startGardening()">Simulator Berkebun</button>
+  <button onclick="startBusiness()">Simulator Bisnis</button>
+</div>
 
-    for (let i = 0; i < gridSize * gridSize; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.dataset.index = i;
-      cell.draggable = true;
-      cell.addEventListener('dragstart', dragStart);
-      cell.addEventListener('dragover', e => e.preventDefault());
-      cell.addEventListener('drop', drop);
-      grid.appendChild(cell);
+<div id="gameArea"></div>
+
+<script>
+const gameArea = document.getElementById('gameArea');
+
+// Bersihkan gameArea sebelum mulai game baru
+function clearGameArea() {
+  gameArea.innerHTML = '';
+}
+
+// --- Simulator Memancing ---
+function startFishing() {
+  clearGameArea();
+
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <h2>Fishing Simulator</h2>
+    <canvas id="fishCanvas" width="600" height="400"></canvas>
+    <p>Score: <span id="score">0</span></p>
+    <button id="castBtn">Lempar Joran</button>
+  `;
+  gameArea.appendChild(container);
+
+  const canvas = document.getElementById('fishCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreDisplay = container.querySelector('#score');
+  const castBtn = container.querySelector('#castBtn');
+
+  let score = 0;
+  let fishing = false;
+  let fishAppeared = false;
+  let fishX = 0;
+  let fishY = 0;
+  let fishSize = 30;
+
+  function drawWater() {
+    ctx.fillStyle = '#3399ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function drawFish() {
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.ellipse(fishX, fishY, fishSize, fishSize / 2, 0, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  function clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function appearFish() {
+    fishX = Math.random() * (canvas.width - fishSize * 2) + fishSize;
+    fishY = Math.random() * (canvas.height - fishSize * 2) + fishSize;
+    fishAppeared = true;
+    drawFish();
+  }
+
+  function update() {
+    clear();
+    drawWater();
+
+    if (fishAppeared) {
+      drawFish();
     }
+  }
 
-    function dragStart(e) {
-      e.dataTransfer.setData("text", e.target.dataset.index);
-    }
+  castBtn.addEventListener('click', () => {
+    if (!fishing) {
+      fishing = true;
+      fishAppeared = false;
+      scoreDisplay.textContent = score;
+      update();
 
-    function drop(e) {
-      const fromIndex = e.dataTransfer.getData("text");
-      const toIndex = e.target.dataset.index;
-      const from = grid.children[fromIndex];
-      const to = grid.children[toIndex];
-      const fromFilled = from.classList.contains('filled');
-      const toFilled = to.classList.contains('filled');
-      if (!toFilled && fromFilled) {
-        from.classList.remove('filled');
-        to.classList.add('filled');
-        checkLines();
-      }
-    }
-
-    function checkLines() {
-      for (let y = 0; y < gridSize; y++) {
-        let full = true;
-        for (let x = 0; x < gridSize; x++) {
-          if (!grid.children[y * gridSize + x].classList.contains('filled')) {
-            full = false;
-            break;
-          }
+      const waitTime = Math.random() * 2000 + 1000;
+      setTimeout(() => {
+        if (fishing) {
+          appearFish();
         }
-        if (full) {
-          for (let x = 0; x < gridSize; x++) {
-            grid.children[y * gridSize + x].classList.remove('filled');
-          }
-          score += 10;
-          scoreText.innerText = 'Score: ' + score;
-        }
+      }, waitTime);
+    }
+  });
+
+  canvas.addEventListener('click', (e) => {
+    if (fishing && fishAppeared) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const dx = mouseX - fishX;
+      const dy = mouseY - fishY;
+
+      if (Math.sqrt(dx * dx + dy * dy) < fishSize) {
+        score++;
+        scoreDisplay.textContent = score;
+        fishing = false;
+        fishAppeared = false;
+        update();
+        alert('Ikan tertangkap!');
       }
     }
+  });
 
-    function resetGrid() {
-      [...grid.children].forEach(c => c.classList.remove('filled'));
-      score = 0;
-      scoreText.innerText = 'Score: 0';
-      fillRandom();
-    }
+  function gameLoop() {
+    update();
+    requestAnimationFrame(gameLoop);
+  }
 
-    function fillRandom() {
-      for (let i = 0; i < 30; i++) {
-        const r = Math.floor(Math.random() * (gridSize * gridSize));
-        grid.children[r].classList.add('filled');
-      }
-    }
+  gameLoop();
+}
 
-    fillRandom();
-  </script>
+// --- Simulator Berkebun (contoh sederhana) ---
+function startGardening() {
+  clearGameArea();
+
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <h2>Gardening Simulator</h2>
+    <p>Tanam tanaman dengan klik tombol!</p>
+    <button id="plantBtn">Tanam</button>
+    <p>Tanaman tumbuh: <span id="plants">0</span></p>
+  `;
+  gameArea.appendChild(container);
+
+  const plantBtn = container.querySelector('#plantBtn');
+  const plantsDisplay = container.querySelector('#plants');
+
+  let plants = 0;
+
+  plantBtn.addEventListener('click', () => {
+    plants++;
+    plantsDisplay.textContent = plants;
+  });
+}
+
+// --- Simulator Bisnis (contoh sederhana) ---
+function startBusiness() {
+  clearGameArea();
+
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <h2>Business Simulator</h2>
+    <p>Buka toko dan dapatkan uang!</p>
+    <button id="sellBtn">Jual Barang</button>
+    <p>Uang: $<span id="money">0</span></p>
+  `;
+  gameArea.appendChild(container);
+
+  const sellBtn = container.querySelector('#sellBtn');
+  const moneyDisplay = container.querySelector('#money');
+
+  let money = 0;
+
+  sellBtn.addEventListener('click', () => {
+    money += 10;
+    moneyDisplay.textContent = money;
+  });
+}
+</script>
+
 </body>
 </html>
