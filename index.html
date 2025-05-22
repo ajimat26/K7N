@@ -8,13 +8,49 @@
       background: #ffffff;
       color: #333;
       padding: 20px;
+      margin-bottom: 120px; /* space for chat */
     }
     .hidden { display: none; }
-    .panel { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-    .uang { color: green; font-weight: bold; }
-    button { margin-top: 5px; margin-right: 5px; }
-    input { margin-top: 5px; margin-bottom: 10px; }
-    #chatBox { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 10px; border-top: 1px solid #ccc; }
+    .panel {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .uang {
+      color: green;
+      font-weight: bold;
+    }
+    button {
+      margin-top: 5px;
+      margin-right: 5px;
+    }
+    input {
+      margin-top: 5px;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+    #chatBox {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f1f1f1;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+    }
+    #chatList {
+      max-height: 120px;
+      overflow-y: auto;
+      list-style: none;
+      padding-left: 0;
+      margin: 5px 0 0 0;
+    }
+    #chatList li {
+      padding: 2px 4px;
+      border-bottom: 1px solid #ddd;
+    }
   </style>
 </head>
 <body>
@@ -30,7 +66,7 @@
 <div id="adminLoginPanel" class="panel hidden">
   <h3>Login Admin</h3>
   <input id="adminNama" placeholder="Nama admin"><br>
-  <input id="adminPass" placeholder="Password"><br>
+  <input id="adminPass" placeholder="Password" type="password"><br>
   <button onclick="loginAdmin()">Login</button>
 </div>
 
@@ -101,17 +137,22 @@ function tampilkanForum() {
       document.getElementById('adminPanel').classList.add('hidden');
     }
   } else {
-    document.getElementById('forumPanel').classList.add('hidden');
-    document.getElementById('adminPanel').classList.add('hidden');
+    // Jika tidak ada akun
     document.getElementById('buatAkunPanel').classList.remove('hidden');
     document.getElementById('adminLoginPanel').classList.remove('hidden');
+    document.getElementById('forumPanel').classList.add('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
     document.getElementById('chatBox').classList.add('hidden');
   }
 }
 
 function buatAkun() {
-  const nama = document.getElementById("namaAkun").value;
+  const nama = document.getElementById("namaAkun").value.trim();
   if (!nama) return alert("Isi nama akun!");
+  // Cek nama unik
+  if (semuaAkun.find(a => a.nama.toLowerCase() === nama.toLowerCase())) {
+    return alert("Nama akun sudah digunakan!");
+  }
   akun = { nama, uang: 0, role: 'user' };
   semuaAkun.push(akun);
   simpanData();
@@ -119,7 +160,7 @@ function buatAkun() {
 }
 
 function loginAdmin() {
-  const nama = document.getElementById("adminNama").value;
+  const nama = document.getElementById("adminNama").value.trim();
   const pass = document.getElementById("adminPass").value;
   if (pass !== "RFD1") return alert("Password salah!");
   akun = { nama, uang: 0, role: 'admin' };
@@ -136,7 +177,8 @@ function tambahUang() {
 
 function ambilUang() {
   const val = parseInt(document.getElementById("moneyAmount").value);
-  if (isNaN(val) || val <= 0 || val > akun.uang) return alert("Jumlah tidak valid");
+  if (isNaN(val) || val <= 0) return alert("Jumlah tidak valid");
+  if (val > akun.uang) return alert("Uang tidak cukup");
   akun.uang -= val;
   updateUserData();
 }
@@ -157,7 +199,7 @@ function updateUserData() {
 }
 
 function kirimChat() {
-  const teks = document.getElementById("chatText").value;
+  const teks = document.getElementById("chatText").value.trim();
   if (!teks) return;
   chatLog.push(akun.nama + ": " + teks);
   if (chatLog.length > 5) chatLog.shift(); // Hanya simpan 5 terakhir
@@ -174,6 +216,8 @@ function tampilkanChat() {
     li.textContent = msg;
     ul.appendChild(li);
   });
+  // Scroll ke bawah otomatis
+  ul.scrollTop = ul.scrollHeight;
 }
 
 function tampilkanAkunAdmin() {
@@ -187,40 +231,4 @@ function tampilkanAkunAdmin() {
     container.appendChild(div);
   });
 
-  const top = [...semuaAkun].sort((a, b) => b.uang - a.uang).slice(0, 3);
-  const topList = document.getElementById("topTierList");
-  topList.innerHTML = "";
-  top.forEach(t => {
-    const li = document.createElement("li");
-    li.textContent = t.nama + " - " + formatRupiah(t.uang);
-    topList.appendChild(li);
-  });
-}
-
-function ubahNama(i) {
-  const baru = prompt("Masukkan nama baru:");
-  if (!baru) return;
-  semuaAkun[i].nama = baru;
-  if (akun.nama === semuaAkun[i].nama) akun.nama = baru;
-  simpanData();
-  tampilkanForum();
-}
-
-function hapusAkun(i) {
-  if (akun.nama === semuaAkun[i].nama) akun = null;
-  semuaAkun.splice(i, 1);
-  simpanData();
-  tampilkanForum();
-}
-
-function modeNormal() {
-  akun = semuaAkun.find(a => a.role !== 'admin') || null;
-  simpanData();
-  tampilkanForum();
-}
-
-window.onload = tampilkanForum;
-</script>
-
-</body>
-</html>
+  const top = [...semuaAkun].sort((a, b) => b.uang - a.uang).slice(0, 3
