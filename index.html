@@ -46,6 +46,23 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
   </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    // Ganti dengan konfigurasi Firebase Anda
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
 </head>
 <body>
 
@@ -92,25 +109,27 @@
 
 <script>
 let account = null;
-let accounts = JSON.parse(localStorage.getItem('allAccounts') || '{}');
-let chatLog = JSON.parse(localStorage.getItem('chatLog') || '[]');
-let allowRegister = true;
 let isAdmin = false;
+let allowRegister = true;
 
-function updateLocal() {
-  localStorage.setItem('allAccounts', JSON.stringify(accounts));
-}
+// Mendengarkan perubahan pada pengaturan pendaftaran
+db.ref("settings/allowRegister").on("value", snap => {
+  allowRegister = snap.val() !== false;
+  document.getElementById("toggleRegister").checked = allowRegister;
+});
 
 function createAccount() {
-  const name = document.getElementById("username").value;
+  const name = document.getElementById("username").value.trim();
   if (!allowRegister) return alert("Pembuatan akun sedang ditutup admin.");
   if (!name) return alert("Nama tidak boleh kosong");
   if (account) return alert("Akun sudah dibuat.");
 
-  if (accounts[name]) return alert("Nama sudah dipakai.");
-  accounts[name] = { money: 0, history: [] };
-  updateLocal();
-  login(name);
+  const userRef = db.ref("accounts/" + name);
+  userRef.once("value", snap => {
+    if (snap.exists()) return alert("Nama sudah dipakai.");
+    userRef.set({ money: 0, history: [] });
+    login(name);
+  });
 }
 
 function login(name) {
@@ -118,69 +137,71 @@ function login(name) {
   document.getElementById("formSection").classList.add("hidden");
   document.getElementById("userPanel").classList.remove("hidden");
   document.getElementById("userName").textContent = account;
-  updateUI();
-}
-
-function updateUI() {
-  document.getElementById("userMoney").textContent = "Rp" + formatMoney(accounts[account].money);
-  const list = document.getElementById("historyList");
-  list.innerHTML = "";
-  accounts[account].history.slice(-5).forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    list.appendChild(li);
+  db.ref("accounts/" + account).on("value", snap => {
+    const data = snap.val();
+    if (!data) return;
+    document.getElementById("userMoney").textContent = "Rp" + formatMoney(data.money);
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+    (data.history || []).slice(-5).forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      list.appendChild(li);
+    });
   });
 }
 
 function addMoney() {
   const amount = parseInt(document.getElementById("amount").value);
   if (isNaN(amount) || amount <= 0) return;
-  accounts[account].money += amount;
-  addHistory("Tambah Rp" + formatMoney(amount));
-  updateLocal();
-  updateUI();
+  const userRef = db.ref("accounts/" + account);
+  userRef.once("value", snap => {
+    const data = snap.val();
+    const newMoney = (data.money || 0) + amount;
+    const history = (data.history || []).concat("Tambah Rp" + formatMoney(amount)).slice(-5);
+    userRef.update({ money: newMoney, history });
+  });
 }
 
 function withdrawMoney() {
   const amount = parseInt(document.getElementById("amount").value);
-  if (isNaN(amount) || amount <= 0 || accounts[account].money < amount) return;
-  accounts[account].money -= amount;
-  addHistory("Ambil Rp" + formatMoney(amount));
-  updateLocal();
-  updateUI();
+  if (isNaN(amount) || amount <= 0) return;
+  const userRef = db.ref("accounts/" + account);
+  userRef.once("value", snap => {
+    const data = snap.val();
+    if ((data.money || 0) < amount) return;
+    const newMoney = data.money - amount;
+    const history = (data.history || []).concat("Ambil Rp" + formatMoney(amount)).slice(-5);
+    userRef.update({ money: newMoney, history });
+  });
 }
 
 function resetMoney() {
-  accounts[account].money = 0;
-  addHistory("Setor (reset) saldo");
-  updateLocal();
-  updateUI();
-}
-
-function addHistory(text) {
-  accounts[account].history.push(text);
-  if (accounts[account].history.length > 5)
-    accounts[account].history = accounts[account].history.slice(-5);
-}
-
-function sendChat() {
-  const msg = document.getElementById("chatInput").value;
-  if (!msg) return;
-  chatLog.push(account + ": " + msg);
-  if (chatLog.length > 50) chatLog = chatLog.slice(-50);
-  localStorage.setItem('chatLog', JSON.stringify(chatLog));
-  document.getElementById("chatInput").value = "";
-  renderChat();
-}
-
-function renderChat() {
-  const box = document.getElementById("chatBox");
-  box.innerHTML = chatLog.map(m => `<div>${m}</div>`).join('');
-  box.scrollTop = box.scrollHeight;
+  const userRef = db.ref("accounts/" + account);
+  userRef.once("value", snap => {
+    const history = (snap.val().history || []).concat("Setor (reset) saldo").slice(-5);
+    userRef.update({ money: 0, history });
+  });
 }
 
 function formatMoney(n) {
   return n.toLocaleString('id-ID') + "rb";
+}
+
+function sendChat() {
+  const msg = document.getElementById("chatInput").value.trim();
+  if (!msg || !account) return;
+  db.ref("chatLog").push(account + ": " + msg);
+  document.getElementById("chatInput").value = "";
+}
+
+function renderChat() {
+  const box = document.getElementById("chatBox");
+  db.ref("chatLog").on("value", snap => {
+    const val = snap.val() || {};
+    box.innerHTML = Object.values(val).map(m => `<div>${m}</div>`).join('');
+    box.scrollTop = box.scrollHeight;
+  });
 }
 
 function enterAdminMode() {
@@ -198,41 +219,29 @@ function enterAdminMode() {
 }
 
 function toggleRegistration() {
-  allowRegister = document.getElementById("toggleRegister").checked;
+  const status = document.getElementById("toggleRegister").checked;
+  db.ref("settings/allowRegister").set(status);
 }
 
 function renderAdmin() {
   const panel = document.getElementById("allAccounts");
   panel.innerHTML = "";
-  for (const name in accounts) {
-    const li = document.createElement("li");
-    li.textContent = `${name} - Rp${formatMoney(accounts[name].money)} `;
-    const renameBtn = document.createElement("button");
-    renameBtn.textContent = "Ubah Nama";
-    renameBtn.onclick = () => {
-      const newName = prompt("Masukkan nama baru:");
-      if (newName && !accounts[newName]) {
-        accounts[newName] = accounts[name];
-        delete accounts[name];
-        updateLocal();
-        renderAdmin();
-      }
-    };
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "Hapus";
-    delBtn.onclick = () => {
-      delete accounts[name];
-      updateLocal();
-      renderAdmin();
-    };
-    li.appendChild(renameBtn);
-    li.appendChild(delBtn);
-    panel.appendChild(li);
-  }
-}
-
-renderChat();
-</script>
-
-</body>
-</html>
+  db.ref("accounts").once("value", snap => {
+    const data = snap.val() || {};
+    for (const name in data) {
+      const li = document.createElement("li");
+      li.textContent = `${name} - Rp${formatMoney(data[name].money)} `;
+      const renameBtn = document.createElement("button");
+      renameBtn.textContent = "Ubah Nama";
+      renameBtn.onclick = () => {
+        const newName = prompt("Masukkan nama baru:");
+        if (newName && !data[newName]) {
+          db.ref("accounts/" + newName).set(data[name]);
+          db.ref("accounts/" + name).remove();
+          renderAdmin();
+        }
+      };
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Hapus";
+      delBtn.onclick = () => {
+        db.ref("accounts/" + name).remove0
