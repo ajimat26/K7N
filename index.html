@@ -1,33 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>SAFD MONEY Forum</title>
+  <title>SAFD MONEY FORUM</title>
   <style>
     body {
-      background-color: white;
-      font-family: Arial, sans-serif;
-      color: #333;
+      font-family: Arial;
+      background-color: #f4f4f4;
+      margin: 20px;
     }
     .panel {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px;
       display: none;
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 15px;
+      margin: 10px 0;
       border-radius: 8px;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px #ccc;
     }
-    .btn {
-      padding: 5px 10px;
-      margin: 5px;
+    .panel.visible {
+      display: block;
+    }
+    button {
+      margin: 3px;
+      padding: 7px 15px;
       cursor: pointer;
     }
-    #chatBox, #topTierList, #logRiwayat {
-      height: 150px;
-      overflow-y: auto;
-      border: 1px solid #aaa;
+    input {
       padding: 5px;
-      background: #f9f9f9;
+      margin: 5px;
+    }
+    #chatBox, #topTierList, #riwayatBox {
+      border: 1px solid #999;
+      background: #fafafa;
+      padding: 8px;
+      height: 120px;
+      overflow-y: auto;
       margin-top: 5px;
     }
     .money {
@@ -37,61 +44,72 @@
   </style>
 </head>
 <body>
-  <h1>SAFD MONEY Forum</h1>
+  <h2>SAFD MONEY FORUM</h2>
 
-  <div id="buttons">
-    <button class="btn" onclick="togglePanel('buatAkunPanel')">Buat Akun</button>
-    <button class="btn" onclick="togglePanel('moneyPanel')">Uang</button>
-    <button class="btn" onclick="togglePanel('chatPanel')">Chat</button>
-    <button class="btn" onclick="togglePanel('topTierPanel')">Top Tier</button>
-    <button class="btn" onclick="togglePanel('adminLoginPanel')">Admin</button>
+  <!-- Tombol Navigasi -->
+  <div>
+    <button onclick="showPanel('akunPanel')">Buat Akun</button>
+    <button onclick="showPanel('uangPanel')">Uang</button>
+    <button onclick="showPanel('chatPanel')">Chat</button>
+    <button onclick="showPanel('topPanel')">Top Tier</button>
+    <button onclick="showPanel('adminPanel')">Admin</button>
   </div>
 
-  <div id="buatAkunPanel" class="panel">
+  <!-- Panel Akun -->
+  <div id="akunPanel" class="panel">
+    <h3>Buat Akun</h3>
     <input id="namaAkun" placeholder="Nama akun">
     <button onclick="buatAkun()">Simpan</button>
   </div>
 
-  <div id="moneyPanel" class="panel">
+  <!-- Panel Uang -->
+  <div id="uangPanel" class="panel">
+    <h3>Panel Uang</h3>
     <p>Total Uang: <span id="totalUang" class="money">Rp 0</span></p>
-    <input id="jumlah" type="number" placeholder="Jumlah">
+    <input id="jumlahUang" type="number" placeholder="Jumlah">
     <button onclick="tambahUang()">Tambah</button>
     <button onclick="ambilUang()">Ambil</button>
     <button onclick="setorUang()">Setor</button>
   </div>
 
+  <!-- Panel Chat -->
   <div id="chatPanel" class="panel">
+    <h3>Chat</h3>
     <div id="chatBox"></div>
-    <input id="pesan" placeholder="Ketik pesan">
-    <button onclick="kirimPesan()">Kirim</button>
+    <input id="isiChat" placeholder="Tulis pesan">
+    <button onclick="kirimChat()">Kirim</button>
   </div>
 
-  <div id="topTierPanel" class="panel">
+  <!-- Panel Top Tier -->
+  <div id="topPanel" class="panel">
     <h3>Top Tier</h3>
     <div id="topTierList"></div>
   </div>
 
-  <div id="adminLoginPanel" class="panel">
-    <input id="adminPassword" type="password" placeholder="Password">
-    <button onclick="loginAdmin()">Masuk Admin</button>
-  </div>
-
+  <!-- Panel Admin -->
   <div id="adminPanel" class="panel">
-    <h3>Panel Admin</h3>
-    <div id="adminData"></div>
+    <h3>Login Admin</h3>
+    <input id="adminPass" type="password" placeholder="Password">
+    <button onclick="loginAdmin()">Masuk</button>
+    <div id="adminContent" style="margin-top:10px;"></div>
   </div>
 
-  <div id="logRiwayat" class="panel"></div>
+  <!-- Riwayat -->
+  <div id="riwayatBox" class="panel visible">
+    <h3>Riwayat Transaksi</h3>
+    <div id="riwayatLog"></div>
+  </div>
 
   <script>
     let akun = localStorage.getItem("akun") || null;
     let uang = parseInt(localStorage.getItem("uang")) || 0;
+    let log = JSON.parse(localStorage.getItem("log")) || [];
     let isAdmin = false;
-    let logRiwayat = JSON.parse(localStorage.getItem("logRiwayat")) || [];
 
-    function togglePanel(id) {
-      document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
+    function showPanel(id) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("visible"));
+      document.getElementById(id).classList.add("visible");
+      updateTampilan();
     }
 
     function buatAkun() {
@@ -99,114 +117,100 @@
       if (!nama) return alert("Nama tidak boleh kosong");
       akun = nama;
       uang = 0;
-      localStorage.setItem("akun", akun);
-      localStorage.setItem("uang", uang);
-      update();
-      alert("Akun dibuat");
-    }
-
-    function update() {
-      document.getElementById("totalUang").textContent = formatRupiah(uang);
-      updateTopTier();
-      updateRiwayat();
-      if (akun) document.getElementById("buatAkunPanel").style.display = 'none';
-    }
-
-    function formatRupiah(angka) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
+      log = [];
+      simpanData();
+      alert("Akun dibuat: " + akun);
+      updateTampilan();
     }
 
     function tambahUang() {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const jumlah = parseInt(document.getElementById("jumlahUang").value);
       if (jumlah > 0) {
         uang += jumlah;
-        simpanUang();
-        catatRiwayat(`+ Rp ${jumlah}`);
-        update();
+        catatLog(`+ Rp${jumlah}`);
+        simpanData();
       }
     }
 
     function ambilUang() {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const jumlah = parseInt(document.getElementById("jumlahUang").value);
       if (jumlah > 0 && uang >= jumlah) {
         uang -= jumlah;
-        simpanUang();
-        catatRiwayat(`- Rp ${jumlah}`);
-        update();
+        catatLog(`- Rp${jumlah}`);
+        simpanData();
       }
     }
 
     function setorUang() {
-      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const jumlah = parseInt(document.getElementById("jumlahUang").value);
       if (jumlah > 0) {
         uang += jumlah;
-        simpanUang();
-        catatRiwayat(`Setor Rp ${jumlah}`);
-        update();
+        catatLog(`Setor Rp${jumlah}`);
+        simpanData();
       }
     }
 
-    function simpanUang() {
-      localStorage.setItem("uang", uang);
-    }
-
-    function kirimPesan() {
-      const pesan = document.getElementById("pesan").value.trim();
-      if (!pesan) return;
-      const box = document.getElementById("chatBox");
-      const nama = isAdmin ? `Admin ${akun}` : akun;
-      box.innerHTML += `<p><strong>${nama}:</strong> ${pesan}</p>`;
-      document.getElementById("pesan").value = "";
-      box.scrollTop = box.scrollHeight;
-    }
-
-    function loginAdmin() {
-      const pass = document.getElementById("adminPassword").value;
-      if (pass === "RFD1") {
-        isAdmin = true;
-        togglePanel('adminPanel');
-        tampilkanDataAdmin();
-      } else {
-        alert("Password salah");
-      }
-    }
-
-    function tampilkanDataAdmin() {
-      const data = `<p>Akun: ${akun}</p><p>Uang: ${formatRupiah(uang)}</p>
-        <button onclick="hapusAkun()">Hapus Akun</button>`;
-      document.getElementById("adminData").innerHTML = data;
-    }
-
-    function hapusAkun() {
-      localStorage.removeItem("akun");
-      localStorage.removeItem("uang");
-      akun = null;
-      uang = 0;
-      alert("Akun dihapus");
-      location.reload();
-    }
-
-    function updateTopTier() {
-      const akunTier = [{ nama: akun, uang: uang }];
-      akunTier.sort((a, b) => b.uang - a.uang);
-      let html = '';
-      akunTier.slice(0, 3).forEach((d, i) => {
-        html += `<p>#${i + 1} ${d.nama} - ${formatRupiah(d.uang)}</p>`;
-      });
-      document.getElementById("topTierList").innerHTML = html;
-    }
-
-    function catatRiwayat(teks) {
-      logRiwayat.unshift(teks);
-      if (logRiwayat.length > 5) logRiwayat.pop();
-      localStorage.setItem("logRiwayat", JSON.stringify(logRiwayat));
+    function catatLog(teks) {
+      log.unshift(teks);
+      if (log.length > 5) log.pop();
+      localStorage.setItem("log", JSON.stringify(log));
+      updateRiwayat();
     }
 
     function updateRiwayat() {
-      document.getElementById("logRiwayat").innerHTML = logRiwayat.map(r => `<p>${r}</p>`).join('');
+      const box = document.getElementById("riwayatLog");
+      box.innerHTML = log.map(r => `<p>${r}</p>`).join('');
     }
 
-    update();
+    function kirimChat() {
+      const isi = document.getElementById("isiChat").value.trim();
+      if (isi) {
+        const nama = isAdmin ? `Admin ${akun}` : akun;
+        document.getElementById("chatBox").innerHTML += `<p><b>${nama}:</b> ${isi}</p>`;
+        document.getElementById("isiChat").value = '';
+        document.getElementById("chatBox").scrollTop = document.getElementById("chatBox").scrollHeight;
+      }
+    }
+
+    function loginAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === "RFD1") {
+        isAdmin = true;
+        document.getElementById("adminContent").innerHTML = `
+          <p>Akun: ${akun || 'Belum ada'}</p>
+          <p>Saldo: Rp ${uang}</p>
+          <button onclick="hapusAkun()">Hapus Akun</button>`;
+      } else {
+        alert("Password salah!");
+      }
+    }
+
+    function hapusAkun() {
+      localStorage.clear();
+      akun = null;
+      uang = 0;
+      log = [];
+      location.reload();
+    }
+
+    function updateTampilan() {
+      document.getElementById("totalUang").textContent = `Rp ${uang}`;
+      updateTopTier();
+      updateRiwayat();
+    }
+
+    function updateTopTier() {
+      let html = `<p>1. ${akun || 'Tidak Ada'} - Rp ${uang}</p>`;
+      document.getElementById("topTierList").innerHTML = html;
+    }
+
+    function simpanData() {
+      localStorage.setItem("akun", akun);
+      localStorage.setItem("uang", uang);
+      updateTampilan();
+    }
+
+    updateTampilan();
   </script>
 </body>
 </html>
