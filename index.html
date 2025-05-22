@@ -3,248 +3,248 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SAFD MONEY</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<title>SAFD MONEY Forum - Firebase Realtime</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f5f7fa;
-    color: #222;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .section {
-    margin-bottom: 30px;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 8px #ccc;
-  }
-  input, button, textarea, select {
-    margin: 5px 0;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #bbb;
-  }
-  button {
-    cursor: pointer;
-    background: #2c8;
-    color: white;
-    font-weight: bold;
-    border: none;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background: #269a4a;
-  }
-  .chat-box {
-    border: 1px solid #ccc;
-    padding: 10px;
-    max-height: 180px;
-    overflow-y: scroll;
-    background: #fafafa;
-    border-radius: 5px;
-  }
-  .message {
-    margin-bottom: 10px;
-  }
-  .right {
-    text-align: right;
-    color: #005500;
-  }
-  #saldo {
-    color: green;
-    font-weight: bold;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  table, th, td {
-    border: 1px solid #bbb;
-  }
-  th, td {
-    padding: 8px;
-    text-align: left;
-  }
-  .top-tier {
-    background: #e0ffe0;
-    padding: 10px;
-    border-radius: 6px;
-  }
-  .admin-panel input, .admin-panel button {
-    width: auto;
-    display: inline-block;
-    margin-right: 10px;
-  }
-  #adminSection {
-    display: none;
-  }
-  .flex-row {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .flex-col {
-    flex: 1;
-    min-width: 280px;
-  }
-  #panelContainer {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  #accountPanel, #moneyPanel, #adminSection {
-    flex: 1;
-    min-width: 300px;
-  }
-  #chatContainer {
-    margin-top: 15px;
-  }
-  #topTierSection {
-    margin-top: 15px;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 8px #ccc;
-  }
+  body { font-family: Arial, sans-serif; background: #eee; padding: 20px; margin: 0; }
+  .panel { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  h2 { margin-top: 0; }
+  .hidden { display: none; }
+  input, button { margin-top: 5px; display: block; padding: 8px; width: 100%; max-width: 300px; }
+  .chat-box { background: #f9f9f9; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #ccc; margin-top: 10px; }
+  .green { color: green; font-weight: bold; }
+  button { cursor: pointer; }
 </style>
 </head>
 <body>
 
-<h1>SAFD MONEY</h1>
-
-<div id="panelContainer">
-  <!-- Account panel -->
-  <div class="section" id="accountPanel">
-    <h2>Akun Anda</h2>
-    <div id="createAccountPanel">
-      <input type="text" id="namaDepan" placeholder="Nama Depan" />
-      <input type="text" id="namaBelakang" placeholder="Nama Belakang" />
-      <button onclick="buatAkun()">Buat Forum Anda</button>
-    </div>
-    <p id="infoPengguna"></p>
-  </div>
-
-  <!-- Money & History panel -->
-  <div class="section" id="moneyPanel" style="display:none;">
-    <h2>Forum Anda</h2>
-    <p><strong>Saldo:</strong> <span id="saldo">Rp 0</span></p>
-    <input type="number" id="jumlah" placeholder="Jumlah Uang" />
-    <button onclick="tambahUang()">Tambah</button>
-    <button onclick="ambilUang()">Ambil</button>
-    <button onclick="setorUang()">Setor (Reset)</button>
-    <div id="riwayat"></div>
-  </div>
-
-  <!-- Admin panel -->
-  <div class="section admin-panel" id="adminSection">
-    <h2>Admin Panel</h2>
-    <p>Admin: <input type="text" id="adminName" style="width:150px" /></p>
-    <button onclick="updateAdminName()">Ubah Nama Admin</button>
-    <button onclick="logoutAdmin()">Keluar Admin</button>
-    <hr />
-    <h3>Daftar Akun Anggota</h3>
-    <table>
-      <thead><tr><th>Nama</th><th>Saldo</th><th>Aksi</th></tr></thead>
-      <tbody id="anggotaList"></tbody>
-    </table>
-  </div>
+<div class="panel" id="buatAkunPanel">
+  <h2>Buat Akun SAFD</h2>
+  <input type="text" id="namaAkun" placeholder="Nama Akun"/>
+  <input type="number" id="uangAkun" placeholder="Saldo Awal"/>
+  <button onclick="buatAkun()">Buat Akun</button>
 </div>
 
-<!-- Buttons to switch views -->
-<div class="section flex-row" style="margin-bottom:20px;">
-  <button onclick="showPanel('money')">Forum & Uang</button>
-  <button onclick="showPanel('chat')">Chat</button>
-  <button onclick="showPanel('topTier')">Top Tier</button>
-  <button onclick="toggleAdminLogin()">Login Admin</button>
-</div>
+<div class="panel hidden" id="forumPanel">
+  <h2>Forum SAFD MONEY</h2>
+  <p>Selamat datang, <span id="namaPengguna"></span>! <button onclick="logout()">Logout</button></p>
+  <p>Saldo: <span id="uangPengguna" class="green"></span></p>
 
-<!-- Chat Panel -->
-<div class="section" id="chatPanel" style="display:none;">
-  <h2>Obrolan</h2>
+  <input type="text" id="chatInput" placeholder="Tulis pesan..." onkeypress="if(event.key==='Enter'){kirimChat()}"/>
+  <button onclick="kirimChat()">Kirim</button>
+
   <div class="chat-box" id="chatBox"></div>
-  <textarea id="pesan" placeholder="Ketik pesan Anda"></textarea>
-  <button onclick="kirimPesan()">Kirim</button>
+  <button onclick="bukaAdminLogin()">Masuk Admin</button>
 </div>
 
-<!-- Top Tier Panel -->
-<div class="section" id="topTierSection" style="display:none;">
-  <h2>Top Tier - 3 Orang dengan Saldo Terbesar</h2>
+<div class="panel hidden" id="loginAdminPanel">
+  <h2>Login Admin</h2>
+  <input type="password" id="adminPassword" placeholder="Password Admin"/>
+  <button onclick="loginAdmin()">Login</button>
+  <button onclick="batalAdmin()">Batal</button>
+</div>
+
+<div class="panel hidden" id="adminPanel">
+  <h2>Panel Admin</h2>
+  <p>Nama Admin: <span id="namaAdminTampil"></span> <button onclick="keluarAdmin()">Keluar Admin</button></p>
+
+  <input type="text" id="editNamaAdmin" placeholder="Ubah Nama Admin"/>
+  <button onclick="ubahNamaAdmin()">Ubah Nama</button>
+
+  <h3>Daftar Akun</h3>
+  <ul id="daftarAkun"></ul>
+</div>
+
+<div class="panel">
+  <h2>Top Tier Investor</h2>
   <ol id="topTierList"></ol>
 </div>
 
-<!-- Admin Login Panel -->
-<div class="section" id="adminLoginPanel" style="display:none;">
-  <h2>Login Admin</h2>
-  <input type="password" id="adminPass" placeholder="Masukkan Password Admin" />
-  <button onclick="loginAdmin()">Login</button>
-  <p id="adminLoginInfo" style="color:red"></p>
-</div>
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+  // Ganti config ini dengan config Firebase projectmu
   const firebaseConfig = {
-    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-    authDomain: "uangduty.firebaseapp.com",
-    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "uangduty",
-    storageBucket: "uangduty.appspot.com",
-    messagingSenderId: "598905752132",
-    appId: "1:598905752132:web:9b764840e51c3044a11",
-    measurementId: "G-YXZPEVYBDR"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTHDOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let userKey = localStorage.getItem("userKey");
-  let fullName = localStorage.getItem("fullName");
-  let isAdmin = localStorage.getItem("isAdmin") === "true";
-  let adminName = localStorage.getItem("adminName") || "Admin";
-  let adminPassCorrect = "RFD1";
+  let akun = null;
+  let isAdmin = false;
+  let adminName = "Admin SAFD";
 
-  // Show panel helpers
-  function showPanel(name) {
-    document.getElementById("moneyPanel").style.display = name === "money" ? "block" : "none";
-    document.getElementById("chatPanel").style.display = name === "chat" ? "block" : "none";
-    document.getElementById("topTierSection").style.display = name === "topTier" ? "block" : "none";
-    document.getElementById("adminLoginPanel").style.display = "none";
-  }
-
-  function toggleAdminLogin() {
-    if (isAdmin) {
-      alert("Anda sudah login sebagai admin.");
-      return;
-    }
-    document.getElementById("adminLoginPanel").style.display = "block";
-    showPanel(""); // hide other panels
-  }
-
-  function setUserPanelVisible(visible) {
-    document.getElementById("moneyPanel").style.display = visible ? "block" : "none";
-    document.getElementById("accountPanel").style.display = visible ? "none" : "block";
-    if (!visible) clearUserData();
-  }
-
-  function clearUserData() {
-    userKey = null;
-    fullName = null;
-    localStorage.removeItem("userKey");
-    localStorage.removeItem("fullName");
-  }
-
-  // Format number to Rupiah
-  function formatRupiah(num) {
-    return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
-
-  // Create account
+  // Simpan akun baru di Firebase
   function buatAkun() {
-    const depan = document.get
+    const nama = document.getElementById("namaAkun").value.trim();
+    const uang = parseInt(document.getElementById("uangAkun").value);
+    if (!nama || isNaN(uang) || uang < 0) return alert("Isi nama dan saldo dengan benar!");
+
+    // Cek apakah nama sudah ada
+    db.ref("akun").orderByChild("nama").equalTo(nama).get().then(snapshot => {
+      if(snapshot.exists()) {
+        alert("Nama akun sudah digunakan!");
+      } else {
+        const akunBaru = { nama, uang };
+        // Push ke Firebase (gunakan key generated otomatis)
+        db.ref("akun").push(akunBaru).then(() => {
+          loginAkun(nama);
+        });
+      }
+    });
+  }
+
+  // Login akun biasa (bukan admin)
+  function loginAkun(nama) {
+    db.ref("akun").orderByChild("nama").equalTo(nama).limitToFirst(1).get().then(snapshot => {
+      if(snapshot.exists()) {
+        snapshot.forEach(child => {
+          akun = { id: child.key, ...child.val() };
+        });
+        isAdmin = false;
+        tampilkanForum();
+        listenSaldo();
+        listenChat();
+        listenTopTier();
+      } else {
+        alert("Akun tidak ditemukan");
+      }
+    });
+  }
+
+  // Update saldo realtime listener
+  function listenSaldo() {
+    if (!akun) return;
+    db.ref("akun/" + akun.id + "/uang").on("value", (snap) => {
+      if (snap.exists()) {
+        akun.uang = snap.val();
+        document.getElementById("uangPengguna").textContent = `Rp ${akun.uang.toLocaleString()}`;
+      }
+    });
+  }
+
+  // Kirim chat ke Firebase
+  function kirimChat() {
+    if (!akun) return alert("Belum login");
+    const pesan = document.getElementById("chatInput").value.trim();
+    if (!pesan) return;
+    const chatData = {
+      nama: akun.nama,
+      pesan,
+      waktu: Date.now()
+    };
+    db.ref("chat").push(chatData);
+    document.getElementById("chatInput").value = "";
+  }
+
+  // Dengar chat realtime dan tampilkan
+  function listenChat() {
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = "";
+    db.ref("chat").limitToLast(50).on("child_added", (snap) => {
+      const data = snap.val();
+      const p = document.createElement("p");
+      p.innerHTML = `<b>${data.nama}:</b> ${data.pesan}`;
+      chatBox.appendChild(p);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  }
+
+  // Tampilkan forum, sembunyikan buat akun dan admin login
+  function tampilkanForum() {
+    document.getElementById("buatAkunPanel").classList.add("hidden");
+    document.getElementById("loginAdminPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
+    document.getElementById("forumPanel").classList.remove("hidden");
+    document.getElementById("namaPengguna").textContent = akun.nama;
+    document.getElementById("uangPengguna").textContent = `Rp ${akun.uang.toLocaleString()}`;
+  }
+
+  // Logout akun (biasa)
+  function logout() {
+    akun = null;
+    isAdmin = false;
+    document.getElementById("forumPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
+    document.getElementById("buatAkunPanel").classList.remove("hidden");
+    // Hentikan listener Firebase
+    db.ref("akun").off();
+    db.ref("chat").off();
+    db.ref("akun").off();
+    db.ref("akun").off();
+  }
+
+  // Buka panel login admin
+  function bukaAdminLogin() {
+    if (!akun) return alert("Harus login dulu!");
+    document.getElementById("loginAdminPanel").classList.remove("hidden");
+    document.getElementById("forumPanel").classList.add("hidden");
+  }
+
+  // Batalkan login admin, kembali ke forum
+  function batalAdmin() {
+    document.getElementById("loginAdminPanel").classList.add("hidden");
+    document.getElementById("forumPanel").classList.remove("hidden");
+  }
+
+  // Login admin
+  function loginAdmin() {
+    const pass = document.getElementById("adminPassword").value;
+    if (pass !== "RFD1") return alert("Password admin salah!");
+    isAdmin = true;
+    adminName = akun.nama + " (Admin)";
+    document.getElementById("namaAdminTampil").textContent = adminName;
+    document.getElementById("loginAdminPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+    tampilkanDaftarAkun();
+    document.getElementById("namaPengguna").textContent = adminName;
+  }
+
+  // Keluar mode admin, kembali ke mode biasa
+  function keluarAdmin() {
+    isAdmin = false;
+    document.getElementById("adminPanel").classList.add("hidden");
+    document.getElementById("forumPanel").classList.remove("hidden");
+    document.getElementById("namaPengguna").textContent = akun.nama;
+  }
+
+  // Ubah nama admin (hanya ubah tampilan)
+  function ubahNamaAdmin() {
+    const namaBaru = document.getElementById("editNamaAdmin").value.trim();
+    if (!namaBaru) return alert("Nama admin tidak boleh kosong");
+    adminName = namaBaru;
+    document.getElementById("namaAdminTampil").textContent = adminName;
+    document.getElementById("namaPengguna").textContent = adminName;
+  }
+
+  // Tampilkan daftar akun di admin panel
+  function tampilkanDaftarAkun() {
+    const ul = document.getElementById("daftarAkun");
+    ul.innerHTML = "";
+    db.ref("akun").once("value").then(snapshot => {
+      snapshot.forEach(child => {
+        const data = child.val();
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${data.nama} - <span class="green">Rp ${data.uang.toLocaleString()}</span>
+          <button onclick="gantiNama('${child.key}')">Ganti Nama</button>
+          <button onclick="hapusAkun('${child.key}')">Hapus</button>
+          <button onclick="tambahUang('${child.key}')">Tambah Uang</button>
+          <button onclick="ambilUang('${child.key}')">Ambil Uang</button>
+        `;
+        ul.appendChild(li);
+      });
+    });
+  }
+
+  // Ganti nama akun di Firebase
+  function gantiNama(id) {
+    const namaBaru = prompt("Nama baru:");
+    if (!namaBaru) return;
+    db.ref("akun/" + id + "/nama").set(namaBaru).then(() => {
