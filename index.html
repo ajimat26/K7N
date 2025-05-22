@@ -5,7 +5,7 @@
   <title>SAFD MONEY</title>
   <style>
     body {
-      background-color: #f5f5f5;
+      background-color: #fefefe;
       color: #333;
       font-family: Arial, sans-serif;
       padding: 20px;
@@ -56,7 +56,7 @@
   <button onclick="createAccount()">Buat Akun</button>
 </div>
 
-<div id="adminLoginPanel" class="panel">
+<div id="adminLoginPanel" class="panel hidden">
   <h3>Login Admin</h3>
   <input type="password" id="adminPass" placeholder="Password Admin">
   <button onclick="adminLogin()">Login Admin</button>
@@ -77,19 +77,20 @@
   <div id="userList"></div>
   <h4>Top Tier</h4>
   <div id="topTier"></div>
+  <button onclick="logoutAdmin()">Keluar dari Mode Admin</button>
 </div>
 
 <script>
   let users = JSON.parse(localStorage.getItem("users") || "[]");
   let chats = JSON.parse(localStorage.getItem("chats") || "[]");
   let akun = JSON.parse(localStorage.getItem("akun") || "null");
-  let isAdmin = false;
-  let adminName = "";
+  let adminStatus = JSON.parse(localStorage.getItem("adminStatus") || "null");
 
   function saveData() {
     localStorage.setItem("users", JSON.stringify(users));
     localStorage.setItem("chats", JSON.stringify(chats));
     localStorage.setItem("akun", JSON.stringify(akun));
+    localStorage.setItem("adminStatus", JSON.stringify(adminStatus));
   }
 
   function formatMoney(val) {
@@ -110,28 +111,28 @@
   function adminLogin() {
     const pass = document.getElementById("adminPass").value;
     if (pass === "RFD1") {
-      adminName = prompt("Nama Admin:");
-      isAdmin = true;
+      const name = prompt("Nama Admin:");
+      adminStatus = { isAdmin: true, name };
       akun = null;
       saveData();
-      document.getElementById("adminLoginPanel").classList.add("hidden");
-      document.getElementById("forumPanel").classList.remove("hidden");
-      document.getElementById("adminPanel").classList.remove("hidden");
-      document.getElementById("userNameDisplay").innerText = adminName + " (Admin)";
-      document.getElementById("userMoneyDisplay").innerText = formatMoney(0);
-      document.getElementById("adminName").innerText = adminName;
-      loadUserList();
-      showTopTier();
-      loadChats();
+      refreshView();
     } else {
       alert("Password salah!");
     }
   }
 
+  function logoutAdmin() {
+    adminStatus = null;
+    saveData();
+    refreshView();
+  }
+
   function showForum() {
     document.getElementById("forumPanel").classList.remove("hidden");
-    document.getElementById("userNameDisplay").innerText = akun.name;
-    document.getElementById("userMoneyDisplay").innerText = formatMoney(akun.money);
+    const displayName = adminStatus?.isAdmin ? adminStatus.name + " (Admin)" : akun.name;
+    const displayMoney = adminStatus?.isAdmin ? 0 : akun.money;
+    document.getElementById("userNameDisplay").innerText = displayName;
+    document.getElementById("userMoneyDisplay").innerText = formatMoney(displayMoney);
     loadChats();
   }
 
@@ -139,7 +140,7 @@
     const input = document.getElementById("chatInput");
     const text = input.value.trim();
     if (!text) return;
-    const sender = isAdmin ? adminName + " (Admin)" : akun.name;
+    const sender = adminStatus?.isAdmin ? adminStatus.name + " (Admin)" : akun.name;
     chats.push({ name: sender, text });
     input.value = "";
     saveData();
@@ -194,14 +195,33 @@
     list.innerHTML = top.map((u, i) => `${i+1}. ${u.name} - ${formatMoney(u.money)}`).join("<br>");
   }
 
-  // Auto load
-  window.onload = () => {
-    if (akun) {
+  function refreshView() {
+    // Reset semua panel
+    document.getElementById("forumPanel").classList.add("hidden");
+    document.getElementById("createAccountPanel").classList.add("hidden");
+    document.getElementById("adminLoginPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
+
+    if (adminStatus?.isAdmin) {
+      document.getElementById("forumPanel").classList.remove("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      document.getElementById("adminName").innerText = adminStatus.name;
+      loadUserList();
+      showTopTier();
       showForum();
-    } else if (users.length === 0) {
-      document.getElementById("createAccountPanel").classList.remove("hidden");
+    } else if (akun) {
+      showForum();
+    } else {
+      if (users.length === 0) {
+        document.getElementById("createAccountPanel").classList.remove("hidden");
+      } else {
+        document.getElementById("adminLoginPanel").classList.remove("hidden");
+        document.getElementById("createAccountPanel").classList.remove("hidden");
+      }
     }
   }
+
+  window.onload = refreshView;
 </script>
 
 </body>
