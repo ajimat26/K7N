@@ -1,186 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Aplikasi Pegawai</title>
+  <meta charset="UTF-8">
+  <title>Block Blast - Lanjutan</title>
   <style>
-    body { font-family: Arial; max-width: 600px; margin: 20px auto; }
-    #chat { border: 1px solid #ccc; height: 200px; overflow-y: scroll; padding: 5px; margin-bottom: 10px; }
-    #pegawaiList table { width: 100%; border-collapse: collapse; }
-    #pegawaiList th, #pegawaiList td { border: 1px solid #ccc; padding: 5px; text-align: left; }
-    .hidden { display: none; }
+    body {
+      background: #222;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #game {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      background: #555;
+      border-radius: 4px;
+    }
+    .filled {
+      background: #4caf50;
+    }
+    #score {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-
-  <div id="loginDiv">
-    <h2>Login Pegawai</h2>
-    <input id="username" placeholder="Username"><br><br>
-    <input id="password" type="password" placeholder="Password"><br><br>
-    <button onclick="login()">Login</button>
-    <p id="loginInfo" style="color:red;"></p>
+  <div id="game">
+    <div id="score">Score: 0</div>
+    <div class="grid" id="grid"></div>
+    <button onclick="resetGrid()">Reset</button>
   </div>
-
-  <div id="appDiv" class="hidden">
-    <h2>Halo, <span id="displayName"></span> (<span id="displayRole"></span>)</h2>
-    <p>Total Uang: Rp <span id="uangDisplay">0</span></p>
-
-    <input type="number" id="tambahUangInput" placeholder="Tambah uang (angka)">
-    <button onclick="tambahUang()">Tambah</button>
-    <button onclick="logout()">Logout</button>
-
-    <div id="adminPanel" class="hidden">
-      <h3>Data Semua Pegawai</h3>
-      <div id="pegawaiList"></div>
-    </div>
-
-    <h3>Chat Realtime</h3>
-    <div id="chat"></div>
-    <input type="text" id="chatInput" placeholder="Ketik pesan...">
-    <button onclick="kirimChat()">Kirim</button>
-  </div>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // CONFIG FIREBASE - GANTI SESUAI PROJECTMU
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.firebasestorage.app",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:7be400c23de21665044a11",
-      measurementId: "G-TJL9K6YDL9"
-    };
+    const gridSize = 10;
+    const grid = document.getElementById('grid');
+    let score = 0;
+    const scoreText = document.getElementById('score');
 
-    // INIT FIREBASE
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    for (let i = 0; i < gridSize * gridSize; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.index = i;
+      cell.draggable = true;
+      cell.addEventListener('dragstart', dragStart);
+      cell.addEventListener('dragover', e => e.preventDefault());
+      cell.addEventListener('drop', drop);
+      grid.appendChild(cell);
+    }
 
-    let currentUser = null;
+    function dragStart(e) {
+      e.dataTransfer.setData("text", e.target.dataset.index);
+    }
 
-    const loginDiv = document.getElementById('loginDiv');
-    const appDiv = document.getElementById('appDiv');
-    const displayNameSpan = document.getElementById('displayName');
-    const displayRoleSpan = document.getElementById('displayRole');
-    const uangDisplay = document.getElementById('uangDisplay');
-    const tambahUangInput = document.getElementById('tambahUangInput');
-    const loginInfo = document.getElementById('loginInfo');
-    const adminPanel = document.getElementById('adminPanel');
-    const pegawaiList = document.getElementById('pegawaiList');
-    const chatDiv = document.getElementById('chat');
-    const chatInput = document.getElementById('chatInput');
-
-    // Fungsi login
-    function login() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      loginInfo.innerText = '';
-
-      if (!username || !password) {
-        loginInfo.innerText = 'Username dan password harus diisi';
-        return;
+    function drop(e) {
+      const fromIndex = e.dataTransfer.getData("text");
+      const toIndex = e.target.dataset.index;
+      const from = grid.children[fromIndex];
+      const to = grid.children[toIndex];
+      const fromFilled = from.classList.contains('filled');
+      const toFilled = to.classList.contains('filled');
+      if (!toFilled && fromFilled) {
+        from.classList.remove('filled');
+        to.classList.add('filled');
+        checkLines();
       }
-
-      db.ref('users/' + username).get().then(snapshot => {
-        if (!snapshot.exists()) {
-          loginInfo.innerText = 'User tidak ditemukan';
-          return;
-        }
-        const user = snapshot.val();
-        if (user.password !== password) {
-          loginInfo.innerText = 'Password salah';
-          return;
-        }
-        // Sukses login
-        currentUser = { username, role: user.role || 'pegawai' };
-        tampilkanApp(user);
-        setupRealtimeUang();
-        if (currentUser.role === 'admin') {
-          tampilkanAdminPanel();
-        }
-        setupChatListener();
-      });
     }
 
-    // Tampilkan app setelah login
-    function tampilkanApp(user) {
-      loginDiv.classList.add('hidden');
-      appDiv.classList.remove('hidden');
-      displayNameSpan.innerText = currentUser.username;
-      displayRoleSpan.innerText = currentUser.role;
-      uangDisplay.innerText = user.uang || 0;
-    }
-
-    // Update realtime uang tampilan
-    function setupRealtimeUang() {
-      db.ref('users/' + currentUser.username + '/uang').on('value', snap => {
-        uangDisplay.innerText = snap.val() || 0;
-      });
-    }
-
-    // Tambah uang
-    function tambahUang() {
-      const amount = parseInt(tambahUangInput.value);
-      if (isNaN(amount)) {
-        alert('Masukkan angka yang valid');
-        return;
+    function checkLines() {
+      for (let y = 0; y < gridSize; y++) {
+        let full = true;
+        for (let x = 0; x < gridSize; x++) {
+          if (!grid.children[y * gridSize + x].classList.contains('filled')) {
+            full = false;
+            break;
+          }
+        }
+        if (full) {
+          for (let x = 0; x < gridSize; x++) {
+            grid.children[y * gridSize + x].classList.remove('filled');
+          }
+          score += 10;
+          scoreText.innerText = 'Score: ' + score;
+        }
       }
-      const userRef = db.ref('users/' + currentUser.username);
-      userRef.transaction(user => {
-        if (user) {
-          if (!user.uang) user.uang = 0;
-          user.uang += amount;
-        }
-        return user;
-      });
-      tambahUangInput.value = '';
     }
 
-    // Logout
-    function logout() {
-      location.reload();
+    function resetGrid() {
+      [...grid.children].forEach(c => c.classList.remove('filled'));
+      score = 0;
+      scoreText.innerText = 'Score: 0';
+      fillRandom();
     }
 
-    // Tampilkan data semua pegawai (admin)
-    function tampilkanAdminPanel() {
-      adminPanel.classList.remove('hidden');
-      db.ref('users').on('value', snapshot => {
-        const users = snapshot.val();
-        let html = '<table><tr><th>Username</th><th>Role</th><th>Uang</th></tr>';
-        for (const u in users) {
-          html += `<tr><td>${u}</td><td>${users[u].role || 'pegawai'}</td><td>Rp ${users[u].uang || 0}</td></tr>`;
-        }
-        html += '</table>';
-        pegawaiList.innerHTML = html;
-      });
+    function fillRandom() {
+      for (let i = 0; i < 30; i++) {
+        const r = Math.floor(Math.random() * (gridSize * gridSize));
+        grid.children[r].classList.add('filled');
+      }
     }
 
-    // Setup Chat Listener
-    function setupChatListener() {
-      db.ref('chat').on('child_added', snapshot => {
-        const data = snapshot.val();
-        const div = document.createElement('div');
-        div.textContent = `${data.username}: ${data.message}`;
-        chatDiv.appendChild(div);
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-      });
-    }
-
-    // Kirim chat
-    function kirimChat() {
-      const message = chatInput.value.trim();
-      if (!message) return;
-      db.ref('chat').push({
-        username: currentUser.username,
-        message: message,
-        timestamp: Date.now()
-      });
-      chatInput.value = '';
-    }
+    fillRandom();
   </script>
 </body>
 </html>
