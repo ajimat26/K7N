@@ -1,169 +1,173 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html><html>
 <head>
-  <meta charset="UTF-8">
   <title>UANGDUTY</title>
   <style>
-    body { font-family: Arial; background: #f0f0f0; margin: 0; padding: 0; }
-    .container { max-width: 600px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; }
-    h1 { text-align: center; margin-top: 0; }
-    .green { color: green; }
-    .admin-button { background: red; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 5px; }
-    .admin-button.active { background: green; }
-    .admin-panel { display: none; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
-    .log, .chat, .akun-list { max-height: 120px; overflow-y: auto; background: #eee; padding: 5px; margin-top: 10px; border-radius: 5px; }
-    input[type=text], input[type=number] { padding: 5px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-    button { padding: 5px 10px; margin-right: 5px; }
+    body { font-family: sans-serif; background: #f2f2f2; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+    .admin { color: white; background: green; padding: 5px 10px; border: none; border-radius: 5px; }
+    .hidden { display: none; }
+    .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .indicator { font-size: 12px; color: red; margin-top: 5px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group input { width: 100%; padding: 8px; }
+    .form-group button { padding: 8px 12px; }
+    .chat-box { border: 1px solid #ccc; height: 150px; overflow-y: scroll; padding: 10px; background: #fafafa; margin-bottom: 10px; }
+    .riwayat { font-size: 12px; background: #eee; padding: 5px; margin-top: 5px; border-radius: 4px; }
+    .money { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>UANGDUTY</h1>
-    <button id="adminToggle" class="admin-button">Mode Admin</button><div id="adminPanel" class="admin-panel">
-  <p><b>Panel Admin</b> - <span id="daftarToggle">[Tutup Pendaftaran]</span></p>
-  <div class="akun-list" id="akunList"></div>
-</div>
-
-<div id="buatAkunPanel">
-  <input type="text" id="namaInput" placeholder="Masukkan nama anda">
-  <button onclick="buatAkun()">Buat Akun</button>
-</div>
-
-<div id="akunPanel" style="display:none">
-  <p>Halo, <span id="namaPengguna"></span>!</p>
-  <p>Saldo: <span id="saldoPengguna" class="green"></span>rb</p>
-  <input type="number" id="jumlahUang" placeholder="Jumlah uang">
-  <button onclick="tambahUang()">Tambah Uang</button>
-  <button onclick="ambilUang()">Ambil Uang</button>
-  <button onclick="resetUang()">Setor (Reset Uang)</button>
-  <div class="log" id="riwayatLog"></div>
-  <input type="text" id="chatInput" placeholder="Ketik pesan...">
-  <button onclick="kirimChat()">Kirim</button>
-  <div class="chat" id="chatBox"></div>
+    <div class="title">UANGDUTY</div>
+    <button id="modeAdmin">Mode Admin</button>
+    <div id="adminPanel" class="hidden">
+      <div class="indicator" id="adminStatus">Admin Nonaktif</div>
+      <button onclick="togglePendaftaran()">Tutup/Buka Pendaftaran</button>
+      <div id="adminData"></div>
+    </div>
+    <div id="registerSection">
+      <div class="form-group">
+        <input type="text" id="username" placeholder="Masukkan Nama">
+        <button onclick="buatAkun()">Buat Akun</button>
+      </div>
+    </div><div id="userPanel" class="hidden">
+  <div>Halo, <span id="namaUser"></span></div>
+  <div>Uangmu: <span class="money" id="uangUser">Rp 0</span></div>
+  <div class="form-group">
+    <input type="number" id="jumlahTambah" placeholder="Jumlah Tambah">
+    <button onclick="tambahUang()">Tambah Uang</button>
+  </div>
+  <div class="form-group">
+    <input type="number" id="jumlahAmbil" placeholder="Jumlah Ambil">
+    <button onclick="ambilUang()">Ambil Uang</button>
+  </div>
+  <div class="form-group">
+    <button onclick="resetUang()">Setor / Reset Uang</button>
+  </div>
+  <div class="form-group">
+    <div><strong>Riwayat (maks 5):</strong></div>
+    <div id="riwayatList"></div>
+  </div>
+  <div class="form-group">
+    <div class="chat-box" id="chatBox"></div>
+    <input type="text" id="chatInput" placeholder="Ketik pesan...">
+    <button onclick="kirimChat()">Kirim</button>
+  </div>
 </div>
 
   </div>  <script>
+    let akun = localStorage.getItem("akun") ? JSON.parse(localStorage.getItem("akun")) : null;
+    let pendaftaranAktif = true;
     let isAdmin = false;
-    let pendaftaranTerbuka = true;
-    let akun = null;
-    let dataAkun = [];
-    let chatList = [];
 
-    document.getElementById('adminToggle').onclick = () => {
-      if (!isAdmin) {
-        const pass = prompt("Masukkan password admin:");
-        if (pass === "RFD1") {
-          isAdmin = true;
-          document.getElementById('adminPanel').style.display = 'block';
-          document.getElementById('adminToggle').classList.add('active');
-          updateAkunList();
-        } else {
-          alert("Password salah");
-        }
-      } else {
-        isAdmin = false;
-        document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('adminToggle').classList.remove('active');
+    document.getElementById("modeAdmin").addEventListener("click", function () {
+      let pass = prompt("Masukkan password admin:");
+      if (pass === "RFD1") {
+        isAdmin = true;
+        document.getElementById("adminPanel").classList.remove("hidden");
+        document.getElementById("adminStatus").textContent = "Admin Aktif";
+        document.getElementById("adminStatus").style.color = "green";
+        tampilkanAdminData();
       }
-    };
+    });
 
-    document.getElementById('daftarToggle').onclick = () => {
-      pendaftaranTerbuka = !pendaftaranTerbuka;
-      document.getElementById('daftarToggle').textContent = pendaftaranTerbuka ? '[Tutup Pendaftaran]' : '[Buka Pendaftaran]';
-      alert(pendaftaranTerbuka ? 'Pendaftaran dibuka!' : 'Pendaftaran ditutup!');
-    };
+    function togglePendaftaran() {
+      pendaftaranAktif = !pendaftaranAktif;
+      alert("Pendaftaran " + (pendaftaranAktif ? "dibuka" : "ditutup"));
+    }
 
     function buatAkun() {
-      if (!pendaftaranTerbuka) return alert("Pendaftaran sedang ditutup oleh admin.");
-      if (akun) return alert("Anda sudah memiliki akun.");
-      const nama = document.getElementById('namaInput').value.trim();
-      if (!nama) return alert("Nama tidak boleh kosong.");
-      akun = { nama, saldo: 0, log: [] };
-      dataAkun.push(akun);
-      document.getElementById('buatAkunPanel').style.display = 'none';
-      document.getElementById('akunPanel').style.display = 'block';
-      document.getElementById('namaPengguna').textContent = akun.nama;
-      updateSaldo();
-      updateLog();
+      if (!pendaftaranAktif) return alert("Pendaftaran sedang ditutup oleh admin.");
+      if (akun) return alert("Kamu sudah memiliki akun!");
+      let nama = document.getElementById("username").value.trim();
+      if (!nama) return alert("Nama tidak boleh kosong!");
+      akun = { nama: nama, uang: 0, riwayat: [] };
+      localStorage.setItem("akun", JSON.stringify(akun));
+      mulai();
+    }
+
+    function mulai() {
+      if (!akun) return;
+      document.getElementById("registerSection").classList.add("hidden");
+      document.getElementById("userPanel").classList.remove("hidden");
+      document.getElementById("namaUser").textContent = akun.nama;
+      updateUang();
+      tampilkanRiwayat();
     }
 
     function tambahUang() {
-      const jumlah = parseInt(document.getElementById('jumlahUang').value);
-      if (isNaN(jumlah) || jumlah <= 0) return;
-      akun.saldo += jumlah;
-      addLog(`Menambahkan ${formatUang(jumlah)}rb`);
-      updateSaldo();
+      let jumlah = parseInt(document.getElementById("jumlahTambah").value);
+      if (isNaN(jumlah) || jumlah <= 0) return alert("Jumlah tidak valid.");
+      akun.uang += jumlah;
+      tambahRiwayat("+" + jumlah);
+      simpan();
     }
 
     function ambilUang() {
-      const jumlah = parseInt(document.getElementById('jumlahUang').value);
-      if (isNaN(jumlah) || jumlah <= 0 || jumlah > akun.saldo) return;
-      akun.saldo -= jumlah;
-      addLog(`Mengambil ${formatUang(jumlah)}rb`);
-      updateSaldo();
+      let jumlah = parseInt(document.getElementById("jumlahAmbil").value);
+      if (isNaN(jumlah) || jumlah <= 0 || jumlah > akun.uang) return alert("Jumlah tidak valid.");
+      akun.uang -= jumlah;
+      tambahRiwayat("-" + jumlah);
+      simpan();
     }
 
     function resetUang() {
-      akun.saldo = 0;
-      addLog("Saldo disetor dan direset.");
-      updateSaldo();
+      akun.uang = 0;
+      tambahRiwayat("Reset");
+      simpan();
     }
 
-    function addLog(teks) {
-      akun.log.unshift(teks);
-      if (akun.log.length > 5) akun.log.pop();
-      updateLog();
+    function tambahRiwayat(aksi) {
+      akun.riwayat.unshift(aksi);
+      if (akun.riwayat.length > 5) akun.riwayat.pop();
     }
 
-    function updateSaldo() {
-      document.getElementById('saldoPengguna').textContent = formatUang(akun.saldo);
+    function tampilkanRiwayat() {
+      document.getElementById("riwayatList").innerHTML = akun.riwayat.map(r => `<div class="riwayat">${r}</div>`).join("");
     }
 
-    function updateLog() {
-      document.getElementById('riwayatLog').innerHTML = akun.log.map(x => `<div>${x}</div>`).join('');
+    function updateUang() {
+      document.getElementById("uangUser").textContent = "Rp " + akun.uang.toLocaleString("id-ID");
     }
 
-    function formatUang(jumlah) {
-      return jumlah.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    function simpan() {
+      localStorage.setItem("akun", JSON.stringify(akun));
+      updateUang();
+      tampilkanRiwayat();
+    }
+
+    function tampilkanAdminData() {
+      let data = localStorage.getItem("akun");
+      if (!data) return;
+      let user = JSON.parse(data);
+      let html = `<div><strong>Nama:</strong> ${user.nama} | <strong>Uang:</strong> Rp ${user.uang.toLocaleString("id-ID")}</div>
+        <button onclick="hapusAkun()">Hapus Akun</button>
+        <button onclick="ubahNama()">Ubah Nama</button>`;
+      document.getElementById("adminData").innerHTML = html;
+    }
+
+    function hapusAkun() {
+      localStorage.removeItem("akun");
+      location.reload();
+    }
+
+    function ubahNama() {
+      let baru = prompt("Nama baru:", akun.nama);
+      if (!baru) return;
+      akun.nama = baru;
+      simpan();
+      tampilkanAdminData();
     }
 
     function kirimChat() {
-      const teks = document.getElementById('chatInput').value.trim();
-      if (!teks) return;
-      const isi = akun ? `${akun.nama}: ${teks}` : `Anonim: ${teks}`;
-      chatList.push(isi);
-      if (chatList.length > 20) chatList.shift();
-      updateChat();
+      let pesan = document.getElementById("chatInput").value.trim();
+      if (!pesan) return;
+      let box = document.getElementById("chatBox");
+      box.innerHTML += `<div><b>${akun.nama}:</b> ${pesan}</div>`;
+      document.getElementById("chatInput").value = "";
+      box.scrollTop = box.scrollHeight;
     }
 
-    function updateChat() {
-      document.getElementById('chatBox').innerHTML = chatList.map(c => `<div>${c}</div>`).join('');
-    }
-
-    function updateAkunList() {
-      document.getElementById('akunList').innerHTML = dataAkun.map((a, i) => `
-        <div><b>${a.nama}</b> - ${formatUang(a.saldo)}rb
-          <button onclick="ubahNama(${i})">Ubah</button>
-          <button onclick="hapusAkun(${i})">Hapus</button>
-        </div>
-      `).join('');
-    }
-
-    function ubahNama(index) {
-      const namaBaru = prompt("Masukkan nama baru:", dataAkun[index].nama);
-      if (namaBaru) {
-        dataAkun[index].nama = namaBaru;
-        updateAkunList();
-      }
-    }
-
-    function hapusAkun(index) {
-      if (confirm("Yakin ingin menghapus akun ini?")) {
-        if (dataAkun[index] === akun) akun = null;
-        dataAkun.splice(index, 1);
-        document.getElementById('akunPanel').style.display = 'none';
-        document.getElementById('buatAkunPanel').style.display = pendaftaranTerbuka ? 'block' : 'none';
-        updateAkunList();
-      }
-    }
+    if (akun) mulai();
   </script></body>
 </html>
