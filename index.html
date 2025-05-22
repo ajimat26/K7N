@@ -1,227 +1,155 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>SAFD MONEY</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SAFD MONEY Forum</title>
   <style>
-    body {
-      font-family: Arial;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    h2 {
-      color: #003366;
-    }
-    .panel, .nav {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    .nav button {
-      margin-right: 10px;
-      padding: 8px 15px;
-    }
-    .money {
-      color: green;
-      font-weight: bold;
-    }
-    #chat-box {
-      max-height: 200px;
-      overflow-y: auto;
-      background: #eef;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
+    body { font-family: Arial, sans-serif; background: #eee; padding: 20px; margin: 0; }
+    .panel { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; }
+    .hidden { display: none; }
+    input, button { margin-top: 5px; display: block; padding: 8px; width: 100%; max-width: 300px; }
+    .chat-box { background: #f9f9f9; padding: 10px; height: 150px; overflow-y: auto; border: 1px solid #ccc; margin-top: 10px; }
+    .green { color: green; font-weight: bold; }
   </style>
 </head>
-<body>
-  <div class="nav" id="navbar"></div>
-  <div id="main"></div>
+<body><div class="panel" id="buatAkun">
+  <h2>Buat Akun SAFD</h2>
+  <input type="text" id="namaAkun" placeholder="Nama Akun"/>
+  <input type="number" id="uangAkun" placeholder="Saldo Awal"/>
+  <button onclick="buatAkun()">Buat Akun</button>
+</div><div class="panel hidden" id="forumPanel">
+  <h2>Forum SAFD MONEY</h2>
+  <p>Selamat datang, <span id="namaPengguna"></span> <span id="adminTag"></span>!</p>
+  <p>Saldo: <span id="uangPengguna" class="green"></span></p>
+  <input type="text" id="chatInput" placeholder="Tulis pesan..."/>
+  <button onclick="kirimChat()">Kirim</button>
+  <div class="chat-box" id="chatBox"></div>
+  <button onclick="bukaAdmin()">Masuk Admin</button>
+  <button onclick="keluarAdmin()" class="hidden" id="keluarAdminBtn">Keluar dari Mode Admin</button>
+</div><div class="panel hidden" id="loginAdmin">
+  <h2>Login Admin</h2>
+  <input type="password" id="adminPassword" placeholder="Password Admin"/>
+  <button onclick="loginAdmin()">Login</button>
+</div><div class="panel hidden" id="adminPanel">
+  <h2>Panel Admin</h2>
+  <h3>Daftar Akun</h3>
+  <ul id="daftarAkun"></ul>
+</div><div class="panel" id="topTierPanel">
+  <h2>Top Tier Investor</h2>
+  <ol id="topTierList"></ol>
+</div><script>
+let akun = JSON.parse(localStorage.getItem("akunAktif")) || null;
+let akunList = JSON.parse(localStorage.getItem("akunList")) || [];
+let isAdmin = JSON.parse(localStorage.getItem("isAdmin")) || false;
 
-<script>
-let akun = JSON.parse(localStorage.getItem("akun"));
-let isAdmin = JSON.parse(localStorage.getItem("admin")) || false;
-let chatLog = JSON.parse(localStorage.getItem("chatLog")) || [];
-let currentPage = localStorage.getItem("page") || "home";
-
-function simpanSemua() {
-  localStorage.setItem("akun", JSON.stringify(akun));
-  localStorage.setItem("admin", JSON.stringify(isAdmin));
-  localStorage.setItem("chatLog", JSON.stringify(chatLog));
+function simpanData() {
+  localStorage.setItem("akunList", JSON.stringify(akunList));
+  localStorage.setItem("akunAktif", JSON.stringify(akun));
+  localStorage.setItem("isAdmin", JSON.stringify(isAdmin));
 }
 
-function formatRupiah(nom) {
-  return "Rp " + nom.toLocaleString("id-ID");
+function tampilkanTopTier() {
+  const sorted = [...akunList].sort((a, b) => b.uang - a.uang).slice(0, 3);
+  const list = document.getElementById("topTierList");
+  list.innerHTML = "";
+  sorted.forEach(a => {
+    list.innerHTML += `<li>${a.nama} - <span class="green">Rp ${a.uang.toLocaleString()}</span></li>`;
+  });
 }
 
 function buatAkun() {
-  const nama = prompt("Masukkan nama:");
-  if (!nama) return;
-  akun = { nama, uang: 0 };
-  simpanSemua();
-  render();
+  const nama = document.getElementById("namaAkun").value.trim();
+  const uang = parseInt(document.getElementById("uangAkun").value);
+  if (!nama || isNaN(uang)) return alert("Isi semua kolom!");
+
+  akun = { nama, uang };
+  akunList.push(akun);
+  simpanData();
+  tampilForum();
 }
 
-function hapusAkun() {
-  if (confirm("Yakin hapus akun ini?")) {
-    localStorage.removeItem("akun");
-    render();
-  }
-}
-
-function loginAdmin() {
-  const pass = prompt("Masukkan password admin:");
-  if (pass === "RFD1") {
-    isAdmin = true;
-    simpanSemua();
-    render();
-  } else {
-    alert("Password salah.");
-  }
-}
-
-function logoutAdmin() {
-  isAdmin = false;
-  simpanSemua();
-  render();
-}
-
-function ubahUang(nom) {
-  akun.uang = Math.max(0, akun.uang + nom);
-  simpanSemua();
-  render();
-}
-
-function setorUang() {
-  akun.uang += 10000;
-  simpanSemua();
-  render();
+function tampilForum() {
+  document.getElementById("buatAkun").classList.add("hidden");
+  document.getElementById("forumPanel").classList.remove("hidden");
+  document.getElementById("namaPengguna").textContent = akun.nama;
+  document.getElementById("uangPengguna").textContent = `Rp ${akun.uang.toLocaleString()}`;
+  document.getElementById("adminTag").textContent = isAdmin ? "(Admin)" : "";
+  document.getElementById("keluarAdminBtn").classList.toggle("hidden", !isAdmin);
+  tampilkanTopTier();
 }
 
 function kirimChat() {
-  const teks = prompt("Tulis pesan:");
-  if (!teks) return;
-  chatLog.push({ nama: akun.nama, teks });
-  if (chatLog.length > 5) chatLog.shift();
-  simpanSemua();
-  render();
+  const pesan = document.getElementById("chatInput").value.trim();
+  if (!pesan) return;
+  document.getElementById("chatBox").innerHTML += `<p><b>${akun.nama}:</b> ${pesan}</p>`;
+  document.getElementById("chatInput").value = "";
 }
 
-function getTop3() {
-  let all = JSON.parse(localStorage.getItem("allData")) || {};
-  all[akun.nama] = akun;
-  localStorage.setItem("allData", JSON.stringify(all));
-  return Object.values(all)
-    .sort((a, b) => b.uang - a.uang)
-    .slice(0, 3)
-    .map((x, i) => `${i+1}. ${x.nama} - <span class="money">${formatRupiah(x.uang)}</span>`)
-    .join("<br>");
+function bukaAdmin() {
+  document.getElementById("loginAdmin").classList.remove("hidden");
 }
 
-function updateAllData() {
-  let all = JSON.parse(localStorage.getItem("allData")) || {};
-  all[akun.nama] = akun;
-  localStorage.setItem("allData", JSON.stringify(all));
+function loginAdmin() {
+  const pass = document.getElementById("adminPassword").value;
+  if (pass !== "RFD1") return alert("Password salah!");
+  isAdmin = true;
+  simpanData();
+  document.getElementById("loginAdmin").classList.add("hidden");
+  document.getElementById("adminPanel").classList.remove("hidden");
+  tampilForum();
+  tampilkanDaftarAkun();
 }
 
-function gantiNamaUser(namaLama) {
-  let baru = prompt("Nama baru:", namaLama);
-  if (!baru) return;
-  let all = JSON.parse(localStorage.getItem("allData"));
-  all[baru] = all[namaLama];
-  all[baru].nama = baru;
-  delete all[namaLama];
-  if (akun.nama === namaLama) akun.nama = baru;
-  localStorage.setItem("allData", JSON.stringify(all));
-  simpanSemua();
-  render();
+function keluarAdmin() {
+  isAdmin = false;
+  simpanData();
+  document.getElementById("adminPanel").classList.add("hidden");
+  tampilForum();
 }
 
-function hapusUser(nama) {
-  let all = JSON.parse(localStorage.getItem("allData"));
-  delete all[nama];
-  localStorage.setItem("allData", JSON.stringify(all));
-  if (akun.nama === nama) {
-    localStorage.removeItem("akun");
-    render();
-  } else {
-    render();
+function tampilkanDaftarAkun() {
+  const ul = document.getElementById("daftarAkun");
+  ul.innerHTML = "";
+  akunList.forEach((a, i) => {
+    ul.innerHTML += `<li>${a.nama} - <span class="green">Rp ${a.uang.toLocaleString()}</span>
+    <button onclick="gantiNama(${i})">Ganti Nama</button>
+    <button onclick="hapusAkun(${i})">Hapus</button></li>`;
+  });
+}
+
+function gantiNama(index) {
+  const namaBaru = prompt("Nama baru:");
+  if (!namaBaru) return;
+  akunList[index].nama = namaBaru;
+  if (akun && akun.nama === akunList[index].nama) akun.nama = namaBaru;
+  simpanData();
+  tampilkanDaftarAkun();
+  tampilkanTopTier();
+  tampilForum();
+}
+
+function hapusAkun(index) {
+  const hapusNama = akunList[index].nama;
+  akunList.splice(index, 1);
+  if (akun && akun.nama === hapusNama) {
+    akun = null;
+    isAdmin = false;
+    localStorage.removeItem("akunAktif");
+    document.getElementById("forumPanel").classList.add("hidden");
+    document.getElementById("adminPanel").classList.add("hidden");
+    document.getElementById("buatAkun").classList.remove("hidden");
   }
+  simpanData();
+  tampilkanDaftarAkun();
+  tampilkanTopTier();
 }
 
-function getAdminPanel() {
-  let all = JSON.parse(localStorage.getItem("allData")) || {};
-  return Object.keys(all).map(nama => `
-    <div style="margin-bottom:5px;">
-      <b>${nama}</b> - ${formatRupiah(all[nama].uang)}
-      <button onclick="hapusUser('${nama}')">Hapus</button>
-      <button onclick="gantiNamaUser('${nama}')">Edit Nama</button>
-    </div>
-  `).join('');
-}
-
-function setPage(page) {
-  currentPage = page;
-  localStorage.setItem("page", page);
-  render();
-}
-
-function renderNav() {
-  document.getElementById("navbar").innerHTML = `
-    <button onclick="setPage('home')">Beranda</button>
-    <button onclick="setPage('chat')">Chat</button>
-    <button onclick="setPage('top')">Top Tier</button>
-  `;
-}
-
-function render() {
-  if (!akun) return buatAkun();
-  updateAllData();
-  renderNav();
-  let html = "";
-
-  if (currentPage === "home") {
-    html = `
-      <div class="panel">
-        <h2>Halo, ${akun.nama}</h2>
-        <p>Saldo: <span class="money">${formatRupiah(akun.uang)}</span></p>
-        <button onclick="ubahUang(5000)">Tambah Uang</button>
-        <button onclick="ubahUang(-5000)">Ambil Uang</button>
-        <button onclick="setorUang()">Setor Rp 10.000</button>
-        <button onclick="hapusAkun()">Hapus Akun</button><br><br>
-        ${isAdmin ? `
-          <button onclick="logoutAdmin()">Keluar Admin</button>
-          <div class="panel"><h3>Panel Admin</h3>${getAdminPanel()}</div>
-        ` : `<button onclick="loginAdmin()">Masuk Admin</button>`}
-      </div>
-    `;
-  } else if (currentPage === "chat") {
-    html = `
-      <div class="panel">
-        <h2>Chat</h2>
-        <div id="chat-box">
-          ${chatLog.map(c => `<div><b>${c.nama}:</b> ${c.teks}</div>`).join('')}
-        </div>
-        <button onclick="kirimChat()">Kirim Pesan</button>
-      </div>
-    `;
-  } else if (currentPage === "top") {
-    html = `
-      <div class="panel">
-        <h2>Top 3 Terkaya</h2>
-        ${getTop3()}
-      </div>
-    `;
-  }
-
-  document.getElementById("main").innerHTML = html;
-}
-
-render();
-</script>
-</body>
+window.onload = () => {
+  if (akun) tampilForum();
+  else document.getElementById("buatAkun").classList.remove("hidden");
+  if (isAdmin) document.getElementById("adminPanel").classList.remove("hidden");
+  tampilkanTopTier();
+};
+</script></body>
 </html>
