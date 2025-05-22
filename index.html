@@ -1,194 +1,153 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Bank UANGDUTY</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <title>UANGDUTY SAFD</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      text-align: center;
-      padding-top: 30px;
+      background: white;
+      font-family: sans-serif;
+      padding: 20px;
     }
-    input, button, select {
-      margin: 8px;
-      padding: 10px;
-      font-size: 16px;
-    }
-    #bankPanel, #adminPanel, #adminLoginForm {
-      display: none;
-      margin-top: 30px;
-    }
-    .admin-active {
-      color: red;
-      font-weight: bold;
-    }
+    .hidden { display: none; }
+    input, button { margin: 5px; padding: 8px; }
+    .admin-tag { color: red; font-weight: bold; }
+    .chat-box { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; background: #f9f9f9; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <h2>Bank UANGDUTY</h2>
-  <input id="badge" placeholder="Badge (contoh: #123)" />
-  <input id="fullname" placeholder="Nama Lengkap" />
+<h2>Login UANGDUTY SAFD</h2>
+<div id="login">
+  <input id="name" placeholder="Nama Lengkap"><br>
+  <input id="badge" placeholder="Badge (cth: #123)"><br>
   <button onclick="login()">Login</button>
-  <br>
-  <button onclick="toggleAdminForm()">Akses Admin</button>
+</div>
 
-  <div id="adminLoginForm">
-    <input id="adminPass" placeholder="Masukkan Password Admin" type="password" />
-    <button onclick="adminLogin()">Masuk Admin</button>
+<div id="main" class="hidden">
+  <h3>Selamat datang, <span id="userDisplay"></span> <span id="adminTag" class="admin-tag"></span></h3>
+
+  <h4>Uang kamu: Rp <span id="money">0</span></h4>
+  <input id="amount" placeholder="Jumlah uang"><br>
+  <button onclick="tambahUang()">Tambah Uang</button>
+  <button onclick="ambilUang()">Ambil Uang</button>
+  <button onclick="resetUang()">Setor / Reset Uang</button>
+
+  <hr>
+  <h4>Chat:</h4>
+  <div class="chat-box" id="chatBox"></div>
+  <input id="chatInput" placeholder="Ketik pesan"><button onclick="sendChat()">Kirim</button>
+
+  <hr>
+  <button onclick="toggleAdmin()">Akses Admin</button>
+  <div id="adminPanel" class="hidden">
+    <input id="adminPass" type="password" placeholder="Password Admin">
+    <button onclick="masukAdmin()">Masuk Admin</button>
   </div>
+</div>
 
-  <div id="adminStatus" class="admin-active"></div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.appspot.com",
+    messagingSenderId: "598905752132",
+    appId: "1:598905752132:web:9b764840e51c13a3044a11"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  <div id="bankPanel">
-    <h3>Halo <span id="namaUser"></span>! Saldo Anda: <span id="saldo">0</span></h3>
-    <input id="amountInput" type="number" placeholder="Jumlah uang..." />
-    <br>
-    <button onclick="tambahUang()">Tambah Uang</button>
-    <button onclick="ambilUang()">Ambil Uang</button>
-    <button onclick="setorUang()">Setor (Reset ke 0)</button>
-  </div>
+  let userKey = "";
+  let userFull = "";
+  let isAdmin = false;
 
-  <div id="adminPanel">
-    <h3>Admin Panel</h3>
-    <select id="userSelect"></select><br>
-    <input id="adminAmount" type="number" placeholder="Jumlah uang..." />
-    <br>
-    <button onclick="adminTambahUang()">Tambah Uang ke User</button>
-    <button onclick="adminResetUser()">Reset Saldo User</button>
-    <button onclick="adminHapusAkun()">Hapus Akun User</button>
-  </div>
+  function login() {
+    const name = document.getElementById("name").value;
+    const badge = document.getElementById("badge").value;
+    if (!name || !badge) return alert("Isi semua kolom");
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    userKey = badge + "_" + name.replace(/\s/g, "_");
+    userFull = badge + " " + name;
 
-    let currentUserKey = null;
-    let isAdmin = false;
-
-    function login() {
-      const badge = document.getElementById('badge').value.trim();
-      const name = document.getElementById('fullname').value.trim();
-      if (!badge || !name) return alert("Isi semua field!");
-
-      const userKey = badge.replace(/[^a-zA-Z0-9]/g, '') + "_" + name.replace(/\s/g, '_');
-      currentUserKey = userKey;
-
-      db.ref('users/' + userKey).once('value').then(snapshot => {
-        if (!snapshot.exists()) {
-          db.ref('users/' + userKey).set({
-            badge: badge,
-            name: name
-          });
-          db.ref('saldo/' + userKey).set(0);
-        }
-        document.getElementById('bankPanel').style.display = 'block';
-        document.getElementById('namaUser').innerText = badge + " " + name;
-        loadSaldo();
-      });
-    }
-
-    function toggleAdminForm() {
-      const form = document.getElementById('adminLoginForm');
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function adminLogin() {
-      const pass = document.getElementById('adminPass').value.trim();
-      if (pass === "RFD1") {
-        isAdmin = true;
-        document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('adminStatus').innerText = "Mode Admin Aktif!";
-        loadAdminPanel();
-      } else {
-        alert("Password admin salah.");
+    db.ref("users/" + userKey).once("value", snap => {
+      if (!snap.exists()) {
+        db.ref("users/" + userKey).set({ uang: 0 });
       }
-    }
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("main").classList.remove("hidden");
+      document.getElementById("userDisplay").innerText = userFull;
+      listenMoney();
+      listenChat();
+    });
+  }
 
-    function loadSaldo() {
-      db.ref('saldo/' + currentUserKey).on('value', snapshot => {
-        const saldo = snapshot.val() || 0;
-        document.getElementById('saldo').innerText = saldo;
-      });
-    }
+  function listenMoney() {
+    db.ref("users/" + userKey + "/uang").on("value", snap => {
+      document.getElementById("money").innerText = snap.val() || 0;
+    });
+  }
 
-    function tambahUang() {
-      const amount = parseInt(document.getElementById('amountInput').value);
-      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid!");
-      const saldoRef = db.ref('saldo/' + currentUserKey);
-      saldoRef.once('value').then(snapshot => {
-        const current = snapshot.val() || 0;
-        saldoRef.set(current + amount);
-      });
-    }
+  function tambahUang() {
+    const val = parseInt(document.getElementById("amount").value);
+    if (isNaN(val)) return;
+    db.ref("users/" + userKey + "/uang").once("value", snap => {
+      let total = (snap.val() || 0) + val;
+      db.ref("users/" + userKey + "/uang").set(total);
+    });
+  }
 
-    function ambilUang() {
-      const amount = parseInt(document.getElementById('amountInput').value);
-      if (isNaN(amount) || amount <= 0) return alert("Masukkan jumlah valid!");
-      const saldoRef = db.ref('saldo/' + currentUserKey);
-      saldoRef.once('value').then(snapshot => {
-        const current = snapshot.val() || 0;
-        const baru = current - amount;
-        saldoRef.set(baru < 0 ? 0 : baru);
-      });
-    }
+  function ambilUang() {
+    const val = parseInt(document.getElementById("amount").value);
+    if (isNaN(val)) return;
+    db.ref("users/" + userKey + "/uang").once("value", snap => {
+      let total = (snap.val() || 0) - val;
+      db.ref("users/" + userKey + "/uang").set(total);
+    });
+  }
 
-    function setorUang() {
-      db.ref('saldo/' + currentUserKey).set(0);
-    }
+  function resetUang() {
+    db.ref("users/" + userKey + "/uang").set(0);
+  }
 
-    function loadAdminPanel() {
-      db.ref('users').once('value').then(snapshot => {
-        const select = document.getElementById('userSelect');
-        select.innerHTML = "";
-        snapshot.forEach(child => {
-          const option = document.createElement('option');
-          option.value = child.key;
-          option.text = child.key;
-          select.appendChild(option);
-        });
-      });
-    }
+  function listenChat() {
+    db.ref("chat").limitToLast(20).on("child_added", snap => {
+      const box = document.getElementById("chatBox");
+      const data = snap.val();
+      const tag = data.admin ? "<span class='admin-tag'>(ADMIN)</span> " : "";
+      box.innerHTML += `<div>${tag}<b>${data.nama}</b>: ${data.pesan}</div>`;
+      box.scrollTop = box.scrollHeight;
+    });
+  }
 
-    function adminTambahUang() {
-      const user = document.getElementById('userSelect').value;
-      const amount = parseInt(document.getElementById('adminAmount').value);
-      if (!user || isNaN(amount) || amount <= 0) return alert("Isi dengan benar.");
-      const saldoRef = db.ref('saldo/' + user);
-      saldoRef.once('value').then(snapshot => {
-        const current = snapshot.val() || 0;
-        saldoRef.set(current + amount);
-        alert("Uang berhasil ditambahkan.");
-      });
-    }
+  function sendChat() {
+    const pesan = document.getElementById("chatInput").value;
+    if (!pesan) return;
+    db.ref("chat").push({
+      nama: userFull,
+      pesan,
+      admin: isAdmin
+    });
+    document.getElementById("chatInput").value = "";
+  }
 
-    function adminResetUser() {
-      const user = document.getElementById('userSelect').value;
-      if (!user) return alert("Pilih user.");
-      db.ref('saldo/' + user).set(0);
-      alert("Saldo user direset.");
-    }
+  function toggleAdmin() {
+    document.getElementById("adminPanel").classList.toggle("hidden");
+  }
 
-    function adminHapusAkun() {
-      const user = document.getElementById('userSelect').value;
-      if (!user) return alert("Pilih user.");
-      db.ref('users/' + user).remove();
-      db.ref('saldo/' + user).remove();
-      loadAdminPanel();
-      alert("Akun dan saldo user telah dihapus.");
+  function masukAdmin() {
+    const pw = document.getElementById("adminPass").value;
+    if (pw === "RFD1") {
+      isAdmin = true;
+      document.getElementById("adminTag").innerText = "(ADMIN)";
+      alert("Mode Admin aktif!");
+    } else {
+      alert("Password salah.");
     }
-  </script>
+  }
+</script>
+
 </body>
-  </html>
+</html>
