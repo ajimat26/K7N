@@ -38,6 +38,7 @@
       background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
       background-size: contain;
       background-repeat: no-repeat;
+      animation: none;
     }
     @keyframes shake {
       0% { transform: rotate(0deg); }
@@ -80,6 +81,7 @@
   <button id="btnOpenBox">Buka Kotak</button>
   <div id="notif"></div>
   <h3>Poin: <span id="points">0</span></h3>
+  <h3>Kunci: <span id="keys">0</span></h3>
 
   <hr>
 
@@ -115,42 +117,58 @@
   </div>
 </div>
 
-<div id="adminLoginPanel" class="panel">
+<!-- Panel login admin -->
+<div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3);">
   <h3>Login Admin</h3>
   <input type="password" id="adminPass" placeholder="Password Admin"><br>
   <button id="btnLoginAdmin">Masuk</button>
   <button id="btnBatalLoginAdmin">Batal</button>
-  <div id="adminLoginNotif"></div>
+  <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
 </div>
 
-<div id="adminPanel" class="panel">
+<!-- Panel admin setelah login -->
+<div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto; background: rgba(0,0,0,0.4);">
   <h3>Panel Admin</h3>
+  
   <h4>Permintaan Penarikan</h4>
-  <ul id="pendingWithdrawList"></ul>
+  <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
+
   <hr>
   <h4>Mode Maintenance</h4>
-  <textarea id="maintenanceReason" placeholder="Alasan..."></textarea><br>
-  <input type="number" id="maintenanceDuration" placeholder="Durasi (menit)"><br>
+  <label>Alasan Maintenance:</label><br>
+  <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
+  <label>Durasi Maintenance (menit):</label><br>
+  <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
   <button id="btnStartMaintenance">Mulai Maintenance</button>
   <button id="btnStopMaintenance">Hentikan Maintenance</button>
+
   <hr>
   <button id="btnLogoutAdmin">Logout Admin</button>
 </div>
 
-<audio autoplay loop>
+<audio autoplay loop id="backsound" volume="0.5">
   <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
 </audio>
 
 <script>
-  // Inisialisasi
+  // Data localStorage keys
   const STORAGE_POINTS = "points";
+  const STORAGE_KEYS = "keys";
   const STORAGE_MESSAGES = "messages";
   const STORAGE_WITHDRAWS = "withdraws";
+  const STORAGE_MAINTENANCE = "maintenance";
+  const STORAGE_ADMIN = "adminLoggedIn";
+  const STORAGE_LAST_SUPPLY = "lastSupplyTime";
 
-  let points = parseInt(localStorage.getItem(STORAGE_POINTS)) || 0;
-  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES)) || [];
-  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS)) || [];
-  let adminLoggedIn = false;
+  // State
+  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
+  let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
+  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
+  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
+  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || null);
+  let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
+
   const rewards = [
     {name: "Zonk", point: 0},
     {name: "+10 Poin", point: 10},
@@ -158,15 +176,26 @@
     {name: "+100 Poin", point: 100},
     {name: "2x Reward Berikutnya", point: -1}
   ];
-  let doubleReward = false;
 
   function updatePoints() {
     document.getElementById("points").innerText = points;
     localStorage.setItem(STORAGE_POINTS, points);
   }
 
-  function notif(msg) {
-    document.getElementById("notif").innerText = msg;
+  function updateKeys() {
+    document.getElementById("keys").innerText = keys;
+    localStorage.setItem(STORAGE_KEYS, keys);
+  }
+
+  function notif(teks) {
+    document.getElementById("notif").innerText = teks;
+  }
+
+  function addMessage(text) {
+    messages.push(text);
+    if (messages.length > 50) messages.shift();
+    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
+    tampilPesan();
   }
 
   function tampilPesan() {
@@ -179,109 +208,4 @@
     });
   }
 
-  function tampilRiwayat() {
-    const ul = document.getElementById("riwayatList");
-    ul.innerHTML = "";
-    withdraws.forEach(w => {
-      const li = document.createElement("li");
-      li.textContent = `Nama: ${w.nama}, Rek: ${w.rekening}, Poin: ${w.amount}`;
-      ul.appendChild(li);
-    });
-  }
-
-  function tampilPendingWithdraws() {
-    const ul = document.getElementById("pendingWithdrawList");
-    ul.innerHTML = "";
-    withdraws.forEach(w => {
-      const li = document.createElement("li");
-      li.textContent = `${w.nama} (${w.rekening}) - ${w.amount} poin`;
-      ul.appendChild(li);
-    });
-  }
-
-  document.getElementById("btnOpenBox").onclick = function() {
-    document.getElementById("boxAnimation").style.animation = "shake 0.5s";
-    setTimeout(() => {
-      document.getElementById("boxAnimation").style.animation = "";
-      const reward = rewards[Math.floor(Math.random() * rewards.length)];
-      if (reward.point === -1) {
-        doubleReward = true;
-        notif("Kamu mendapatkan 2x reward berikutnya!");
-      } else {
-        let realReward = reward.point;
-        if (doubleReward) {
-          realReward *= 2;
-          doubleReward = false;
-        }
-        points += realReward;
-        updatePoints();
-        notif(`Kamu mendapatkan: ${reward.name}`);
-      }
-    }, 500);
-  };
-
-  document.getElementById("btnAjukanPenarikan").onclick = function() {
-    const nama = document.getElementById("nama").value;
-    const rekening = document.getElementById("rekening").value;
-    const amount = parseInt(document.getElementById("amount").value);
-
-    if (!nama || !rekening) return notif("Isi semua data!");
-    if (points < amount) return notif("Poin tidak cukup!");
-
-    points -= amount;
-    updatePoints();
-    withdraws.push({ nama, rekening, amount });
-    localStorage.setItem(STORAGE_WITHDRAWS, JSON.stringify(withdraws));
-    notif("Permintaan penarikan dikirim.");
-  };
-
-  document.getElementById("btnLihatPesan").onclick = function() {
-    tampilPesan();
-    document.getElementById("pesan").style.display = "block";
-    document.getElementById("riwayat").style.display = "none";
-  };
-
-  document.getElementById("btnRiwayatPenarikan").onclick = function() {
-    tampilRiwayat();
-    document.getElementById("riwayat").style.display = "block";
-    document.getElementById("pesan").style.display = "none";
-  };
-
-  document.getElementById("btnHapusPesan").onclick = function() {
-    if (confirm("Yakin hapus semua pesan?")) {
-      messages = [];
-      localStorage.setItem(STORAGE_MESSAGES, "[]");
-      tampilPesan();
-      notif("Semua pesan dihapus.");
-    }
-  };
-
-  document.getElementById("btnAdminPanel").onclick = function() {
-    document.getElementById("adminLoginPanel").style.display = "block";
-  };
-
-  document.getElementById("btnLoginAdmin").onclick = function() {
-    const pass = document.getElementById("adminPass").value;
-    if (pass === "admin123") {
-      adminLoggedIn = true;
-      document.getElementById("adminLoginPanel").style.display = "none";
-      document.getElementById("adminPanel").style.display = "block";
-      tampilPendingWithdraws();
-    } else {
-      document.getElementById("adminLoginNotif").innerText = "Password salah.";
-    }
-  };
-
-  document.getElementById("btnBatalLoginAdmin").onclick = function() {
-    document.getElementById("adminLoginPanel").style.display = "none";
-  };
-
-  document.getElementById("btnLogoutAdmin").onclick = function() {
-    adminLoggedIn = false;
-    document.getElementById("adminPanel").style.display = "none";
-  };
-
-  updatePoints();
-</script>
-</body>
-    </html>
+40
