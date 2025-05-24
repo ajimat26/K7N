@@ -1,175 +1,101 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Box Uang Duty</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 20px; }
-  #container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
-  h2 { text-align: center; color: #333; }
-  #money-indicator, #key-indicator, #top-tier, #box-result { margin: 15px 0; font-size: 18px; }
-  #open-box-btn { width: 100%; padding: 10px; font-size: 16px; background: #28a745; border: none; color: white; border-radius: 5px; cursor: pointer; }
-  #open-box-btn:disabled { background: #aaa; cursor: not-allowed; }
-  #top-tier ul { list-style: none; padding-left: 0; }
-  #top-tier li { background: #eee; margin: 5px 0; padding: 8px; border-radius: 4px; }
-</style>
+  <meta charset="UTF-8">
+  <title>Dana Kaget Reyzen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
-<body>
+<body class="bg-gradient-to-b from-blue-100 to-white min-h-screen flex flex-col items-center justify-center text-center p-4">
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+    <h1 class="text-2xl font-bold text-blue-700 mb-4">Dana Kaget Reyzen</h1>
+    <div id="totalUang" class="text-xl font-semibold text-green-600 mb-2">Sisa Hadiah: Rp...</div>
 
-<div id="container">
-  <h2>Game Box Uang Duty</h2>
+    <input type="text" id="namaInput" placeholder="Masukkan Nama Anda" class="w-full border rounded p-2 mb-2" />
+    <input type="text" id="norekInput" placeholder="Nomor Rekening IC" class="w-full border rounded p-2 mb-4" />
 
-  <div id="money-indicator">Total Uang Tersedia: Rp <span id="total-money">50,000,000</span></div>
-  <div id="key-indicator">Jumlah Kunci: <span id="key-count">10</span></div>
+    <button onclick="klaimHadiah()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+      KLAIM HADIAH
+    </button>
 
-  <button id="open-box-btn">Buka Kotak</button>
+    <div id="notifikasi" class="mt-4 text-sm text-gray-700"></div>
 
-  <div id="box-result"></div>
-
-  <div id="top-tier">
-    <h3>Top 3 Penarik Terbesar</h3>
-    <ul id="top-list">
-      <li>Loading...</li>
-    </ul>
+    <h2 class="mt-6 font-semibold text-lg">Top Tier Penarik:</h2>
+    <ol id="topTier" class="text-left mt-2 text-gray-800"></ol>
   </div>
-</div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.appspot.com",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:7be400c23de21665044a11"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script>
-  // Config Firebase kamu
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-    authDomain: "uangduty.firebaseapp.com",
-    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "uangduty",
-    storageBucket: "uangduty.firebasestorage.app",
-    messagingSenderId: "598905752132",
-    appId: "1:598905752132:web:7be400c23de21665044a11",
-    measurementId: "G-TJL9K6YDL9"
-  };
+    const totalHadiah = 20000000; // 20jt
+    const jumlahPemenang = 10;
+    const maxPerUser = 5000000;
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // Elemen DOM
-  const totalMoneyEl = document.getElementById('total-money');
-  const keyCountEl = document.getElementById('key-count');
-  const openBoxBtn = document.getElementById('open-box-btn');
-  const boxResultEl = document.getElementById('box-result');
-  const topListEl = document.getElementById('top-list');
-
-  // Data lokal pemain (dummy)
-  let playerName = prompt("Masukkan nama kamu:") || "Player";
-  let keys = 10; // kunci awal
-  let totalMoney = 50000000; // 50jt
-  let topTiers = {}; // nama -> total penarikan
-
-  // Update UI awal
-  keyCountEl.textContent = keys;
-  totalMoneyEl.textContent = totalMoney.toLocaleString();
-
-  // Fungsi update data total uang ke Firebase
-  function updateTotalMoney(newAmount) {
-    db.ref('totalMoney').set(newAmount);
-  }
-
-  // Fungsi update top tier ke Firebase
-  function updateTopTier(name, amount) {
-    db.ref('topTier/' + name).transaction(current => {
-      return (current || 0) + amount;
+    // Realtime Update Uang
+    const totalUangRef = db.ref("hadiah/total");
+    totalUangRef.on("value", snap => {
+      const total = snap.val() ?? totalHadiah;
+      document.getElementById("totalUang").innerText = "Sisa Hadiah: Rp" + total.toLocaleString("id-ID");
     });
-  }
 
-  // Fungsi buka kotak (menarik uang)
-  openBoxBtn.addEventListener('click', () => {
-    if (keys <= 0) {
-      boxResultEl.textContent = 'Kunci habis, tidak bisa buka kotak.';
-      openBoxBtn.disabled = true;
-      return;
-    }
-    if (totalMoney <= 0) {
-      boxResultEl.textContent = 'Uang sudah habis, permainan selesai.';
-      openBoxBtn.disabled = true;
-      return;
-    }
+    // Fungsi untuk Klaim Hadiah
+    function klaimHadiah() {
+      const nama = document.getElementById("namaInput").value.trim();
+      const norek = document.getElementById("norekInput").value.trim();
+      const notifikasi = document.getElementById("notifikasi");
 
-    // Kurangi kunci
-    keys--;
-    keyCountEl.textContent = keys;
-
-    // Tentukan jumlah penarikan (random)
-    let penarikan = Math.floor(Math.random() * 1000000) + 100000; // 100rb s/d 1jt
-
-    // Pastikan tidak lebih dari total uang yang tersisa
-    if (penarikan > totalMoney) penarikan = totalMoney;
-
-    totalMoney -= penarikan;
-
-    // Update ke Firebase total uang
-    updateTotalMoney(totalMoney);
-
-    // Update top tier nama player dengan jumlah penarikan
-    updateTopTier(playerName, penarikan);
-
-    // Update tampilan uang & hasil
-    totalMoneyEl.textContent = totalMoney.toLocaleString();
-    boxResultEl.textContent = `Kamu menarik Rp ${penarikan.toLocaleString()}. Sisa uang: Rp ${totalMoney.toLocaleString()}`;
-
-    if (keys === 0) openBoxBtn.disabled = true;
-  });
-
-  // Listener realtime totalMoney dari Firebase
-  db.ref('totalMoney').on('value', snapshot => {
-    const val = snapshot.val();
-    if (val !== null) {
-      totalMoney = val;
-      totalMoneyEl.textContent = totalMoney.toLocaleString();
-
-      if (totalMoney <= 0) {
-        boxResultEl.textContent = 'Uang sudah habis, permainan selesai.';
-        openBoxBtn.disabled = true;
+      if (!nama || !norek) {
+        notifikasi.innerText = "Nama dan Nomor Rekening wajib diisi!";
+        return;
       }
+
+      const jumlah = Math.floor(Math.random() * maxPerUser) + 10000;
+
+      // Kurangi total uang
+      totalUangRef.transaction(current => {
+        if (current === null) return totalHadiah - jumlah;
+        if (current >= jumlah) return current - jumlah;
+        return; // Tidak cukup
+      });
+
+      // Simpan data klaim
+      const klaimRef = db.ref("klaim/" + Date.now());
+      klaimRef.set({
+        nama, norek, jumlah, waktu: new Date().toISOString()
+      });
+
+      // Tambahkan ke Top Tier
+      const topRef = db.ref("topTier/" + nama);
+      topRef.transaction(data => (data ?? 0) + jumlah);
+
+      notifikasi.innerHTML = `
+        Selamat <strong>${nama}</strong>, kamu mendapatkan Rp${jumlah.toLocaleString("id-ID")}!<br>
+        Hadiah akan diproses dalam 24 jam. Jika tidak, berarti Reyzen sedang badmood.
+      `;
     }
-  });
 
-  // Listener realtime topTier dari Firebase, update top 3
-  db.ref('topTier').on('value', snapshot => {
-    const data = snapshot.val() || {};
-    // Ubah objek jadi array dan sort descending berdasarkan value (penarikan)
-    let arr = Object.entries(data).sort((a,b) => b[1] - a[1]);
-    let top3 = arr.slice(0,3);
-
-    if (top3.length === 0) {
-      topListEl.innerHTML = '<li>Belum ada penarikan.</li>';
-      return;
-    }
-
-    topListEl.innerHTML = ''; // reset list
-    top3.forEach(([name, amount], i) => {
-      let li = document.createElement('li');
-      li.textContent = `${i+1}. ${name} - Rp ${amount.toLocaleString()}`;
-      topListEl.appendChild(li);
+    // Tampilkan Top Tier
+    const topTierList = document.getElementById("topTier");
+    db.ref("topTier").on("value", snap => {
+      const data = snap.val() ?? {};
+      const ranking = Object.entries(data).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      topTierList.innerHTML = ranking.map(([nama, total], i) => `<li>${i+1}. ${nama} - Rp${total.toLocaleString("id-ID")}</li>`).join("");
     });
-  });
-
-  // Inisialisasi totalMoney dan topTier di Firebase jika belum ada
-  db.ref('totalMoney').once('value').then(snapshot => {
-    if (snapshot.val() === null) {
-      updateTotalMoney(50000000);
-    }
-  });
-  db.ref('topTier').once('value').then(snapshot => {
-    if (snapshot.val() === null) {
-      db.ref('topTier').set({});
-    }
-  });
-
-</script>
-
+  </script>
 </body>
 </html>
