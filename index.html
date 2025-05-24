@@ -1,219 +1,259 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Game Kotak Hadiah 2D Berwarna</title>
-  <style>
-    body {
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: linear-gradient(to bottom, #ffeaa7, #fab1a0);
-      text-align: center;
-      color: #2d3436;
-      margin: 0; padding: 0;
-    }
-    h1 {
-      background-color: #fd79a8;
-      color: white;
-      padding: 15px;
-      margin: 0;
-    }
-    #boxAnimation {
-      width: 120px; height: 120px;
-      background: #fdcb6e url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
-      background-size: 80%;
-      border: 3px solid #e17055;
-      border-radius: 15px;
-      margin: 20px auto;
-      box-shadow: 0 0 10px #d63031;
-    }
-    @keyframes shake {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(10deg); }
-      50% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
-      100% { transform: rotate(0deg); }
-    }
-    button {
-      background-color: #55efc4;
-      border: none;
-      padding: 12px 25px;
-      margin: 5px;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px #00b894;
-      transition: 0.2s;
-      user-select: none;
-    }
-    button:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px #00b894;
-    }
-    input, select {
-      padding: 10px;
-      margin: 5px;
-      font-size: 15px;
-      border-radius: 8px;
-      border: 2px solid #dfe6e9;
-      width: 80%;
-      max-width: 320px;
-    }
-    .panel {
-      display: none;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin: 10px auto;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 10px #b2bec3;
-      color: #2d3436;
-      text-align: left;
-    }
-    ul {
-      list-style: square;
-      padding-left: 20px;
-    }
-    hr {
-      border: 1px dashed #d63031;
-      width: 80%;
-      margin: 20px auto;
-    }
-    #notif {
-      font-weight: bold;
-      min-height: 24px;
-      margin-top: 10px;
-      color: #0984e3;
-      min-height: 28px;
-    }
-    #maintenanceNotice {
-      background: #ff4c4c;
-      padding: 10px;
-      border-radius: 6px;
-      margin: 15px auto;
-      max-width: 400px;
-      color: white;
-      font-weight: bold;
-      display: none;
-    }
-    #btnSupply {
-      background-color: #fd79a8;
-      box-shadow: 0 4px #d63031;
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 15px;
-    }
-    #btnSupply:disabled {
-      background-color: #fab1a0;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    #adminLoginPanel {
-      max-width: 400px;
-      margin: 20px auto;
-      background: rgba(0,0,0,0.3);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      display: none;
-      text-align: center;
-    }
-    #adminPanel {
-      max-width: 600px;
-      margin: 20px auto;
-      background: rgba(0,0,0,0.4);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      display: none;
-      text-align: left;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game Kotak Hadiah 2D Berwarna - Tombol Berfungsi</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #fbc7a4, #f48fb1);
+    margin: 0; padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    color: #fff;
+    background-color: #e91e63;
+    padding: 15px;
+    border-radius: 10px;
+  }
+  #box {
+    width: 150px; height: 150px;
+    margin: 20px auto;
+    background-color: #ffcc80;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #fb8c00;
+    line-height: 150px;
+    font-size: 40px;
+    color: #6d4c41;
+    user-select: none;
+    cursor: pointer;
+  }
+  button {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #ff7043;
+    color: white;
+    box-shadow: 0 5px #bf360c;
+    transition: background-color 0.2s;
+  }
+  button:hover {
+    background-color: #ff5722;
+  }
+  button:active {
+    box-shadow: 0 2px #bf360c;
+    transform: translateY(3px);
+  }
+  input, select {
+    padding: 8px;
+    margin: 5px auto;
+    width: 80%;
+    max-width: 300px;
+    border-radius: 8px;
+    border: 2px solid #f57c00;
+    font-size: 16px;
+    display: block;
+  }
+  #notif {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #004d40;
+    min-height: 24px;
+  }
+  .panel {
+    margin-top: 20px;
+    background-color: #ffe0b2;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+    text-align: left;
+  }
+</style>
 </head>
 <body>
-  <h1>Game Kotak Hadiah</h1>
 
-  <div id="maintenanceNotice"></div>
+<h1>Game Kotak Hadiah</h1>
 
-  <div id="gamePanel">
-    <div id="boxAnimation"></div>
-    <button id="btnOpenBox">Buka Kotak</button>
-    <div id="notif"></div>
+<div id="box">🎁</div>
 
-    <h3>Poin: <span id="points">0</span></h3>
-    <h3>Kunci: <span id="keys">0</span></h3>
+<button id="btnOpenBox">Buka Kotak</button>
+<button id="btnSupply">Ambil Box Suplai (1x per jam)</button>
 
-    <button id="btnSupply">Ambil Box Suplai (1x per jam)</button>
+<div id="notif"></div>
 
-    <hr>
+<hr>
 
-    <h3>Penarikan Poin</h3>
-    <select id="amount">
-      <option value="200">50.000 IC - 200 poin</option>
-      <option value="400">100.000 IC - 400 poin</option>
-      <option value="1000">250.000 IC - 1000 poin</option>
-      <option value="2000">500.000 IC - 2000 poin</option>
-      <option value="4000">1.000.000 IC - 4000 poin</option>
-      <option value="8000">2.000.000 IC - 8000 poin</option>
-    </select><br>
-    <input type="text" id="nama" placeholder="Nama Lengkap"><br>
-    <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
-    <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
+<h3>Poin: <span id="points">0</span></h3>
+<h3>Kunci: <span id="keys">0</span></h3>
 
-    <hr>
+<hr>
 
-    <button id="btnLihatPesan">Lihat Pesan</button>
-    <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
-    <button id="btnAdminPanel">Admin Panel</button>
-    <button onclick="window.open('https://wa.me/6283891019471','_blank')">Kasih Saran ke Developer</button>
+<select id="amount">
+  <option value="200">50.000 IC - 200 poin</option>
+  <option value="400">100.000 IC - 400 poin</option>
+  <option value="1000">250.000 IC - 1000 poin</option>
+  <option value="2000">500.000 IC - 2000 poin</option>
+  <option value="4000">1.000.000 IC - 4000 poin</option>
+  <option value="8000">2.000.000 IC - 8000 poin</option>
+</select>
 
-    <div id="pesan" class="panel">
-      <h3>Pesan</h3>
-      <ul id="messageList"></ul>
-      <button id="btnHapusPesan">Hapus Semua Pesan</button>
-    </div>
+<input type="text" id="nama" placeholder="Nama Lengkap" />
+<input type="text" id="rekening" placeholder="Nomor Rekening" />
 
-    <div id="riwayat" class="panel">
-      <h3>Riwayat Penarikan</h3>
-      <ul id="riwayatList"></ul>
-    </div>
-  </div>
+<button id="btnAjukanPenarikan">Ajukan Penarikan</button>
 
-  <!-- Panel login admin -->
-  <div id="adminLoginPanel">
-    <h3>Login Admin</h3>
-    <input type="password" id="adminPass" placeholder="Password Admin"><br>
-    <button id="btnLoginAdmin">Masuk</button>
-    <button id="btnBatalLoginAdmin">Batal</button>
-    <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
-  </div>
+<hr>
 
-  <!-- Panel admin setelah login -->
-  <div id="adminPanel">
-    <h3>Panel Admin</h3>
-    <h4>Permintaan Penarikan</h4>
-    <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto;"></ul>
-    <hr>
-    <h4>Mode Maintenance</h4>
-    <label>Alasan Maintenance:</label><br>
-    <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
-    <label>Durasi Maintenance (menit):</label><br>
-    <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
-    <button id="btnStartMaintenance">Mulai Maintenance</button>
-    <button id="btnStopMaintenance">Hentikan Maintenance</button>
-    <hr>
-    <button id="btnLogoutAdmin">Logout Admin</button>
-  </div>
+<button id="btnLihatPesan">Lihat Pesan</button>
+<button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
 
-  <audio autoplay loop id="backsound" volume="0.5">
-    <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
-    Your browser tidak support audio.
-  </audio>
+<div id="pesanPanel" class="panel">
+  <h3>Pesan</h3>
+  <ul id="messageList"></ul>
+  <button id="btnHapusPesan">Hapus Semua Pesan</button>
+</div>
 
-  <script>
-    // Local storage keys
-    const STORAGE_POINTS = "points";
-    const STORAGE_KEYS = "keys";
-    const STORAGE_MESSAGES = "messages";
-    const STORAGE_WITHDRAWS = "withdraws";
-    const STORAGE_MAINTENANCE =
+<div id="riwayatPanel" class="panel">
+  <h3>Riwayat Penarikan</h3>
+  <ul id="riwayatList"></ul>
+</div>
+
+<script>
+  // Data awal
+  let points = 0;
+  let keys = 0;
+  let messages = ["Selamat datang di game!"];
+  let riwayatPenarikan = [];
+
+  // Elemen DOM
+  const notif = document.getElementById('notif');
+  const pointsEl = document.getElementById('points');
+  const keysEl = document.getElementById('keys');
+  const messageList = document.getElementById('messageList');
+  const riwayatList = document.getElementById('riwayatList');
+  const pesanPanel = document.getElementById('pesanPanel');
+  const riwayatPanel = document.getElementById('riwayatPanel');
+
+  // Update tampilan poin dan kunci
+  function updateStats() {
+    pointsEl.textContent = points;
+    keysEl.textContent = keys;
+  }
+
+  // Tampilkan pesan di panel pesan
+  function tampilkanPesan() {
+    messageList.innerHTML = '';
+    messages.forEach((msg, idx) => {
+      const li = document.createElement('li');
+      li.textContent = msg;
+      messageList.appendChild(li);
+    });
+  }
+
+  // Tampilkan riwayat penarikan
+  function tampilkanRiwayat() {
+    riwayatList.innerHTML = '';
+    if (riwayatPenarikan.length === 0) {
+      riwayatList.innerHTML = '<li>Tidak ada riwayat penarikan.</li>';
+      return;
+    }
+    riwayatPenarikan.forEach((item, idx) => {
+      const li = document.createElement('li');
+      li.textContent = `${item.nama} - ${item.amount} poin - ${item.tanggal}`;
+      riwayatList.appendChild(li);
+    });
+  }
+
+  // Reset notif
+  function clearNotif() {
+    notif.textContent = '';
+  }
+
+  // Event tombol Buka Kotak
+  document.getElementById('btnOpenBox').addEventListener('click', () => {
+    if (keys <= 0) {
+      notif.textContent = 'Kunci tidak cukup untuk membuka kotak!';
+      return;
+    }
+    keys--;
+    // Hadiah acak poin antara 50 - 150
+    const hadiah = Math.floor(Math.random() * 101) + 50;
+    points += hadiah;
+    notif.textContent = `Kamu mendapatkan ${hadiah} poin dari kotak!`;
+    updateStats();
+  });
+
+  // Event tombol Ambil Box Suplai (1x per jam)
+  let lastSupply = 0;
+  document.getElementById('btnSupply').addEventListener('click', () => {
+    const now = Date.now();
+    if (now - lastSupply < 3600000) {
+      const remaining = Math.ceil((3600000 - (now - lastSupply)) / 60000);
+      notif.textContent = `Tunggu ${remaining} menit lagi untuk suplai berikutnya.`;
+      return;
+    }
+    keys++;
+    notif.textContent = 'Kamu mendapatkan 1 kunci kotak!';
+    updateStats();
+    lastSupply = now;
+  });
+
+  // Event tombol Ajukan Penarikan
+  document.getElementById('btnAjukanPenarikan').addEventListener('click', () => {
+    const amount = Number(document.getElementById('amount').value);
+    const nama = document.getElementById('nama').value.trim();
+    const rekening = document.getElementById('rekening').value.trim();
+
+    if (!nama || !rekening) {
+      notif.textContent = 'Nama dan Rekening harus diisi!';
+      return;
+    }
+    if (points < amount) {
+      notif.textContent = 'Poin tidak cukup untuk penarikan ini.';
+      return;
+    }
+
+    points -= amount;
+    const tanggal = new Date().toLocaleString();
+    riwayatPenarikan.push({nama, rekening, amount, tanggal});
+    notif.textContent = `Penarikan ${amount} poin diajukan!`;
+    updateStats();
+  });
+
+  // Event tombol Lihat Pesan
+  document.getElementById('btnLihatPesan').addEventListener('click', () => {
+    pesanPanel.style.display = pesanPanel.style.display === 'block' ? 'none' : 'block';
+    riwayatPanel.style.display = 'none';
+    tampilkanPesan();
+  });
+
+  // Event tombol Hapus Semua Pesan
+  document.getElementById('btnHapusPesan').addEventListener('click', () => {
+    if (confirm("Yakin ingin menghapus semua pesan?")) {
+      messages = [];
+      tampilkanPesan();
+      notif.textContent = 'Semua pesan telah dihapus.';
+    }
+  });
+
+  // Event tombol Riwayat Penarikan
+  document.getElementById('btnRiwayatPenarikan').addEventListener('click', () => {
+    riwayatPanel.style.display = riwayatPanel.style.display === 'block' ? 'none' : 'block';
+    pesanPanel.style.display = 'none';
+    tampilkanRiwayat();
+  });
+
+  // Update tampilan awal
+  updateStats();
+  clearNotif();
+</script>
+
+</body>
+  </html>
