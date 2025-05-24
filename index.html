@@ -1,354 +1,309 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Poin & Penarikan</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: white;
-    margin: 0;
-    padding: 20px;
-  }
-  #points {
-    font-size: 2em;
-    margin-bottom: 10px;
-  }
-  #box {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 10px;
-    position: relative;
-    cursor: pointer;
-  }
-  #box-front {
-    width: 150px;
-    height: 150px;
-    background: #3c3c3c;
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.2em;
-    user-select: none;
-    position: relative;
-    transition: transform 0.5s ease;
-  }
-  #box-front.opening {
-    animation: shake 1.2s;
-  }
-  #box-front.opened {
-    background: #e3b23c;
-  }
-  #box-inside {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.4em;
-    font-weight: bold;
-    display: none;
-  }
-  #box-inside.hidden {
-    display: none;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translate(0); }
-    20%, 60% { transform: translate(-8px, 0); }
-    40%, 80% { transform: translate(8px, 0); }
-  }
-  button {
-    background-color: #3c3c3c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 15px;
-    cursor: pointer;
-    margin: 5px 0;
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  input, select {
-    background-color: #222;
-    border: 1px solid #444;
-    color: white;
-    padding: 8px;
-    border-radius: 6px;
-    width: 100%;
-    margin: 5px 0 15px 0;
-  }
-  #notification, #exchangeMessage {
-    margin-top: 10px;
-    min-height: 20px;
-  }
-  #messagesPanel, #withdrawPanel {
-    background-color: #222;
-    padding: 10px;
-    margin-top: 15px;
-    max-height: 200px;
-    overflow-y: auto;
-    display: none;
-    border-radius: 6px;
-  }
-  ul {
-    padding-left: 20px;
-  }
-  #adminPanel {
-    background-color: #1a1a1a;
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 6px;
-    display: none;
-  }
-  #adminPanel ul {
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  .admin-btn {
-    margin-top: 10px;
-    background-color: #555;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Box Game & Admin Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: #fff;
+      user-select: none;
+      text-align: center;
+    }
+    #points, #message, #adminPanel, #notification {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background-color: #2196f3;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0b7dda;
+    }
+    button:disabled {
+      background-color: #777;
+      cursor: not-allowed;
+    }
+    #exchange-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 350px;
+      margin: 20px auto;
+      color: #fff;
+    }
+    input, select {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+    }
+    #adminLogin, #adminPanel, #messagesPanel {
+      max-width: 400px;
+      margin: 20px auto;
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 10px;
+      color: #fff;
+      text-align: left;
+    }
+    #withdrawList, #messagesList {
+      max-height: 150px;
+      overflow-y: auto;
+      padding-left: 20px;
+    }
+    #messagesPanel {
+      display: none;
+    }
+    #notification {
+      color: yellow;
+      font-size: 16px;
+      min-height: 24px;
+      margin-top: 10px;
+      min-height: 30px;
+    }
+    #exchangeMessage {
+      margin-top: 10px;
+      min-height: 24px;
+      font-weight: bold;
+      color: #ffcc00;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Game Poin & Penarikan</h1>
+  <div id="points">Poin: 0</div>
+  <div id="notification"></div>
 
-<div id="points">Poin: 0</div>
+  <button id="openBoxBtn">Buka Kotak</button>
 
-<div id="box">
-  <div id="box-front">Klik Buka Kotak</div>
-  <div id="box-inside" class="hidden"></div>
-</div>
+  <div id="message"></div>
 
-<button id="openBoxBtn">Buka Kotak</button>
-<div id="notification"></div>
+  <div id="exchange-section">
+    <h2>Tukar Poin</h2>
+    <select id="amount">
+      <option value="500">50.000 IC - 500 Poin</option>
+      <option value="1000">100.000 IC - 1000 Poin</option>
+      <option value="2500">250.000 IC - 2500 Poin</option>
+    </select>
+    <input type="text" id="fullname" placeholder="Nama lengkap" />
+    <input type="text" id="account" placeholder="Nomor rekening" />
+    <button id="withdrawBtn">Ajukan Penarikan</button>
+    <div id="exchangeMessage"></div>
+  </div>
 
-<hr />
+  <button id="toggleMessagesBtn">Lihat Pesan & Riwayat</button>
 
-<h2>Penarikan Poin</h2>
-<label for="fullname">Nama Lengkap:</label>
-<input type="text" id="fullname" placeholder="Masukkan nama lengkap" />
-<label for="account">Nomor Rekening:</label>
-<input type="text" id="account" placeholder="Masukkan nomor rekening" />
-<button id="submitWithdrawBtn">Ajukan Penarikan</button>
-<div id="exchangeMessage"></div>
+  <div id="messagesPanel">
+    <h3>Riwayat Pesan</h3>
+    <ul id="messagesList"></ul>
+    <button id="clearMessagesBtn">Hapus Pesan</button>
+  </div>
 
-<hr />
+  <div id="adminLogin">
+    <h3>Login Admin</h3>
+    <input type="text" id="adminUser" placeholder="Username" />
+    <input type="password" id="adminPass" placeholder="Password" />
+    <button id="loginAdminBtn">Login</button>
+  </div>
 
-<button id="toggleMessagesBtn">Lihat Riwayat Pesan</button>
-<button id="clearMessagesBtn">Hapus Semua Pesan</button>
-<div id="messagesPanel">
-  <ul id="messagesList"></ul>
-</div>
-
-<button id="toggleWithdrawBtn">Lihat Riwayat Penarikan</button>
-<button id="clearWithdrawBtn">Hapus Semua Riwayat Penarikan</button>
-<div id="withdrawPanel">
-  <ul id="withdrawList"></ul>
-</div>
-
-<hr />
-
-<h2>Admin Login</h2>
-<div id="adminLogin">
-  <input type="text" id="adminUser" placeholder="Username admin" />
-  <input type="password" id="adminPass" placeholder="Password admin" />
-  <button id="adminLoginBtn">Login Admin</button>
-</div>
-
-<div id="adminPanel">
-  <h3>Panel Admin</h3>
-  <div>Total Poin Saat Ini: <span id="totalPoints">0</span></div>
-  <h4>Riwayat Penarikan</h4>
-  <ul id="adminWithdrawList"></ul>
-  <button id="adminLogoutBtn" class="admin-btn">Logout Admin</button>
-</div>
+  <div id="adminPanel" style="display:none;">
+    <h2>Admin Panel</h2>
+    <div>Total Poin: <span id="totalPoints">0</span></div>
+    <h3>Riwayat Penarikan:</h3>
+    <ul id="withdrawList"></ul>
+    <button id="logoutAdminBtn">Logout</button>
+  </div>
 
 <script>
-  // Data simpan di localStorage
+  // Data awal
   let points = parseInt(localStorage.getItem("points")) || 0;
   let messages = JSON.parse(localStorage.getItem("messages") || "[]");
   let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
-  let adminLoggedIn = false;
+  let doubleNext = false;
 
-  const pointsEl = document.getElementById("points");
   const notification = document.getElementById("notification");
-  const boxFront = document.getElementById("box-front");
-  const boxInside = document.getElementById("box-inside");
   const openBoxBtn = document.getElementById("openBoxBtn");
+  const withdrawBtn = document.getElementById("withdrawBtn");
+  const toggleMessagesBtn = document.getElementById("toggleMessagesBtn");
+  const clearMessagesBtn = document.getElementById("clearMessagesBtn");
+  const loginAdminBtn = document.getElementById("loginAdminBtn");
+  const logoutAdminBtn = document.getElementById("logoutAdminBtn");
 
-  const messagesPanel = document.getElementById("messagesPanel");
-  const withdrawPanel = document.getElementById("withdrawPanel");
-  const messagesList = document.getElementById("messagesList");
-  const withdrawList = document.getElementById("withdrawList");
+  const rewards = [
+    { name: "Zonk", points: 0 },
+    { name: "+10 Poin", points: 10 },
+    { name: "+25 Poin", points: 25 },
+    { name: "+50 Poin", points: 50 },
+    { name: "2x Poin Berikutnya", points: -1 } // Special
+  ];
 
-  const exchangeMessage = document.getElementById("exchangeMessage");
-
-  const adminLoginDiv = document.getElementById("adminLogin");
-  const adminPanelDiv = document.getElementById("adminPanel");
-  const totalPointsAdmin = document.getElementById("totalPoints");
-  const adminWithdrawList = document.getElementById("adminWithdrawList");
-
-  // Fungsi hadiah random
-  function getRandomReward() {
-    let zonkChance = 0.15;
-    if (Math.random() < zonkChance) {
-      return { name: "Zonk! Tidak ada poin", points: 0 };
-    } else {
-      let pts = Math.floor(Math.random() * 91) * 5 + 50; // 50 sampai 500 kelipatan 5
-      return { name: `+${pts} Poin`, points: pts };
-    }
-  }
-
+  // Update tampilan poin
   function updatePointsDisplay() {
-    pointsEl.textContent = `Poin: ${points.toLocaleString("id-ID")}`;
+    document.getElementById("points").textContent = "Poin: " + points;
     localStorage.setItem("points", points);
   }
 
-  // Menambah pesan ke riwayat
+  // Tambah pesan
   function addMessage(text) {
     messages.push(text);
-    if (messages.length > 100) messages.shift();
+    if (messages.length > 50) messages.shift(); // batasi max 50 pesan
     localStorage.setItem("messages", JSON.stringify(messages));
-    if (messagesPanel.style.display === "block") {
+    if(document.getElementById("messagesPanel").style.display === "block") {
       renderMessages();
     }
   }
 
-  // Render riwayat pesan
+  // Render daftar pesan
   function renderMessages() {
-    messagesList.innerHTML = "";
-    if (messages.length === 0) {
-      messagesList.innerHTML = "<li>Tidak ada pesan.</li>";
+    const list = document.getElementById("messagesList");
+    list.innerHTML = "";
+    messages.forEach((msg) => {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      list.appendChild(li);
+    });
+  }
+
+  // Toggle panel pesan
+  function toggleMessagesPanel() {
+    const panel = document.getElementById("messagesPanel");
+    if(panel.style.display === "block") {
+      panel.style.display = "none";
     } else {
-      messages.forEach(msg => {
-        const li = document.createElement("li");
-        li.textContent = msg;
-        messagesList.appendChild(li);
-      });
+      panel.style.display = "block";
+      renderMessages();
     }
   }
 
   // Hapus semua pesan
   function clearMessages() {
-    if (confirm("Yakin ingin menghapus semua pesan?")) {
+    if(confirm("Yakin ingin menghapus semua pesan?")) {
       messages = [];
       localStorage.setItem("messages", JSON.stringify(messages));
       renderMessages();
     }
   }
 
-  // Render riwayat penarikan
-  function renderWithdraws() {
-    withdrawList.innerHTML = "";
-    if (withdraws.length === 0) {
-      withdrawList.innerHTML = "<li>Tidak ada riwayat penarikan.</li>";
-    } else {
-      withdraws.forEach(wd => {
-        const li = document.createElement("li");
-        li.textContent = `${wd.date} - ${wd.fullname} - ${wd.account} - ${wd.amount.toLocaleString("id-ID")} Poin`;
-        withdrawList.appendChild(li);
-      });
-    }
-  }
-
-  // Hapus semua riwayat penarikan
-  function clearWithdraws() {
-    if (confirm("Yakin ingin menghapus semua riwayat penarikan?")) {
-      withdraws = [];
-      localStorage.setItem("withdraws", JSON.stringify(withdraws));
-      renderWithdraws();
-    }
-  }
-
-  // Toggle panel riwayat pesan
-  function toggleMessagesPanel() {
-    if (messagesPanel.style.display === "block") {
-      messagesPanel.style.display = "none";
-    } else {
-      messagesPanel.style.display = "block";
-      withdrawPanel.style.display = "none";
-      renderMessages();
-    }
-  }
-
-  // Toggle panel riwayat penarikan
-  function toggleWithdrawPanel() {
-    if (withdrawPanel.style.display === "block") {
-      withdrawPanel.style.display = "none";
-    } else {
-      withdrawPanel.style.display = "block";
-      messagesPanel.style.display = "none";
-      renderWithdraws();
-    }
-  }
-
-  // Fungsi membuka kotak dengan animasi dan update poin
+  // Fungsi buka kotak
   function openBox() {
-    if (openBoxBtn.disabled) return;
-
     openBoxBtn.disabled = true;
-    notification.textContent = "";
-    boxInside.classList.add("hidden");
-    boxFront.classList.remove("opened");
-    boxFront.classList.add("opening");
-
-    // Setelah animasi shake selesai (1.2s)
+    notification.textContent = "Membuka kotak...";
     setTimeout(() => {
-      boxFront.classList.remove("opening");
-      boxFront.classList.add("opened");
+      let rewardIndex = Math.floor(Math.random() * rewards.length);
+      let reward = rewards[rewardIndex];
+      let earned = 0;
 
-      // Dapatkan hadiah random
-      let reward = getRandomReward();
-      boxInside.textContent = reward.name;
-      boxInside.classList.remove("hidden");
-
-      if (reward.points > 0) {
-        points += reward.points;
-        updatePointsDisplay();
-        addMessage(`Mendapatkan ${reward.name}`);
-        notification.textContent = `Selamat! Kamu mendapatkan ${reward.name}`;
+      if(reward.points === -1) { // bonus 2x poin
+        doubleNext = true;
+        notification.textContent = "Selanjutnya poinmu akan dikalikan 2!";
+        addMessage("Mendapatkan bonus 2x poin berikutnya!");
       } else {
-        addMessage("Mendapatkan Zonk! Tidak ada poin.");
-        notification.textContent = "Zonk! Tidak mendapatkan poin.";
+        earned = doubleNext ? reward.points * 2 : reward.points;
+        doubleNext = false;
+        points += earned;
+        notification.textContent = `Kamu mendapatkan ${earned} poin (${reward.name})!`;
+        addMessage(`Mendapatkan hadiah: ${reward.name} (${earned} poin)`);
+        updatePointsDisplay();
       }
 
       openBoxBtn.disabled = false;
-    }, 1200);
+    }, 3000);
   }
 
-  // Fungsi submit penarikan poin
+  // Submit penarikan
   function submitWithdraw() {
-    if (points <= 0) {
-      exchangeMessage.style.color = "#ff4444";
-      exchangeMessage.textContent = "Poin kamu kosong, tidak bisa melakukan penarikan.";
+    const amount = parseInt(document.getElementById("amount").value);
+    const name = document.getElementById("fullname").value.trim();
+    const acc = document.getElementById("account").value.trim();
+    const exchangeMsg = document.getElementById("exchangeMessage");
+
+    exchangeMsg.textContent = "";
+
+    if (!name) {
+      alert("Harap isi nama lengkap.");
       return;
     }
-
-    let amount = parseInt(prompt("Masukkan jumlah poin yang ingin ditarik (kelipatan 5):", "50"));
-    if (isNaN(amount) || amount <= 0 || amount % 5 !== 0) {
-      exchangeMessage.style.color = "#ff4444";
-      exchangeMessage.textContent = "Jumlah penarikan harus angka positif kelipatan 5.";
+    if (!acc) {
+      alert("Harap isi nomor rekening.");
       return;
     }
-
-    let fullname = document.getElementById("fullname").value.trim();
-    let account = document.getElementById("account").value.trim();
-
-    if (!fullname) {
-      exchangeMessage.style.color = "#ff4444";
-      exchangeMessage.textContent = "Nama lengkap harus diisi.";
-      return;
-    }
-    if (!account) {
-      exchangeMessage.style.color = "#ff4444";
-      exchangeMessage.textContent = "Nomor rekening harus diisi.";
+    if (isNaN(amount) || amount <= 0) {
+      alert("Jumlah poin tidak valid.");
       return;
     }
     if (points < amount) {
+      exchangeMsg.textContent = "Poin tidak cukup!";
+      return;
+    }
+
+    points -= amount;
+    updatePointsDisplay();
+    exchangeMsg.style.color = "#00ff00";
+    exchangeMsg.textContent = "Permintaan penarikan diajukan!";
+    addMessage(`Penarikan diajukan: ${name} - ${acc} - ${amount} poin`);
+
+    withdraws.push({ name, acc, amount });
+    localStorage.setItem("withdraws", JSON.stringify(withdraws));
+  }
+
+  // Login admin
+  function loginAdmin() {
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    if (user === "admin" && pass === "admin123") {
+      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("adminLogin").style.display = "none";
+      showAdminData();
+    } else {
+      alert("Login gagal!");
+    }
+  }
+
+  // Logout admin
+  function logoutAdmin() {
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("adminLogin").style.display = "block";
+  }
+
+  // Tampilkan data admin
+  function showAdminData() {
+    document.getElementById("totalPoints").textContent = points;
+    const list = document.getElementById("withdrawList");
+    list.innerHTML = "";
+    withdraws.forEach((w) => {
+      const li = document.createElement("li");
+      li.textContent = `${w.name} - ${w.acc} - ${w.amount} poin`;
+      list.appendChild(li);
+    });
+  }
+
+  // Event listener
+  openBoxBtn.addEventListener("click", openBox);
+  withdrawBtn.addEventListener("click", submitWithdraw);
+  toggleMessagesBtn.addEventListener("click", toggleMessagesPanel);
+  clearMessagesBtn.addEventListener("click", clearMessages);
+  loginAdminBtn.addEventListener("click", loginAdmin);
+  logoutAdminBtn.addEventListener("click", logoutAdmin);
+
+  // Inisialisasi awal
+  updatePointsDisplay();
+
+</script>
+
+</body>
+</html>
