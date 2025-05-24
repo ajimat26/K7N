@@ -1,260 +1,182 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Game Kotak Hadiah</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kotak Hadiah Realtime</title>
+  <script type="module" defer>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.firebasestorage.app",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:7be400c23de21665044a11",
+      measurementId: "G-TJL9K6YDL9"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const uangTotalEl = document.getElementById("uangTotal");
+    const topTierEl = document.getElementById("topTier");
+    const notifEl = document.getElementById("notif");
+    const btnWithdraw = document.getElementById("btnWithdraw");
+
+    // Contoh user id dan nama, ganti dengan autentikasi sebenarnya
+    const userId = "user123";
+    const userName = "Pemain123";
+
+    const userRef = ref(db, `users/${userId}`);
+    const globalUangRef = ref(db, "totalUang");
+
+    // Set default total uang 50 juta jika belum ada
+    runTransaction(globalUangRef, (current) => {
+      if (current === null) return 50000000;
+      return current;
+    });
+
+    // Update tampilan uang global realtime
+    onValue(globalUangRef, (snapshot) => {
+      const val = snapshot.val();
+      uangTotalEl.textContent = "Rp " + (val ?? 0).toLocaleString("id-ID");
+      updateTopTier();
+    });
+
+    // Fungsi menampilkan notifikasi singkat
+    function showNotif(msg, className = "text-green-600") {
+      notifEl.textContent = msg;
+      notifEl.className = `text-center text-sm mt-2 ${className}`;
+      setTimeout(() => {
+        notifEl.textContent = "";
+      }, 3000);
+    }
+
+    // Fungsi update Top Tier secara realtime dan urut
+    function updateTopTier() {
+      const usersRef = ref(db, "users");
+      onValue(usersRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const sorted = Object.values(data)
+            .filter(user => user.penarikan)
+            .sort((a, b) => b.penarikan - a.penarikan)
+            .slice(0, 3);
+          if (sorted.length === 0) {
+            topTierEl.innerHTML = "<li>Belum ada penarikan.</li>";
+          } else {
+            topTierEl.innerHTML = sorted.map((u, i) =>
+              `<li><strong>${i + 1}.</strong> ${u.nama || "Anonim"} - ${u.penarikan.toLocaleString("id-ID")} Poin</li>`
+            ).join("");
+          }
+        } else {
+          topTierEl.innerHTML = "<li>Belum ada data user.</li>";
+        }
+      });
+    }
+
+    // Penarikan poin user (contoh 1000 poin per klik)
+    btnWithdraw.onclick = () => {
+      const jumlahTarik = 1000;
+      runTransaction(userRef, (user) => {
+        if (user === null) {
+          // user baru, set default poin dan nama
+          user = {
+            points: 10000, // contoh poin awal user
+            nama: userName,
+            penarikan: 0
+          };
+        }
+
+        if (user.points >= jumlahTarik) {
+          user.points -= jumlahTarik;
+          user.penarikan = (user.penarikan || 0) + jumlahTarik;
+
+          // Kurangi total uang global
+          runTransaction(globalUangRef, (uangGlobal) => {
+            if ((uangGlobal ?? 0) >= jumlahTarik) {
+              return uangGlobal - jumlahTarik;
+            } else {
+              showNotif("Uang global tidak cukup!", "text-red-600");
+              return uangGlobal;
+            }
+          });
+
+          showNotif(`Penarikan berhasil! ${jumlahTarik.toLocaleString("id-ID")} poin ditarik.`);
+        } else {
+          showNotif("Poin tidak cukup untuk ditarik!", "text-red-600");
+        }
+        return user;
+      });
+    };
+
+    // Inisialisasi Top Tier
+    updateTopTier();
+
+  </script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-    button { padding: 10px 15px; margin: 5px; cursor: pointer; }
-    #maintenanceNotice { color: red; font-weight: bold; margin: 10px 0; }
-    #adminPanel, #adminLoginPanel, #pesanPanel, #riwayatPanel { display: none; margin-top: 10px; }
+    body {
+      background: #eef2ff;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0; display: flex;
+      justify-content: center; align-items: center; height: 100vh;
+    }
+    .container {
+      background: white; padding: 2rem;
+      border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    button {
+      cursor: pointer;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.7rem 1rem;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin: 0.5rem 0;
+      font-weight: 500;
+      color: #333;
+    }
   </style>
 </head>
 <body>
-  <h1>Game Kotak Hadiah</h1>
-  <p>Poin: <span id="points">0</span> | Kunci: <span id="keys">0</span></p>
 
-  <div id="maintenanceNotice"></div>
+  <div class="container">
+    <h1>Kotak Hadiah</h1>
+    <p>Total Uang Global: <strong id="uangTotal">Rp 50.000.000</strong></p>
 
-  <button id="btnOpenBox">Buka Kotak</button>
-  <button id="btnSupply">Box Suplai</button>
-  <br><br>
+    <button id="btnWithdraw">Tarik 1000 Poin</button>
 
-  <h3>Penarikan</h3>
-  <input id="inputNama" placeholder="Nama" />
-  <input id="inputRek" placeholder="Rekening" />
-  <select id="amountSelect">
-    <option value="2500">2.500</option>
-    <option value="5000">5.000</option>
-    <option value="10000">10.000</option>
-  </select>
-  <button id="btnAjukanPenarikan">Ajukan</button>
-  <br><br>
+    <h2>Top Tier Penarikan</h2>
+    <ul id="topTier"><li>Memuat data...</li></ul>
 
-  <button id="btnLihatPesan">Pesan</button>
-  <button id="btnRiwayatPenarikan">Riwayat</button>
-  <button id="btnHapusPesan">Hapus Pesan</button>
-  <div id="notif" style="color: red; margin-top: 10px;"></div>
-
-  <div id="pesanPanel">
-    <h3>Pesan</h3>
-    <ul id="messageList"></ul>
+    <p id="notif"></p>
   </div>
 
-  <div id="riwayatPanel">
-    <h3>Riwayat Penarikan</h3>
-    <ul id="riwayatList"></ul>
-  </div>
-
-  <hr>
-  <button id="btnAdminPanel">Admin</button>
-
-  <div id="adminLoginPanel">
-    <input id="adminPassInput" type="password" placeholder="Password admin" />
-    <button id="btnLoginAdmin">Login</button>
-    <button id="btnBatalLoginAdmin">Batal</button>
-    <div id="adminLoginNotif" style="color: red;"></div>
-  </div>
-
-  <div id="adminPanel">
-    <h3>Admin Panel</h3>
-    <h4>Pending Penarikan</h4>
-    <ul id="pendingWithdrawList"></ul>
-
-    <h4>Maintenance</h4>
-    <input id="maintenanceReasonInput" placeholder="Alasan Maintenance" />
-    <input id="maintenanceDurationInput" type="number" placeholder="Durasi (menit)" />
-    <button id="btnStartMaintenance">Mulai</button>
-    <button id="btnStopMaintenance">Berhenti</button>
-    <br><br>
-    <button id="btnLogoutAdmin">Logout Admin</button>
-  </div>
-
-  <script>
-    const pointsSpan = document.getElementById("points");
-    const keysSpan = document.getElementById("keys");
-    const btnOpenBox = document.getElementById("btnOpenBox");
-    const btnSupply = document.getElementById("btnSupply");
-    const btnAjukanPenarikan = document.getElementById("btnAjukanPenarikan");
-    const inputNama = document.getElementById("inputNama");
-    const inputRek = document.getElementById("inputRek");
-    const amountSelect = document.getElementById("amountSelect");
-    const btnLihatPesan = document.getElementById("btnLihatPesan");
-    const btnRiwayatPenarikan = document.getElementById("btnRiwayatPenarikan");
-    const btnHapusPesan = document.getElementById("btnHapusPesan");
-    const notifDiv = document.getElementById("notif");
-    const messageList = document.getElementById("messageList");
-    const riwayatList = document.getElementById("riwayatList");
-    const pesanPanel = document.getElementById("pesanPanel");
-    const riwayatPanel = document.getElementById("riwayatPanel");
-    const maintenanceNotice = document.getElementById("maintenanceNotice");
-
-    const btnAdminPanel = document.getElementById("btnAdminPanel");
-    const btnLoginAdmin = document.getElementById("btnLoginAdmin");
-    const btnLogoutAdmin = document.getElementById("btnLogoutAdmin");
-    const btnBatalLoginAdmin = document.getElementById("btnBatalLoginAdmin");
-    const adminPassInput = document.getElementById("adminPassInput");
-    const adminLoginPanel = document.getElementById("adminLoginPanel");
-    const adminLoginNotif = document.getElementById("adminLoginNotif");
-    const adminPanel = document.getElementById("adminPanel");
-    const pendingWithdrawList = document.getElementById("pendingWithdrawList");
-    const maintenanceReasonInput = document.getElementById("maintenanceReasonInput");
-    const maintenanceDurationInput = document.getElementById("maintenanceDurationInput");
-    const btnStartMaintenance = document.getElementById("btnStartMaintenance");
-    const btnStopMaintenance = document.getElementById("btnStopMaintenance");
-
-    const STORAGE_POINTS = "gh_points";
-    const STORAGE_KEYS = "gh_keys";
-    const STORAGE_MESSAGES = "gh_messages";
-    const STORAGE_WITHDRAWS = "gh_withdraws";
-    const STORAGE_MAINTENANCE = "gh_maintenance";
-    const STORAGE_ADMIN = "gh_admin";
-    const STORAGE_LAST_SUPPLY = "gh_last_supply";
-
-    const ADMIN_PASSWORD = "admin123";
-
-    let points = parseInt(localStorage.getItem(STORAGE_POINTS)) || 0;
-    let keys = parseInt(localStorage.getItem(STORAGE_KEYS)) || 0;
-    let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES)) || [];
-    let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS)) || [];
-    let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE)) || { active: false };
-    let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
-    let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY)) || 0;
-
-    function saveData() {
-      localStorage.setItem(STORAGE_POINTS, points);
-      localStorage.setItem(STORAGE_KEYS, keys);
-      localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
-      localStorage.setItem(STORAGE_WITHDRAWS, JSON.stringify(withdraws));
-      localStorage.setItem(STORAGE_MAINTENANCE, JSON.stringify(maintenance));
-      localStorage.setItem(STORAGE_ADMIN, adminLoggedIn ? "true" : "false");
-      localStorage.setItem(STORAGE_LAST_SUPPLY, lastSupplyTime);
-      updateUI();
-    }
-
-    function updateUI() {
-      pointsSpan.innerText = points;
-      keysSpan.innerText = keys;
-      notifDiv.innerText = "";
-
-      if (maintenance.active) {
-        maintenanceNotice.innerText = `Maintenance Aktif: ${maintenance.reason} (selesai dalam ${Math.max(0, Math.ceil((maintenance.end - Date.now()) / 60000))} menit)`;
-        maintenanceNotice.style.display = "block";
-        btnOpenBox.disabled = true;
-        btnAjukanPenarikan.disabled = true;
-        btnSupply.disabled = true;
-      } else {
-        maintenanceNotice.style.display = "none";
-        btnOpenBox.disabled = false;
-        btnAjukanPenarikan.disabled = false;
-        btnSupply.disabled = false;
-      }
-
-      messageList.innerHTML = messages.map(msg => `<li>${msg}</li>`).join("");
-      riwayatList.innerHTML = withdraws.map(w => `<li>${w.nama} - ${w.rek} - ${w.jumlah} poin</li>`).join("");
-
-      if (adminLoggedIn) {
-        adminLoginPanel.style.display = "none";
-        adminPanel.style.display = "block";
-        pendingWithdrawList.innerHTML = withdraws.map((w, i) => 
-          `<li>${w.nama} - ${w.rek} - ${w.jumlah} poin <button onclick="hapusWithdraw(${i})">Selesai</button></li>`
-        ).join("");
-      } else {
-        adminPanel.style.display = "none";
-      }
-    }
-
-    function hapusWithdraw(index) {
-      withdraws.splice(index, 1);
-      saveData();
-    }
-
-    function bukaKotak() {
-      if (keys <= 0) return notifDiv.innerText = "Kamu tidak punya kunci!";
-      keys--;
-      let hadiah = Math.floor(Math.random() * 150) + 50;
-      points += hadiah;
-      messages.push(`Kamu membuka kotak dan dapat ${hadiah} poin!`);
-      saveData();
-    }
-
-    function ambilSuplai() {
-      const now = Date.now();
-      if (now - lastSupplyTime < 3600000) {
-        notifDiv.innerText = "Suplai hanya bisa diambil 1 jam sekali!";
-        return;
-      }
-      keys++;
-      lastSupplyTime = now;
-      messages.push("Kamu menerima 1 kunci dari Box Suplai!");
-      saveData();
-    }
-
-    function ajukanPenarikan() {
-      let nama = inputNama.value.trim();
-      let rek = inputRek.value.trim();
-      let jumlah = parseInt(amountSelect.value);
-      if (!nama || !rek) return notifDiv.innerText = "Isi semua data penarikan!";
-      if (points < jumlah) return notifDiv.innerText = "Poin kamu tidak cukup!";
-      withdraws.push({ nama, rek, jumlah });
-      messages.push(`Kamu mengajukan penarikan ${jumlah} poin.`);
-      points -= jumlah;
-      inputNama.value = "";
-      inputRek.value = "";
-      saveData();
-    }
-
-    function startMaintenance() {
-      let reason = maintenanceReasonInput.value.trim();
-      let duration = parseInt(maintenanceDurationInput.value);
-      if (!reason || !duration || duration < 1) {
-        notifDiv.innerText = "Isi alasan dan durasi maintenance!";
-        return;
-      }
-      maintenance = {
-        active: true,
-        reason: reason,
-        end: Date.now() + duration * 60000
-      };
-      saveData();
-    }
-
-    function stopMaintenance() {
-      maintenance = { active: false };
-      saveData();
-    }
-
-    btnOpenBox.onclick = bukaKotak;
-    btnSupply.onclick = ambilSuplai;
-    btnAjukanPenarikan.onclick = ajukanPenarikan;
-    btnLihatPesan.onclick = () => pesanPanel.style.display = pesanPanel.style.display === "block" ? "none" : "block";
-    btnRiwayatPenarikan.onclick = () => riwayatPanel.style.display = riwayatPanel.style.display === "block" ? "none" : "block";
-    btnHapusPesan.onclick = () => { messages = []; saveData(); };
-
-    btnAdminPanel.onclick = () => adminLoginPanel.style.display = "block";
-    btnBatalLoginAdmin.onclick = () => adminLoginPanel.style.display = "none";
-    btnLoginAdmin.onclick = () => {
-      if (adminPassInput.value === ADMIN_PASSWORD) {
-        adminLoggedIn = true;
-        adminPassInput.value = "";
-        saveData();
-      } else {
-        adminLoginNotif.innerText = "Password salah!";
-      }
-    };
-    btnLogoutAdmin.onclick = () => {
-      adminLoggedIn = false;
-      saveData();
-    };
-    btnStartMaintenance.onclick = startMaintenance;
-    btnStopMaintenance.onclick = stopMaintenance;
-
-    if (maintenance.active && Date.now() > maintenance.end) {
-      maintenance = { active: false };
-      saveData();
-    }
-
-    updateUI();
-  </script>
 </body>
 </html>
