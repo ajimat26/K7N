@@ -56,18 +56,24 @@
       box-shadow: 0 2px #00b894;
     }
 
-    input, select, textarea {
+    input {
       padding: 10px;
       margin: 5px;
       font-size: 15px;
       border: 2px solid #dfe6e9;
       border-radius: 8px;
       width: 80%;
-      max-width: 320px;
+      max-width: 300px;
     }
 
-    textarea {
-      resize: vertical;
+    select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 2px solid #dfe6e9;
+      width: 80%;
+      max-width: 320px;
     }
 
     .panel {
@@ -77,18 +83,17 @@
       border-radius: 10px;
       margin: 10px auto;
       width: 90%;
-      max-width: 600px;
+      max-width: 400px;
       box-shadow: 0 0 10px #b2bec3;
       color: #2d3436;
-      text-align: left;
     }
 
     ul {
+      text-align: left;
       list-style: square;
-      padding-left: 20px;
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
-      margin: 0;
+      padding-left: 20px;
     }
 
     hr {
@@ -129,16 +134,21 @@
       cursor: not-allowed;
     }
 
-    /* Admin panel styles */
     #adminLoginPanel, #adminPanel {
-      background: rgba(0,0,0,0.4);
       color: white;
+      background: rgba(0,0,0,0.3);
     }
 
-    #adminLoginNotif {
-      color: #ff8080;
-      margin-top: 10px;
+    #adminLoginPanel input {
+      width: 100%;
     }
+
+    #adminPanel ul {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-left: 15px;
+    }
+
   </style>
 </head>
 <body>
@@ -167,8 +177,8 @@
       <option value="4000">1.000.000 IC - 4000 poin</option>
       <option value="8000">2.000.000 IC - 8000 poin</option>
     </select><br>
-    <input type="text" id="nama" placeholder="Nama Lengkap" /><br />
-    <input type="text" id="rekening" placeholder="Nomor Rekening" /><br />
+    <input type="text" id="nama" placeholder="Nama Lengkap"><br>
+    <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
     <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
 
     <hr>
@@ -193,54 +203,54 @@
   <!-- Panel login admin -->
   <div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto;">
     <h3>Login Admin</h3>
-    <input type="password" id="adminPass" placeholder="Password Admin" /><br />
+    <input type="password" id="adminPass" placeholder="Password Admin"><br>
     <button id="btnLoginAdmin">Masuk</button>
     <button id="btnBatalLoginAdmin">Batal</button>
-    <div id="adminLoginNotif"></div>
+    <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
   </div>
 
   <!-- Panel admin setelah login -->
   <div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto;">
     <h3>Panel Admin</h3>
     <h4>Permintaan Penarikan</h4>
-    <ul id="pendingWithdrawList"></ul>
-    <hr />
+    <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
+    <hr>
     <h4>Mode Maintenance</h4>
-    <label>Alasan Maintenance:</label><br />
-    <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br />
-    <label>Durasi Maintenance (menit):</label><br />
-    <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30" /><br />
+    <label>Alasan Maintenance:</label><br>
+    <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
+    <label>Durasi Maintenance (menit):</label><br>
+    <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
     <button id="btnStartMaintenance">Mulai Maintenance</button>
     <button id="btnStopMaintenance">Hentikan Maintenance</button>
-    <hr />
+    <hr>
     <button id="btnLogoutAdmin">Logout Admin</button>
   </div>
 
   <audio autoplay loop id="backsound" volume="0.5">
-    <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg" />
+    <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
-  <script>
-    // Storage keys
-    const STORAGE_POINTS = "points";
-    const STORAGE_KEYS = "keys";
-    const STORAGE_MESSAGES = "messages";
-    const STORAGE_WITHDRAWS = "withdraws";
-    const STORAGE_MAINTENANCE = "maintenance";
-    const STORAGE_ADMIN = "adminLoggedIn";
-    const STORAGE_LAST_SUPPLY = "lastSupplyTime";
+<script>
+  // Storage keys
+  const STORAGE_POINTS = "points";
+  const STORAGE_KEYS = "keys";
+  const STORAGE_MESSAGES = "messages";
+  const STORAGE_WITHDRAWS = "withdraws";
+  const STORAGE_MAINTENANCE = "maintenance";
+  const STORAGE_ADMIN = "adminLoggedIn";
+  const STORAGE_LAST_SUPPLY = "lastSupplyTime";
 
-    // Load data from localStorage or defaults
-    let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
-    let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
-    let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
-    let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
-    let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false,"reason":"","until":0}');
-    let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
-    let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
+  // Load data or defaults
+  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
+  let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
+  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
+  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
+  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false,"reason":"","until":0}');
+  let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
+  let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
 
-    // UI elements
-    const pointsElem = document.getElementById("points");
-    const keysElem = document.getElementById("keys");
-    const notifElem = document.getElement
+  // Elements
+  const pointsElem = document.getElementById("points");
+  const keysElem = document.getElementById("keys");
+  const notifElem = document.getElementById("notif");
