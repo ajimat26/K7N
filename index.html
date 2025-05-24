@@ -2,99 +2,82 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<title>Game Kotak Hadiah</title>
+<title>Giveaway dari Reyzen</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #a8e6a3, #6bc56b);
-    color: #333;
-    margin: 0; padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #a8e6a3;
     text-align: center;
+    padding: 20px;
     user-select: none;
   }
   h1 {
     background-color: #379237;
     color: white;
     padding: 15px;
-    margin: 0 0 20px 0;
     border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
   }
   #boxAnimation {
     width: 120px;
     height: 120px;
+    margin: 20px auto;
     background: #55cc55 url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
     background-size: 80%;
-    border: 3px solid #3a863a;
     border-radius: 15px;
-    margin: 0 auto 20px auto;
+    border: 3px solid #3a863a;
     box-shadow: 0 0 12px #3a863a;
-  }
-  @keyframes shake {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(10deg); }
-    50% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
-    100% { transform: rotate(0deg); }
   }
   button {
     background-color: #3a863a;
     border: none;
-    padding: 12px 25px;
-    margin: 8px 5px;
+    color: white;
+    padding: 12px 20px;
+    margin: 10px 5px;
     font-size: 16px;
     border-radius: 8px;
     cursor: pointer;
-    color: white;
     box-shadow: 0 4px #2e672e;
-    transition: 0.2s;
-    min-width: 140px;
+    min-width: 160px;
   }
   button:hover {
     background-color: #2e672e;
   }
   button:active {
-    transform: translateY(4px);
+    transform: translateY(3px);
     box-shadow: 0 2px #2e672e;
   }
   button:disabled {
     background-color: #9ccc9c;
-    box-shadow: none;
     cursor: not-allowed;
-    color: #555;
+    box-shadow: none;
   }
   input, select, textarea {
     padding: 10px;
-    margin: 5px;
+    margin: 5px 0;
     font-size: 15px;
-    border: 2px solid #4caf50;
     border-radius: 8px;
+    border: 2px solid #4caf50;
     width: 80%;
-    max-width: 320px;
+    max-width: 300px;
   }
   textarea {
     resize: vertical;
   }
   .panel {
-    display: none;
-    background: white;
+    margin: 20px auto;
     padding: 15px;
+    background: white;
+    max-width: 480px;
     border-radius: 10px;
-    margin: 10px auto 30px auto;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 0 15px #4caf50aa;
-    color: #2d3436;
+    display: none;
     text-align: left;
+    box-shadow: 0 0 15px #4caf50aa;
   }
   ul {
-    list-style: square;
+    list-style: square inside;
+    max-height: 200px;
+    overflow-y: auto;
     padding-left: 20px;
-  }
-  hr {
-    border: 1px dashed #379237;
-    width: 80%;
-    margin: 20px auto;
   }
   #notif {
     font-weight: bold;
@@ -104,21 +87,13 @@
   }
   #maintenanceNotice {
     background: #ff4c4c;
-    padding: 10px;
-    border-radius: 6px;
-    margin: 15px auto 30px auto;
-    max-width: 400px;
     color: white;
     font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+    max-width: 480px;
+    margin: 15px auto;
     display: none;
-  }
-  #btnSupply {
-    background-color: #2e7d32;
-    box-shadow: 0 4px #1b5e20;
-    font-weight: bold;
-    font-size: 18px;
-    margin-top: 15px;
-    min-width: 220px;
   }
 </style>
 </head>
@@ -130,6 +105,7 @@
 
 <div id="gamePanel">
   <div id="boxAnimation"></div>
+
   <button id="btnOpenBox">Buka Kotak</button>
   <div id="notif"></div>
 
@@ -149,8 +125,8 @@
     <option value="4000">1.000.000 IC - 4000 poin</option>
     <option value="8000">2.000.000 IC - 8000 poin</option>
   </select><br>
-  <input type="text" id="nama" placeholder="Nama Lengkap"><br>
-  <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
+  <input type="text" id="nama" placeholder="Nama Lengkap" autocomplete="off"><br>
+  <input type="text" id="rekening" placeholder="Nomor Rekening" autocomplete="off"><br>
   <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
 
   <hr>
@@ -172,20 +148,18 @@
   </div>
 </div>
 
-<!-- Panel login admin -->
-<div id="adminLoginPanel" class="panel" style="background: #2e7d32; color: white;">
+<div id="adminLoginPanel" class="panel" style="background:#2e7d32; color:white;">
   <h3>Login Admin</h3>
-  <input type="password" id="adminPass" placeholder="Password Admin"><br>
+  <input type="password" id="adminPass" placeholder="Password Admin" autocomplete="off"><br>
   <button id="btnLoginAdmin">Masuk</button>
   <button id="btnBatalLoginAdmin">Batal</button>
-  <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
+  <div id="adminLoginNotif" style="margin-top:10px; color:#ff8080;"></div>
 </div>
 
-<!-- Panel admin setelah login -->
-<div id="adminPanel" class="panel" style="background: #1b5e20; color: white;">
+<div id="adminPanel" class="panel" style="background:#1b5e20; color:white;">
   <h3>Panel Admin</h3>
   <h4>Permintaan Penarikan</h4>
-  <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto;"></ul>
+  <ul id="pendingWithdrawList" style="max-height:150px; overflow-y:auto;"></ul>
   <hr>
   <h4>Mode Maintenance</h4>
   <label>Alasan Maintenance:</label><br>
@@ -199,10 +173,10 @@
 </div>
 
 <script>
-  // Kunci password admin
+  // Konstanta
   const ADMIN_PASSWORD = "admin123";
 
-  // Keys localStorage
+  // Key penyimpanan localStorage
   const STORAGE_POINTS = "points";
   const STORAGE_KEYS = "keys";
   const STORAGE_MESSAGES = "messages";
@@ -220,7 +194,41 @@
   let adminLoggedIn = (localStorage.getItem(STORAGE_ADMIN) === "true");
   let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
 
-  // Elemen
+  // Elemen DOM
   const pointsSpan = document.getElementById("points");
   const keysSpan = document.getElementById("keys");
-  const notifDiv = document.getElement
+  const notifDiv = document.getElementById("notif");
+  const btnOpenBox = document.getElementById("btnOpenBox");
+  const btnSupply = document.getElementById("btnSupply");
+  const amountSelect = document.getElementById("amount");
+  const inputNama = document.getElementById("nama");
+  const inputRek = document.getElementById("rekening");
+  const btnAjukanPenarikan = document.getElementById("btnAjukanPenarikan");
+  const btnLihatPesan = document.getElementById("btnLihatPesan");
+  const btnRiwayatPenarikan = document.getElementById("btnRiwayatPenarikan");
+  const btnHapusPesan = document.getElementById("btnHapusPesan");
+  const messageList = document.getElementById("messageList");
+  const riwayatList = document.getElementById("riwayatList");
+  const pesanPanel = document.getElementById("pesan");
+  const riwayatPanel = document.getElementById("riwayat");
+  const btnAdminPanel = document.getElementById("btnAdminPanel");
+  const adminLoginPanel = document.getElementById("adminLoginPanel");
+  const adminPanel = document.getElementById("adminPanel");
+  const adminPassInput = document.getElementById("adminPass");
+  const btnLoginAdmin = document.getElementById("btnLoginAdmin");
+  const btnBatalLoginAdmin = document.getElementById("btnBatalLoginAdmin");
+  const adminLoginNotif = document.getElementById("adminLoginNotif");
+  const btnLogoutAdmin = document.getElementById("btnLogoutAdmin");
+  const pendingWithdrawList = document.getElementById("pendingWithdrawList");
+  const maintenanceNotice = document.getElementById("maintenanceNotice");
+  const maintenanceReasonInput = document.getElementById("maintenanceReason");
+  const maintenanceDurationInput = document.getElementById("maintenanceDuration");
+  const btnStartMaintenance = document.getElementById("btnStartMaintenance");
+  const btnStopMaintenance = document.getElementById("btnStopMaintenance");
+
+  // Fungsi Simpan dan Update UI
+  function saveData(){
+    localStorage.setItem(STORAGE_POINTS, points);
+    localStorage.setItem(STORAGE_KEYS, keys);
+    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
+    localStorage.setItem(STORAGE_WITHDRAWS, JSON
