@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Random Box dengan Animasi & Riwayat Terpisah</title>
+<title>Random Box Game v1.0</title>
 <style>
   body {
     margin: 0; font-family: Arial, sans-serif;
@@ -44,65 +44,60 @@
     margin: 30px auto 10px auto;
     width: 220px;
     height: 220px;
-    background: #003366;
-    border-radius: 25px;
-    box-shadow: 0 0 25px #0b7dda;
+    perspective: 1000px;
+  }
+  #box {
+    width: 100%;
+    height: 100%;
     position: relative;
-    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+    cursor: pointer;
+  }
+  #box.flipped {
+    transform: rotateY(180deg);
+  }
+  #box-front, #box-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 25px;
+    backface-visibility: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    font-size: 28px;
   }
   #box-front {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(145deg, #0055aa, #003366);
-    border-radius: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
-    font-weight: 700;
-    color: #aad4ff;
+    background: linear-gradient(145deg, #2a72d6, #1c4e8c);
+    border: 4px solid #0d3c6b;
+    color: #cce5ff;
     user-select: none;
-    transition: transform 1.2s ease;
-    backface-visibility: hidden;
   }
-  #box-front.opening {
-    animation: shake 1.2s;
-  }
-  #box-front.opened {
+  #box-back {
+    background: linear-gradient(145deg, #0d3c6b, #3a87c4);
+    border: 4px solid #1c4e8c;
+    color: #ffec77;
     transform: rotateY(180deg);
-  }
-  #box-inside {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: #003366;
-    border-radius: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: 900;
-    color: #ffee77;
-    user-select: none;
-    transform: rotateY(180deg);
-    backface-visibility: hidden;
-    padding: 10px;
+    padding: 20px;
     text-align: center;
-  }
-  #box-inside.hidden {
-    display: none;
   }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-10px); }
     40%, 80% { transform: translateX(10px); }
   }
+  #box.shake {
+    animation: shake 0.5s;
+  }
   #notification {
     margin-top: 12px;
     font-size: 18px;
     min-height: 26px;
     color: #ffec99;
+    height: 28px;
   }
   #exchange-section {
     background: rgba(255,255,255,0.15);
@@ -179,18 +174,30 @@
   #adminPanel h2 {
     margin-top: 0;
   }
+  #footer {
+    margin-top: auto;
+    padding: 10px;
+    font-size: 14px;
+    color: #ccc;
+  }
 </style>
 </head>
 <body>
 
 <div id="points">Poin: 0</div>
+
 <div id="box-container" aria-label="Kotak hadiah">
-  <div id="box-front">Klik Buka Kotak</div>
-  <div id="box-inside" class="hidden"></div>
+  <div id="box" title="Klik untuk membuka kotak">
+    <div id="box-front">Kotak Hadiah</div>
+    <div id="box-back"></div>
+  </div>
 </div>
+
 <div id="notification"></div>
 
-<button id="openBoxBtn" onclick="openBox()">Buka Kotak</button>
+<div>
+  <button id="openBoxBtn">Buka Kotak</button>
+</div>
 
 <div id="exchange-section">
   <h2>Tukar Poin</h2>
@@ -203,80 +210,83 @@
   </select>
   <input type="text" id="fullname" placeholder="Nama lengkap" />
   <input type="text" id="account" placeholder="Nomor rekening" />
-  <button onclick="submitWithdraw()">Ajukan Penarikan</button>
+  <button id="withdrawBtn">Ajukan Penarikan</button>
   <div id="exchangeMessage"></div>
 </div>
 
 <div>
-  <button onclick="toggleMessagesPanel()">Lihat Pesan</button>
-  <button onclick="toggleWithdrawPanel()">Lihat Riwayat Penarikan</button>
+  <button id="toggleMessagesBtn">Lihat Pesan</button>
+  <button id="toggleWithdrawBtn">Lihat Riwayat Penarikan</button>
 </div>
 
 <div id="messagesPanel">
   <h3>Riwayat Pesan</h3>
   <ul id="messagesList"></ul>
-  <button onclick="clearMessages()">Hapus Semua Pesan</button>
+  <button id="clearMessagesBtn">Hapus Semua Pesan</button>
 </div>
 
 <div id="withdrawPanel">
   <h3>Riwayat Penarikan</h3>
   <ul id="withdrawList"></ul>
-  <button onclick="clearWithdraws()">Hapus Semua Riwayat</button>
+  <button id="clearWithdrawsBtn">Hapus Semua Riwayat</button>
 </div>
 
 <div id="adminLogin">
   <h3>Login Admin</h3>
   <input type="text" id="adminUser" placeholder="Username" />
   <input type="password" id="adminPass" placeholder="Password" />
-  <button onclick="loginAdmin()">Login</button>
+  <button id="adminLoginBtn">Login</button>
 </div>
 
 <div id="adminPanel">
   <h2>Admin Panel</h2>
+  <div>Status permainan: <span id="gameStatusText"></span></div>
+  <button id="toggleGameStatusBtn"></button>
   <div>Total Poin: <span id="totalPoints">0</span></div>
   <h3>Riwayat Penarikan:</h3>
   <ul id="adminWithdrawList"></ul>
-  <button onclick="logoutAdmin()">Logout</button>
+  <button id="adminLogoutBtn">Logout</button>
+</div>
+
+<div id="footer">
+  Versi Website: 1.0.0
 </div>
 
 <script>
-  // Data simpan di localStorage
+  // Inisialisasi data dari localStorage
   let points = parseInt(localStorage.getItem("points")) || 0;
   let messages = JSON.parse(localStorage.getItem("messages") || "[]");
   let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
+  let gameActive = localStorage.getItem("gameActive");
+  if (gameActive === null) gameActive = true;
+  else gameActive = (gameActive === "true");
 
+  // DOM elements
   const pointsEl = document.getElementById("points");
   const notification = document.getElementById("notification");
-  const boxFront = document.getElementById("box-front");
-  const boxInside = document.getElementById("box-inside");
+  const box = document.getElementById("box");
+  const boxBack = box.querySelector("#box-back");
   const openBoxBtn = document.getElementById("openBoxBtn");
+  const amountSelect = document.getElementById("amount");
+  const fullnameInput = document.getElementById("fullname");
+  const accountInput = document.getElementById("account");
+  const withdrawBtn = document.getElementById("withdrawBtn");
+  const exchangeMessage = document.getElementById("exchangeMessage");
 
-  // Hadiah probabilitas
-  // Zonknya 15%, sisanya 85% poin acak 50-500
-  function getRandomReward() {
-    let zonkChance = 0.15;
-    if (Math.random() < zonkChance) {
-      return { name: "Zonk! Tidak ada poin", points: 0 };
-    } else {
-      // random poin 50-500 kelipatan 5
-      let pts = Math.floor(Math.random() * 91) * 5 + 50; // 50 sampai 500
-      return { name: `+${pts} Poin`, points: pts };
-    }
-  }
+  const toggleMessagesBtn = document.getElementById("toggleMessagesBtn");
+  const toggleWithdrawBtn = document.getElementById("toggleWithdrawBtn");
+  const messagesPanel = document.getElementById("messagesPanel");
+  const withdrawPanel = document.getElementById("withdrawPanel");
+  const messagesList = document.getElementById("messagesList");
+  const withdrawList = document.getElementById("withdrawList");
+  const clearMessagesBtn = document.getElementById("clearMessagesBtn");
+  const clearWithdrawsBtn = document.getElementById("clearWithdrawsBtn");
 
-  function updatePointsDisplay() {
-    pointsEl.textContent = `Poin: ${points.toLocaleString("id-ID")}`;
-    localStorage.setItem("points", points);
-  }
-
-  function addMessage(text) {
-    messages.push(text);
-    if (messages.length > 100) messages.shift();
-    localStorage.setItem("messages", JSON.stringify(messages));
-    if (document.getElementById("messagesPanel").style.display === "block") {
-      renderMessages();
-    }
-  }
-
-  function renderMessages() {
-    const list
+  const adminLoginDiv = document.getElementById("adminLogin");
+  const adminUserInput = document.getElementById("adminUser");
+  const adminPassInput = document.getElementById("adminPass");
+  const adminLoginBtn = document.getElementById("adminLoginBtn");
+  const adminPanel = document.getElementById("adminPanel");
+  const gameStatusText = document.getElementById("gameStatusText");
+  const toggleGameStatusBtn = document.getElementById("toggleGameStatusBtn");
+  const totalPointsEl = document.get
