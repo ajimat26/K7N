@@ -1,253 +1,186 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spin Wheel Game & Admin Panel</title>
+  <meta charset="UTF-8">
+  <title>Game Poin Roda Keberuntungan</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      color: #fff;
-      user-select: none;
-    }
-    #points, #message, #adminPanel, #notification {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    #wheel-container {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 30px auto;
-    }
-    #wheel {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      border: 10px solid #fff;
-      background: conic-gradient(
-        #ff6f61 0deg 72deg,
-        #ffd700 72deg 144deg,
-        #4caf50 144deg 216deg,
-        #2196f3 216deg 288deg,
-        #9c27b0 288deg 360deg
-      );
-      transition: transform 4s ease-out;
-      position: relative;
-    }
-    .label {
-      position: absolute;
-      width: 100px;
-      text-align: center;
-      color: white;
-      font-weight: bold;
-      transform-origin: bottom center;
-      left: 110px;
-      top: 10px;
-    }
-    #pointer {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 40px solid #fff;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      margin: 10px;
-      cursor: pointer;
-    }
-    #exchange-section {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 350px;
-      margin: auto;
-    }
-    input, select {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-    }
-    #adminLogin, #adminPanel {
-      max-width: 400px;
-      margin: 20px auto;
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 10px;
-    }
-    #notification {
-      color: yellow;
-      font-size: 16px;
-    }
+    body { text-align: center; font-family: Arial; background: #1e1e1e; color: white; }
+    #wheel { width: 300px; height: 300px; border-radius: 50%; border: 10px solid #fff; margin: 20px auto; transition: transform 4s ease-out; position: relative; }
+    .label { position: absolute; width: 100%; text-align: center; font-weight: bold; font-size: 16px; color: #fff; }
+    button { padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer; }
+    input { padding: 5px; margin: 5px; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
   </style>
 </head>
 <body>
+  <h1>Game Poin Roda Keberuntungan</h1>
+  <div id="points">Poin: 0</div>
 
-<div id="points">Poin: 0</div>
-<div id="notification"></div>
-
-<div id="wheel-container">
-  <div id="pointer"></div>
   <div id="wheel">
-    <div class="label" style="transform: rotate(36deg)">Zonk</div>
-    <div class="label" style="transform: rotate(108deg)">+10</div>
-    <div class="label" style="transform: rotate(180deg)">+25</div>
-    <div class="label" style="transform: rotate(252deg)">+50</div>
-    <div class="label" style="transform: rotate(324deg)">2x Poin</div>
+    <div class="label" style="transform: rotate(36deg) translateY(-140px);">Zonk</div>
+    <div class="label" style="transform: rotate(108deg) translateY(-140px);">+10</div>
+    <div class="label" style="transform: rotate(180deg) translateY(-140px);">+25</div>
+    <div class="label" style="transform: rotate(252deg) translateY(-140px);">+50</div>
+    <div class="label" style="transform: rotate(324deg) translateY(-140px);">2x Poin</div>
   </div>
-</div>
 
-<div style="text-align:center;">
-  <button onclick="spinWheel()">Putar</button>
-</div>
+  <button onclick="spinWheel()">Putar Roda</button>
+  <div id="notification" style="margin:10px;"></div>
 
-<div id="message"></div>
-
-<div id="exchange-section">
-  <h2>Tukar Poin</h2>
-  <select id="amount">
-    <option value="500">50.000 IC - 500 Poin</option>
-    <option value="1000">100.000 IC - 1000 Poin</option>
-    <option value="2500">250.000 IC - 2500 Poin</option>
-  </select>
-  <input type="text" id="fullname" placeholder="Nama lengkap">
-  <input type="text" id="account" placeholder="Nomor rekening">
-  <button onclick="submitWithdraw()">Ajukan Penarikan</button>
+  <h2>Penarikan Poin</h2>
+  <input id="fullname" placeholder="Nama Lengkap"><br>
+  <input id="account" placeholder="Rekening/ID Tujuan"><br>
+  <input id="amount" type="number" placeholder="Jumlah Poin"><br>
+  <button onclick="submitWithdraw()">Tarik Poin</button>
   <div id="exchangeMessage"></div>
-</div>
 
-<div id="adminLogin">
-  <h3>Login Admin</h3>
-  <input type="text" id="adminUser" placeholder="Username">
-  <input type="password" id="adminPass" placeholder="Password">
-  <button onclick="loginAdmin()">Login</button>
-</div>
+  <hr>
 
-<div id="adminPanel" style="display:none;">
-  <h2>Admin Panel</h2>
-  <div>Total Poin: <span id="totalPoints">0</span></div>
-  <h3>Riwayat Penarikan:</h3>
-  <ul id="withdrawList"></ul>
-</div>
+  <div id="adminLogin">
+    <h2>Login Admin</h2>
+    <input id="adminUser" placeholder="Username"><br>
+    <input id="adminPass" type="password" placeholder="Password"><br>
+    <button onclick="loginAdmin()">Login</button>
+  </div>
 
-<script>
-  let points = parseInt(localStorage.getItem("points")) || 0;
-  let doubleNext = false;
-  const notification = document.getElementById("notification");
+  <div id="adminPanel" style="display:none;">
+    <h2>Admin Panel</h2>
+    <div>Total Poin Saat Ini: <span id="totalPoints">0</span></div>
 
-  function updatePointsDisplay() {
-    document.getElementById("points").textContent = "Poin: " + points;
-    localStorage.setItem("points", points);
-  }
+    <h3>Riwayat Penarikan:</h3>
+    <ul id="withdrawList"></ul>
 
-  function spinWheel() {
-    const wheel = document.getElementById("wheel");
-    const deg = Math.floor(3600 + Math.random() * 360);
-    wheel.style.transform = `rotate(${deg}deg)`;
-    const angle = deg % 360;
+    <h3>Riwayat Notifikasi:</h3>
+    <ul id="notificationLog" style="text-align:left;"></ul>
+  </div>
 
-    setTimeout(() => {
-      let reward = "";
-      if (angle >= 0 && angle < 72) reward = "zonk";
-      else if (angle < 144) reward = "+10";
-      else if (angle < 216) reward = "+25";
-      else if (angle < 288) reward = "+50";
-      else reward = "double";
+  <script>
+    let points = parseInt(localStorage.getItem("points")) || 0;
+    let doubleNext = false;
+    const notification = document.getElementById("notification");
 
-      let earned = 0;
-      switch (reward) {
-        case "zonk":
-          earned = 0;
-          break;
-        case "+10":
-          earned = 10;
-          break;
-        case "+25":
-          earned = 25;
-          break;
-        case "+50":
-          earned = 50;
-          break;
-        case "double":
-          doubleNext = true;
-          break;
+    function updatePointsDisplay() {
+      document.getElementById("points").textContent = "Poin: " + points;
+      localStorage.setItem("points", points);
+    }
+
+    function addNotificationLog(msg) {
+      let logs = JSON.parse(localStorage.getItem("notifLogs") || "[]");
+      logs.push({ msg, time: new Date().toLocaleString() });
+      localStorage.setItem("notifLogs", JSON.stringify(logs));
+    }
+
+    function renderNotificationLog() {
+      const list = document.getElementById("notificationLog");
+      list.innerHTML = "";
+      const logs = JSON.parse(localStorage.getItem("notifLogs") || "[]");
+      logs.reverse().forEach((log) => {
+        const li = document.createElement("li");
+        li.textContent = `[${log.time}] ${log.msg}`;
+        list.appendChild(li);
+      });
+    }
+
+    function spinWheel() {
+      const wheel = document.getElementById("wheel");
+      const deg = Math.floor(3600 + Math.random() * 360);
+      wheel.style.transform = `rotate(${deg}deg)`;
+      const angle = deg % 360;
+
+      setTimeout(() => {
+        let reward = "";
+        if (angle >= 0 && angle < 72) reward = "zonk";
+        else if (angle < 144) reward = "+10";
+        else if (angle < 216) reward = "+25";
+        else if (angle < 288) reward = "+50";
+        else reward = "double";
+
+        let earned = 0;
+        switch (reward) {
+          case "zonk": earned = 0; break;
+          case "+10": earned = 10; break;
+          case "+25": earned = 25; break;
+          case "+50": earned = 50; break;
+          case "double": doubleNext = true; break;
+        }
+
+        if (reward !== "double") {
+          earned = doubleNext ? earned * 2 : earned;
+          doubleNext = false;
+          points += earned;
+          notification.textContent = `Kamu mendapatkan ${earned} poin!`;
+          addNotificationLog(`Mendapatkan ${earned} poin dari spin.`);
+        } else {
+          notification.textContent = `Selanjutnya poinmu akan dikalikan 2!`;
+          addNotificationLog(`Aktifkan Double Poin untuk spin berikutnya.`);
+        }
+
+        updatePointsDisplay();
+      }, 4000);
+    }
+
+    function submitWithdraw() {
+      const amount = parseInt(document.getElementById("amount").value);
+      const name = document.getElementById("fullname").value;
+      const acc = document.getElementById("account").value;
+
+      if (!name || !acc) {
+        alert("Harap isi nama dan rekening.");
+        return;
+      }
+      if (points < amount) {
+        document.getElementById("exchangeMessage").textContent = "Poin tidak cukup!";
+        return;
       }
 
-      if (reward !== "double") {
-        earned = doubleNext ? earned * 2 : earned;
-        doubleNext = false;
-        points += earned;
-        notification.textContent = `Kamu mendapatkan ${earned} poin!`;
-      } else {
-        notification.textContent = `Selanjutnya poinmu akan dikalikan 2!`;
-      }
-
+      points -= amount;
       updatePointsDisplay();
-    }, 4000);
-  }
+      document.getElementById("exchangeMessage").textContent = "Permintaan penarikan diajukan!";
+      addNotificationLog(`${name} mengajukan penarikan sebesar ${amount} poin.`);
 
-  function submitWithdraw() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const name = document.getElementById("fullname").value;
-    const acc = document.getElementById("account").value;
-
-    if (!name || !acc) {
-      alert("Harap isi nama dan rekening.");
-      return;
-    }
-    if (points < amount) {
-      document.getElementById("exchangeMessage").textContent = "Poin tidak cukup!";
-      return;
+      let history = JSON.parse(localStorage.getItem("withdraws") || "[]");
+      history.push({ name, acc, amount, confirmed: false });
+      localStorage.setItem("withdraws", JSON.stringify(history));
     }
 
-    points -= amount;
-    updatePointsDisplay();
-    document.getElementById("exchangeMessage").textContent = "Permintaan penarikan diajukan!";
+    function loginAdmin() {
+      const user = document.getElementById("adminUser").value;
+      const pass = document.getElementById("adminPass").value;
+      if (user === "admin" && pass === "admin123") {
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("adminLogin").style.display = "none";
+        showAdminData();
+      } else {
+        alert("Login gagal!");
+      }
+    }
 
-    // Simpan ke localStorage simulasi data penarikan
-    let history = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    history.push({ name, acc, amount });
-    localStorage.setItem("withdraws", JSON.stringify(history));
-  }
+    function showAdminData() {
+      document.getElementById("totalPoints").textContent = localStorage.getItem("points") || 0;
+      const list = document.getElementById("withdrawList");
+      list.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem("withdraws") || "[]");
 
-  function loginAdmin() {
-    const user = document.getElementById("adminUser").value;
-    const pass = document.getElementById("adminPass").value;
-    if (user === "admin" && pass === "admin123") {
-      document.getElementById("adminPanel").style.display = "block";
-      document.getElementById("adminLogin").style.display = "none";
+      data.forEach((d, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `${d.name} - ${d.acc} - ${d.amount} poin 
+          ${!d.confirmed ? `<button onclick="confirmWithdraw(${i})">Konfirmasi</button>` : `<span style="color:lightgreen;">(Sudah dikonfirmasi)</span>`}`;
+        list.appendChild(li);
+      });
+
+      renderNotificationLog();
+    }
+
+    function confirmWithdraw(index) {
+      let data = JSON.parse(localStorage.getItem("withdraws") || "[]");
+      data[index].confirmed = true;
+      localStorage.setItem("withdraws", JSON.stringify(data));
+      addNotificationLog(`Penarikan oleh ${data[index].name} telah dikonfirmasi admin.`);
       showAdminData();
-    } else {
-      alert("Login gagal!");
     }
-  }
 
-  function showAdminData() {
-    document.getElementById("totalPoints").textContent = localStorage.getItem("points") || 0;
-    const list = document.getElementById("withdrawList");
-    list.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    data.forEach((d) => {
-      const li = document.createElement("li");
-      li.textContent = `${d.name} - ${d.acc} - ${d.amount} poin`;
-      list.appendChild(li);
-    });
-  }
-
-  updatePointsDisplay();
-</script>
-
+    updatePointsDisplay();
+  </script>
 </body>
-  </html>
+</html>
