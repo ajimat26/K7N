@@ -32,6 +32,7 @@
     color: #6d4c41;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    user-select:none;
   }
   #box:hover:not(.disabled) {
     background-color: #ffb74d;
@@ -47,6 +48,7 @@
     color: white;
     box-shadow: 0 5px #bf360c;
     transition: background-color 0.2s;
+    user-select:none;
   }
   button:hover:not(:disabled) {
     background-color: #ff5722;
@@ -237,43 +239,4 @@
     localStorage.setItem('riwayatPenarikan', JSON.stringify(riwayatPenarikan));
     localStorage.setItem('penarikanPending', JSON.stringify(penarikanPending));
     localStorage.setItem('lastSupplyTime', lastSupplyTime);
-    localStorage.setItem('maintenanceMode', maintenanceMode);
-    localStorage.setItem('maintenanceReason', maintenanceReason);
-  }
-
-  // Render daftar pesan
-  function renderMessages(){
-    messageList.innerHTML = "";
-    messages.forEach((msg, i) => {
-      const li = document.createElement('li');
-      li.textContent = msg;
-      messageList.appendChild(li);
-    });
-  }
-
-  // Render riwayat penarikan
-  function renderRiwayat(){
-    riwayatList.innerHTML = "";
-    if(riwayatPenarikan.length === 0){
-      riwayatList.innerHTML = "<li>Belum ada riwayat penarikan.</li>";
-      return;
-    }
-    riwayatPenarikan.forEach((item, i) => {
-      const li = document.createElement('li');
-      li.textContent = `Nama: ${item.nama} | Rek: ${item.rekening} | Jumlah: ${item.amount} poin | Status: ${item.status}`;
-      riwayatList.appendChild(li);
-    });
-  }
-
-  // Render daftar penarikan pending untuk admin konfirmasi
-  function renderKonfirmasi(){
-    konfirmasiList.innerHTML = "";
-    if(penarikanPending.length === 0){
-      konfirmasiList.innerHTML = "<li>Tidak ada penarikan yang perlu dikonfirmasi.</li>";
-      return;
-    }
-    penarikanPending.forEach((item, i) => {
-      const li = document.createElement('li');
-      li.textContent = `Nama: ${item.nama} | Rek: ${item.rekening} | Jumlah: ${item.amount} poin`;
-      const btnConfirm = document.createElement('button');
-      btnConfirm.textContent = "Konfirmasi";
+    localStorage.setItem('maintenanceMode', maintenance
