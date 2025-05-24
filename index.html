@@ -1,223 +1,127 @@
+.rekening}, Jum
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<title>Game Kotak Hadiah</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom right, #4facfe, #00f2fe);
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-  }
-  h1 { margin-bottom: 10px; }
-  button {
-    background: #28a745;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    margin: 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  button:hover { background: #218838; }
-  select, input, textarea {
-    width: 80%;
-    padding: 10px;
-    margin: 5px;
-    border-radius: 6px;
-    border: none;
-    font-size: 16px;
-  }
-  #boxAnimation {
-    width: 120px;
-    height: 120px;
-    margin: 20px auto;
-    background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    animation: none;
-  }
-  @keyframes shake {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(10deg); }
-    50% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
-    100% { transform: rotate(0deg); }
-  }
-  .panel {
-    display: none;
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 10px;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  #notif {
-    margin-top: 10px;
-    font-weight: bold;
-    min-height: 24px;
-  }
-  #maintenanceNotice {
-    background: #ff4c4c;
-    padding: 10px;
-    border-radius: 6px;
-    margin: 15px auto;
-    max-width: 400px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulasi Penarikan Poin</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    button { margin: 5px; padding: 10px 15px; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
 
-<h1>Game Kotak Hadiah</h1>
+<h2>Selamat datang, <span id="nama">Guest</span>!</h2>
+<p>Poin Anda: <span id="poin">0</span></p>
+<p>Rekening: <span id="rekening">-</span></p>
 
-<div id="maintenanceNotice" style="display:none;"></div>
+<button onclick="bukaKotak()">Buka Kotak</button>
+<button onclick="ajukanPenarikan()">Ajukan Penarikan</button>
+<button onclick="lihatPesan()">Lihat Pesan</button>
+<button onclick="loginAdmin()">Login Admin</button>
 
-<div id="gamePanel">
-  <div id="boxAnimation"></div>
-  <button id="btnOpenBox">Buka Kotak</button>
-  <div id="notif"></div>
-  <h3>Poin: <span id="points">0</span></h3>
-
-  <hr>
-
-  <h3>Penarikan Poin</h3>
-  <select id="amount">
-    <option value="200">50.000 IC - 200 poin</option>
-    <option value="400">100.000 IC - 400 poin</option>
-    <option value="1000">250.000 IC - 1000 poin</option>
-    <option value="2000">500.000 IC - 2000 poin</option>
-    <option value="4000">1.000.000 IC - 4000 poin</option>
-    <option value="8000">2.000.000 IC - 8000 poin</option>
-  </select><br>
-  <input type="text" id="nama" placeholder="Nama Lengkap"><br>
-  <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
-  <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
-
-  <hr>
-
-  <button id="btnLihatPesan">Lihat Pesan</button>
-  <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
-  <button id="btnAdminPanel">Admin Panel</button>
-  <button onclick="window.open('https://wa.me/6283891019471','_blank')">Kasih Saran ke Developer</button>
-
-  <div id="pesan" class="panel">
-    <h3>Pesan</h3>
-    <ul id="messageList"></ul>
-    <button id="btnHapusPesan">Hapus Semua Pesan</button>
-  </div>
-
-  <div id="riwayat" class="panel">
-    <h3>Riwayat Penarikan</h3>
-    <ul id="riwayatList"></ul>
-  </div>
+<div id="pesan" class="hidden"></div>
+<div id="adminPanel" class="hidden">
+  <h3>Admin Panel</h3>
+  <button onclick="tambahPesan()">Tambah Pesan</button>
+  <button onclick="lihatRiwayat()">Lihat Riwayat Penarikan</button>
+  <button onclick="matikanKotak()">Aktif/Nonaktif Kotak</button>
 </div>
-
-<!-- Panel login admin -->
-<div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3);">
-  <h3>Login Admin</h3>
-  <input type="password" id="adminPass" placeholder="Password Admin"><br>
-  <button id="btnLoginAdmin">Masuk</button>
-  <button id="btnBatalLoginAdmin">Batal</button>
-  <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
-</div>
-
-<!-- Panel admin setelah login -->
-<div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto; background: rgba(0,0,0,0.4);">
-  <h3>Panel Admin</h3>
-  
-  <h4>Permintaan Penarikan</h4>
-  <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
-
-  <hr>
-  <h4>Mode Maintenance</h4>
-  <label>Alasan Maintenance:</label><br>
-  <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
-  <label>Durasi Maintenance (menit):</label><br>
-  <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
-  <button id="btnStartMaintenance">Mulai Maintenance</button>
-  <button id="btnStopMaintenance">Hentikan Maintenance</button>
-
-  <hr>
-  <button id="btnLogoutAdmin">Logout Admin</button>
-</div>
-
-<audio autoplay loop id="backsound" volume="0.5">
-  <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+<div id="riwayat" class="hidden"></div>
 
 <script>
-  // Data localStorage keys
-  const STORAGE_POINTS = "points";
-  const STORAGE_MESSAGES = "messages";
-  const STORAGE_WITHDRAWS = "withdraws";
-  const STORAGE_MAINTENANCE = "maintenance";
+let poin = 0;
+let user = {
+  nama: "Guest",
+  rekening: "-"
+};
+let pesanList = ["Selamat datang di aplikasi!", "Promo penarikan minggu ini!"];
+let isAdmin = false;
+let kotakAktif = true;
+let riwayatPenarikan = [];
 
-  // State
-  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
-  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
-  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
-  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || null);
+// Simulasi login user
+function setUser(nama, rekening) {
+  user.nama = nama;
+  user.rekening = rekening;
+  document.getElementById("nama").textContent = nama;
+  document.getElementById("rekening").textContent = rekening;
+}
+setUser("User123", "1234567890");
 
-  let doubleNext = false;
-  let adminLoggedIn = false;
+// Fungsi utama
+function bukaKotak() {
+  if (!kotakAktif) return alert("Kotak saat ini sedang nonaktif.");
+  const hasil = Math.floor(Math.random() * 50) + 1;
+  poin += hasil;
+  document.getElementById("poin").textContent = poin;
+  alert(`Anda mendapatkan ${hasil} poin!`);
+}
 
-  const rewards = [
-    {name: "Zonk", point: 0},
-    {name: "+10 Poin", point: 10},
-    {name: "+50 Poin", point: 50},
-    {name: "+100 Poin", point: 100},
-    {name: "2x Reward Berikutnya", point: -1}
-  ];
+function ajukanPenarikan() {
+  const jumlah = prompt("Masukkan jumlah poin yang ingin ditarik:");
+  const jumlahNum = parseInt(jumlah);
+  if (isNaN(jumlahNum) || jumlahNum <= 0) return alert("Jumlah tidak valid.");
+  if (jumlahNum > poin) return alert("Poin tidak cukup.");
+  poin -= jumlahNum;
+  document.getElementById("poin").textContent = poin;
+  riwayatPenarikan.push({
+    nama: user.nama,
+    rekening: user.rekening,
+    jumlah: jumlahNum,
+    waktu: new Date().toLocaleString()
+  });
+  alert("Penarikan berhasil diajukan!");
+}
 
-  // Update point display
-  function updatePoints() {
-    document.getElementById("points").innerText = points;
-    localStorage.setItem(STORAGE_POINTS, points);
+function lihatPesan() {
+  const pesanEl = document.getElementById("pesan");
+  if (pesanList.length === 0) {
+    pesanEl.innerHTML = "<p>Tidak ada pesan.</p>";
+  } else {
+    pesanEl.innerHTML = "<ul>" + pesanList.map(p => `<li>${p}</li>`).join("") + "</ul>";
   }
+  pesanEl.classList.toggle("hidden");
+}
 
-  // Show notification
-  function notif(teks) {
-    document.getElementById("notif").innerText = teks;
+function loginAdmin() {
+  const pw = prompt("Masukkan password admin:");
+  if (pw === "admin123") {
+    isAdmin = true;
+    document.getElementById("adminPanel").classList.remove("hidden");
+    alert("Login admin berhasil.");
+  } else {
+    alert("Password salah.");
   }
+}
 
-  // Add message to history
-  function addMessage(text) {
-    messages.push(text);
-    if (messages.length > 50) messages.shift();
-    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
-    tampilPesan();
+function tambahPesan() {
+  if (!isAdmin) return alert("Akses ditolak.");
+  const teks = prompt("Masukkan pesan baru:");
+  if (teks) {
+    pesanList.push(teks);
+    alert("Pesan ditambahkan.");
   }
+}
 
-  // Display messages
-  function tampilPesan() {
-    const ul = document.getElementById("messageList");
-    ul.innerHTML = "";
-    messages.forEach(m => {
-      const li = document.createElement("li");
-      li.textContent = m;
-      ul.appendChild(li);
-    });
+function lihatRiwayat() {
+  const el = document.getElementById("riwayat");
+  if (riwayatPenarikan.length === 0) {
+    el.innerHTML = "<p>Tidak ada riwayat penarikan.</p>";
+  } else {
+    el.innerHTML = "<ul>" + riwayatPenarikan.map(w => `<li>Nama: ${w.nama}, Rekening: ${w.rekening}, Jumlah: ${w.jumlah}, Waktu: ${w.waktu}</li>`).join("") + "</ul>";
   }
+  el.classList.toggle("hidden");
+}
 
-  // Clear all messages
-  function hapusPesan() {
-    if(confirm("Yakin ingin hapus semua pesan?")) {
-      messages = [];
-      localStorage.setItem(STORAGE_MESSAGES, "[]");
-      tampilPesan();
-      notif("Semua pesan telah dihapus.");
-    }
-  }
+function matikanKotak() {
+  if (!isAdmin) return alert("Akses ditolak.");
+  kotakAktif = !kotakAktif;
+  alert("Status kotak: " + (kotakAktif ? "AKTIF" : "NONAKTIF"));
+}
+</script>
 
-  // Display withdraw history
-  function tampilRiwayat() {
-    const ul = document.getElementById("riwayatList");
-    ul.innerHTML = "";
-    withdraws.forEach(w => {
-      const li = document.createElement("li");
-      li.textContent = `Nama: ${w.nama}, Rekening: ${w.rekening}, Jum
+</body>
+</html>
