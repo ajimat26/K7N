@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Kotak Hadiah 2D Berwarna - Tombol Berfungsi</title>
+<title>Game Kotak Hadiah - Real Time & Admin</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -75,6 +75,13 @@
     display: none;
     text-align: left;
   }
+  .adminOnly {
+    background: #d32f2f !important;
+  }
+  .confirmed {
+    text-decoration: line-through;
+    color: gray;
+  }
 </style>
 </head>
 <body>
@@ -113,6 +120,7 @@
 
 <button id="btnLihatPesan">Lihat Pesan</button>
 <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
+<button id="btnKonfirmasiPenarikan" style="display:none;">Konfirmasi Penarikan (Admin)</button>
 
 <div id="pesanPanel" class="panel">
   <h3>Pesan</h3>
@@ -125,32 +133,88 @@
   <ul id="riwayatList"></ul>
 </div>
 
+<div id="konfirmasiPanel" class="panel">
+  <h3>Konfirmasi Penarikan</h3>
+  <ul id="konfirmasiList"></ul>
+</div>
+
 <script>
-  // Data awal
+  // --- SOUNDS ---
+  const soundClick = new Audio('https://actions.google.com/sounds/v1/ui/click.ogg');
+
+  function playClick() {
+    soundClick.currentTime = 0;
+    soundClick.play().catch(() => {}); // ignore errors on autoplay
+  }
+
+  // --- ADMIN CHECK (contoh) ---
+  // Ganti "adminUser" sesuai username admin atau pakai login sistemmu sendiri
+  const adminUser = "admin"; 
+  // Simple prompt username
+  let currentUser = prompt("Masukkan username (admin untuk akses admin):", "guest");
+  if (!currentUser) currentUser = "guest";
+  const isAdmin = currentUser.toLowerCase() === adminUser;
+
+  // --- DATA ---
   let points = 0;
   let keys = 0;
   let messages = ["Selamat datang di game!"];
   let riwayatPenarikan = [];
+  let penarikanPending = [];
 
-  // Elemen DOM
+  // DOM Elements
   const notif = document.getElementById('notif');
   const pointsEl = document.getElementById('points');
   const keysEl = document.getElementById('keys');
   const messageList = document.getElementById('messageList');
   const riwayatList = document.getElementById('riwayatList');
+  const konfirmasiList = document.getElementById('konfirmasiList');
   const pesanPanel = document.getElementById('pesanPanel');
   const riwayatPanel = document.getElementById('riwayatPanel');
+  const konfirmasiPanel = document.getElementById('konfirmasiPanel');
+  const btnKonfirmasi = document.getElementById('btnKonfirmasiPenarikan');
 
-  // Update tampilan poin dan kunci
+  // WebSocket connection
+  const wsUrl = "ws://localhost:8080"; // Ganti sesuai alamat servermu
+  let ws;
+
+  function initWebSocket() {
+    ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+      // Kirim info user ke server
+      ws.send(JSON.stringify({type:"join", user: currentUser, admin: isAdmin}));
+    };
+    ws.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      if(data.type === "updatePenarikan"){
+        penarikanPending = data.pending;
+        riwayatPenarikan = data.history;
+        updateKonfirmasiList();
+        updateRiwayatList();
+      }
+      if(data.type === "notif"){
+        notif.textContent = data.message;
+      }
+    };
+    ws.onclose = () => {
+      console.log("WebSocket disconnected, mencoba reconnect dalam 3 detik...");
+      setTimeout(initWebSocket, 3000);
+    };
+  }
+
+  initWebSocket();
+
+  // Update tampilan poin & kunci
   function updateStats() {
     pointsEl.textContent = points;
     keysEl.textContent = keys;
   }
 
-  // Tampilkan pesan di panel pesan
+  // Tampilkan pesan
   function tampilkanPesan() {
     messageList.innerHTML = '';
-    messages.forEach((msg, idx) => {
+    messages.forEach((msg) => {
       const li = document.createElement('li');
       li.textContent = msg;
       messageList.appendChild(li);
@@ -158,7 +222,7 @@
   }
 
   // Tampilkan riwayat penarikan
-  function tampilkanRiwayat() {
+  function updateRiwayatList() {
     riwayatList.innerHTML = '';
     if (riwayatPenarikan.length === 0) {
       riwayatList.innerHTML = '<li>Tidak ada riwayat penarikan.</li>';
@@ -171,89 +235,39 @@
     });
   }
 
-  // Reset notif
-  function clearNotif() {
-    notif.textContent = '';
+  // Update daftar penarikan yang belum dikonfirmasi (admin)
+  function updateKonfirmasiList() {
+    konfirmasiList.innerHTML = '';
+    if(penarikanPending.length === 0){
+      konfirmasiList.innerHTML = '<li>Tidak ada penarikan yang perlu dikonfirmasi.</li>';
+      return;
+    }
+    penarikanPending.forEach((item, idx) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <strong>${item.nama}</strong> - ${item.amount} poin - ${item.tanggal}
+        <button data-idx="${idx}">Konfirmasi</button>
+      `;
+      konfirmasiList.appendChild(li);
+    });
+    // Pasang event listener ke tombol konfirmasi
+    konfirmasiList.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playClick();
+        const index = Number(btn.getAttribute('data-idx'));
+        konfirmasiPenarikan(index);
+      });
+    });
   }
 
-  // Event tombol Buka Kotak
-  document.getElementById('btnOpenBox').addEventListener('click', () => {
-    if (keys <= 0) {
-      notif.textContent = 'Kunci tidak cukup untuk membuka kotak!';
+  // Fungsi konfirmasi penarikan (admin only)
+  function konfirmasiPenarikan(idx){
+    if(!isAdmin) {
+      notif.textContent = "Hanya admin yang dapat mengonfirmasi penarikan!";
       return;
     }
-    keys--;
-    // Hadiah acak poin antara 50 - 150
-    const hadiah = Math.floor(Math.random() * 101) + 50;
-    points += hadiah;
-    notif.textContent = `Kamu mendapatkan ${hadiah} poin dari kotak!`;
-    updateStats();
-  });
+    const item = penarikanPending[idx];
+    if(!item) return;
 
-  // Event tombol Ambil Box Suplai (1x per jam)
-  let lastSupply = 0;
-  document.getElementById('btnSupply').addEventListener('click', () => {
-    const now = Date.now();
-    if (now - lastSupply < 3600000) {
-      const remaining = Math.ceil((3600000 - (now - lastSupply)) / 60000);
-      notif.textContent = `Tunggu ${remaining} menit lagi untuk suplai berikutnya.`;
-      return;
-    }
-    keys++;
-    notif.textContent = 'Kamu mendapatkan 1 kunci kotak!';
-    updateStats();
-    lastSupply = now;
-  });
-
-  // Event tombol Ajukan Penarikan
-  document.getElementById('btnAjukanPenarikan').addEventListener('click', () => {
-    const amount = Number(document.getElementById('amount').value);
-    const nama = document.getElementById('nama').value.trim();
-    const rekening = document.getElementById('rekening').value.trim();
-
-    if (!nama || !rekening) {
-      notif.textContent = 'Nama dan Rekening harus diisi!';
-      return;
-    }
-    if (points < amount) {
-      notif.textContent = 'Poin tidak cukup untuk penarikan ini.';
-      return;
-    }
-
-    points -= amount;
-    const tanggal = new Date().toLocaleString();
-    riwayatPenarikan.push({nama, rekening, amount, tanggal});
-    notif.textContent = `Penarikan ${amount} poin diajukan!`;
-    updateStats();
-  });
-
-  // Event tombol Lihat Pesan
-  document.getElementById('btnLihatPesan').addEventListener('click', () => {
-    pesanPanel.style.display = pesanPanel.style.display === 'block' ? 'none' : 'block';
-    riwayatPanel.style.display = 'none';
-    tampilkanPesan();
-  });
-
-  // Event tombol Hapus Semua Pesan
-  document.getElementById('btnHapusPesan').addEventListener('click', () => {
-    if (confirm("Yakin ingin menghapus semua pesan?")) {
-      messages = [];
-      tampilkanPesan();
-      notif.textContent = 'Semua pesan telah dihapus.';
-    }
-  });
-
-  // Event tombol Riwayat Penarikan
-  document.getElementById('btnRiwayatPenarikan').addEventListener('click', () => {
-    riwayatPanel.style.display = riwayatPanel.style.display === 'block' ? 'none' : 'block';
-    pesanPanel.style.display = 'none';
-    tampilkanRiwayat();
-  });
-
-  // Update tampilan awal
-  updateStats();
-  clearNotif();
-</script>
-
-</body>
-  </html>
+    // Kirim ke server konfirmasi penarikan
+    ws.send(JSON.stringify({type:"confirm", idx}));
