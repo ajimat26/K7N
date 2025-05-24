@@ -1,229 +1,270 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spin Wheel & Random Box Game</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      color: #fff;
-      user-select: none;
-      text-align: center;
-    }
-    #points, #message, #adminPanel, #notification, #version {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-    #wheel-container, #box-container {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 30px auto;
-    }
-    #wheel {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      border: 10px solid #fff;
-      background: conic-gradient(
-        #ff6f61 0deg 72deg,
-        #ffd700 72deg 144deg,
-        #4caf50 144deg 216deg,
-        #2196f3 216deg 288deg,
-        #9c27b0 288deg 360deg
-      );
-      transition: transform 4s ease-out;
-      position: relative;
-      margin: auto;
-    }
-    .label {
-      position: absolute;
-      width: 100px;
-      text-align: center;
-      color: white;
-      font-weight: bold;
-      transform-origin: bottom center;
-      left: 110px;
-      top: 10px;
-      user-select: none;
-    }
-    #pointer {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 40px solid #fff;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      margin: 10px 5px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background-color: #444;
-      color: white;
-      transition: background-color 0.3s;
-      user-select: none;
-    }
-    button:hover:not(:disabled) {
-      background-color: #666;
-    }
-    button:disabled {
-      background-color: #222;
-      cursor: not-allowed;
-    }
-    #exchange-section, #adminLogin, #adminPanel, #messagesPanel, #historyPanel {
-      background: rgba(0,0,0,0.2);
-      border-radius: 10px;
-      padding: 15px;
-      max-width: 400px;
-      margin: 15px auto;
-      text-align: left;
-      color: white;
-    }
-    input, select {
-      width: 100%;
-      margin: 5px 0 10px 0;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    ul {
-      max-height: 150px;
-      overflow-y: auto;
-      padding-left: 20px;
-      margin: 5px 0;
-    }
-    #box {
-      width: 150px;
-      height: 150px;
-      margin: 20px auto;
-      background-color: #ffd700;
-      border-radius: 15px;
-      box-shadow: 0 0 15px 5px gold;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.5s ease;
-      user-select: none;
-    }
-    #box.opening {
-      animation: shake 0.7s ease-in-out 2;
-    }
-    #box.opened {
-      background-color: #4caf50;
-      box-shadow: 0 0 20px 7px limegreen;
-      cursor: default;
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Random Box & Spin Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#89f7fe 0%,#66a6ff 100%);
+    color: #fff;
+    text-align: center;
+    user-select: none;
+  }
+  #points {
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  #notification {
+    margin: 15px auto;
+    color: #ffeb3b;
+    min-height: 20px;
+    font-weight: bold;
+  }
+  #wheel-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 30px auto;
+  }
+  #wheel {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    border: 10px solid #fff;
+    background: conic-gradient(
+      #ff6f61 0deg 72deg,
+      #ffd700 72deg 144deg,
+      #4caf50 144deg 216deg,
+      #2196f3 216deg 288deg,
+      #9c27b0 288deg 360deg
+    );
+    transition: transform 4s ease-out;
+    margin: auto;
+  }
+  #pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid #fff;
+  }
+  button {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  button:hover:not(:disabled) {
+    background-color: #555;
+  }
+  button:disabled {
+    background-color: #222;
+    cursor: not-allowed;
+  }
+  #box {
+    width: 150px;
+    height: 150px;
+    margin: 20px auto;
+    background-color: #ffd700;
+    border-radius: 15px;
+    box-shadow: 0 0 15px 5px gold;
+    cursor: pointer;
+    transition: transform 0.5s ease;
+  }
+  #box.opening {
+    animation: shake 0.7s ease-in-out 2;
+  }
+  #box.opened {
+    background-color: #4caf50;
+    box-shadow: 0 0 20px 7px limegreen;
+    cursor: default;
+  }
+  @keyframes shake {
+    0%,100%{transform: translateX(0);}
+    25%{transform: translateX(-10px);}
+    75%{transform: translateX(10px);}
+  }
+  #messagesPanel, #historyPanel, #adminPanel {
+    background: rgba(0,0,0,0.3);
+    max-width: 400px;
+    margin: 20px auto;
+    border-radius: 10px;
+    padding: 15px;
+    display: none;
+    text-align: left;
+  }
+  ul {
+    max-height: 150px;
+    overflow-y: auto;
+    padding-left: 20px;
+  }
+  input, select {
+    width: 100%;
+    margin: 5px 0 10px;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+</style>
 </head>
 <body>
 
-  <div id="version">Version 1.1</div>
-  <div id="points">Poin: 0</div>
-  <div id="notification"></div>
+<h1>Random Box & Spin Game</h1>
+<div id="version">Version 1.1</div>
+<div id="points">Poin: 0</div>
+<div id="notification"></div>
 
-  <div id="wheel-container">
-    <div id="pointer"></div>
-    <div id="wheel" aria-label="Roda putar hadiah">
-      <div class="label" style="transform: rotate(36deg)">Zonk</div>
-      <div class="label" style="transform: rotate(108deg)">+50</div>
-      <div class="label" style="transform: rotate(180deg)">+100</div>
-      <div class="label" style="transform: rotate(252deg)">+250</div>
-      <div class="label" style="transform: rotate(324deg)">2x Poin</div>
-    </div>
-  </div>
-  <button id="spinBtn">Putar Roda</button>
+<div id="wheel-container">
+  <div id="pointer"></div>
+  <div id="wheel" aria-label="Roda Putar Hadiah"></div>
+</div>
+<button id="spinBtn">Putar Roda</button>
 
-  <div id="box-container">
-    <div id="box" title="Klik untuk buka box hadiah"></div>
-  </div>
-  <button id="openBoxBtn">Buka Box</button>
+<div id="box" title="Klik untuk buka box hadiah"></div>
+<button id="openBoxBtn" disabled>Buka Box</button>
 
-  <div id="message"></div>
+<div id="exchange-section" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px;">
+  <h3>Tukar Poin</h3>
+  <select id="amount">
+    <option value="50000">50.000 IC - 50.000 Poin</option>
+    <option value="100000">100.000 IC - 100.000 Poin</option>
+    <option value="2000000">2.000.000 IC - 2.000.000 Poin</option>
+  </select>
+  <input type="text" id="fullname" placeholder="Nama lengkap" />
+  <input type="text" id="account" placeholder="Nomor rekening" />
+  <button id="withdrawBtn">Ajukan Penarikan</button>
+  <div id="exchangeMessage"></div>
+</div>
 
-  <div id="exchange-section">
-    <h2>Tukar Poin</h2>
-    <select id="amount">
-      <option value="50000">50.000 IC - 50.000 Poin</option>
-      <option value="100000">100.000 IC - 100.000 Poin</option>
-      <option value="2000000">2.000.000 IC - 2.000.000 Poin</option>
-    </select>
-    <input type="text" id="fullname" placeholder="Nama lengkap" />
-    <input type="text" id="account" placeholder="Nomor rekening" />
-    <button id="withdrawBtn">Ajukan Penarikan</button>
-    <div id="exchangeMessage"></div>
-  </div>
+<button id="showMessagesBtn">Lihat Pesan</button>
+<button id="showHistoryBtn">Lihat Riwayat Penarikan</button>
 
-  <button id="showMessagesBtn">Lihat Pesan</button>
-  <button id="showHistoryBtn">Lihat Riwayat Penarikan</button>
+<div id="messagesPanel">
+  <h3>Pesan</h3>
+  <ul id="messagesList"></ul>
+  <button id="closeMessagesBtn">Tutup Pesan</button>
+</div>
 
-  <div id="messagesPanel" style="display:none;">
-    <h3>Pesan</h3>
-    <ul id="messagesList"></ul>
-    <button id="closeMessagesBtn">Tutup Pesan</button>
-  </div>
+<div id="historyPanel">
+  <h3>Riwayat Penarikan</h3>
+  <ul id="withdrawList"></ul>
+  <button id="closeHistoryBtn">Tutup Riwayat</button>
+</div>
 
-  <div id="historyPanel" style="display:none;">
-    <h3>Riwayat Penarikan</h3>
-    <ul id="withdrawList"></ul>
-    <button id="closeHistoryBtn">Tutup Riwayat</button>
-  </div>
+<div id="adminLogin" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px;">
+  <h3>Login Admin</h3>
+  <input type="text" id="adminUser" placeholder="Username" />
+  <input type="password" id="adminPass" placeholder="Password" />
+  <button id="loginBtn">Login</button>
+  <div id="adminLoginMessage" style="color: red;"></div>
+</div>
 
-  <div id="adminLogin">
-    <h3>Login Admin</h3>
-    <input type="text" id="adminUser" placeholder="Username" />
-    <input type="password" id="adminPass" placeholder="Password" />
-    <button id="loginBtn">Login</button>
-  </div>
-
-  <div id="adminPanel" style="display:none;">
-    <h2>Admin Panel</h2>
-    <div>Status Permainan: <span id="gameStatus">Buka</span></div>
-    <button id="toggleGameBtn">Tutup Permainan</button>
-    <div>Total Poin: <span id="totalPoints">0</span></div>
-  </div>
+<div id="adminPanel">
+  <h3>Admin Panel</h3>
+  <div>Status Permainan: <span id="gameStatus">Buka</span></div>
+  <button id="toggleGameBtn">Tutup Permainan</button>
+  <div>Total Poin: <span id="totalPoints">0</span></div>
+  <button id="adminLogoutBtn">Logout</button>
+</div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  // Variabel global
+  let points = parseInt(localStorage.getItem("points")) || 0;
+  let gameOpen = localStorage.getItem("gameOpen");
+  if (gameOpen === null) gameOpen = "true";
+  let boxOpened = false;
+  let messages = JSON.parse(localStorage.getItem("messages")) || [];
+  let withdrawals = JSON.parse(localStorage.getItem("withdrawals")) || [];
+  let adminLoggedIn = false;
 
-    // Data dan status
-    let points = parseInt(localStorage.getItem("points")) || 0;
-    let doubleNext = false;
-    let gameOpen = localStorage.getItem("gameOpen");
-    if(gameOpen === null) gameOpen = "true"; // default game buka
-    let boxOpened = false;
-    const notification = document.getElementById("notification");
-    const spinBtn = document.getElementById("spinBtn");
-    const openBoxBtn = document.getElementById("openBoxBtn");
-    const withdrawBtn = document.getElementById("withdrawBtn");
-    const showMessagesBtn = document.getElementById("showMessagesBtn");
-    const showHistoryBtn = document.getElementById("showHistoryBtn");
-    const closeMessagesBtn = document.getElementById("closeMessagesBtn");
-    const closeHistoryBtn = document.getElementById("closeHistoryBtn");
-    const adminLoginDiv = document.getElementById("adminLogin");
-    const adminPanelDiv = document.getElementById("adminPanel");
-    const loginBtn = document.getElementById("loginBtn");
-    const toggleGameBtn = document.getElementById("toggleGameBtn");
+  // Elemen DOM
+  const pointsEl = document.getElementById("points");
+  const notification = document.getElementById("notification");
+  const wheel = document.getElementById("wheel");
+  const spinBtn = document.getElementById("spinBtn");
+  const box = document.getElementById("box");
+  const openBoxBtn = document.getElementById("openBoxBtn");
+  const withdrawBtn = document.getElementById("withdrawBtn");
+  const amountSelect = document.getElementById("amount");
+  const fullnameInput = document.getElementById("fullname");
+  const accountInput = document.getElementById("account");
+  const exchangeMessage = document.getElementById("exchangeMessage");
+  const showMessagesBtn = document.getElementById("showMessagesBtn");
+  const showHistoryBtn = document.getElementById("showHistoryBtn");
+  const messagesPanel = document.getElementById("messagesPanel");
+  const historyPanel = document.getElementById("historyPanel");
+  const messagesList = document.getElementById("messagesList");
+  const withdrawList = document.getElementById("withdrawList");
+  const closeMessagesBtn = document.getElementById("closeMessagesBtn");
+  const closeHistoryBtn = document.getElementById("closeHistoryBtn");
+  const adminLoginDiv = document.getElementById("adminLogin");
+  const adminPanelDiv = document.getElementById("adminPanel");
+  const loginBtn = document.getElementById("loginBtn");
+  const adminUser = document.getElementById("adminUser");
+  const adminPass = document.getElementById("adminPass");
+  const adminLoginMessage = document.getElementById("adminLoginMessage");
+  const toggleGameBtn = document.getElementById("toggleGameBtn");
+  const gameStatus = document.getElementById("gameStatus");
+  const totalPointsEl = document.getElementById("totalPoints");
+  const adminLogoutBtn = document.getElementById("adminLogoutBtn");
 
-    // Update tampilan poin
-    function updatePointsDisplay() {
-      document.getElementById("points").textContent = "Poin: " + points;
-      localStorage.setItem("points", points);
-      document.getElementById("totalPoints").textContent = points;
-    }
+  // Setup labels roda putar (sesuaikan jika mau)
+  const segments = [
+    { label: "Zonk", value: 0 },
+    { label: "+50", value: 50 },
+    { label: "+100", value: 100 },
+    { label: "+250", value: 250 },
+    { label: "2x Poin", value: -1 } // nilai -1 artinya kalikan poin berikutnya
+  ];
+
+  // Fungsi render label roda putar
+  function renderWheelLabels() {
+    wheel.innerHTML = "";
+    const segAngle = 360 / segments.length;
+    segments.forEach((seg, i) => {
+      const div = document.createElement("div");
+      div.classList.add("label");
+      div.style.transform = `rotate(${segAngle * i + segAngle / 2}deg) translateY(-130px)`;
+      div.style.position = "absolute";
+      div.style.width = "100px";
+      div.style.color = "white";
+      div.style.fontWeight = "bold";
+      div.style.textShadow = "0 0 3px #000";
+      div.textContent = seg.label;
+      wheel.appendChild(div);
+    });
+  }
+
+  renderWheelLabels();
+
+  // Update poin dan simpan ke localStorage
+  function updatePointsDisplay() {
+    pointsEl.textContent = "Poin: " + points;
+    localStorage.setItem("points", points);
+    totalPointsEl.textContent = points;
+  }
+
+  // Reset notification
+  function clearNotification() {
+    notification.textContent = "";
+  }
+
+  // Show notification sementara
+  function showNotification(text, duration = 3000) {
+    notification.textContent = text;
+    setTimeout(clearNotification, duration);
+  }
+
+  // Spin roda
