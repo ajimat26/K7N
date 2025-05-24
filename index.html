@@ -2,15 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Game Kotak Hadiah</title>
+  <title>Game Kotak Hadiah 2D Berwarna</title>
   <style>
     body {
       font-family: 'Comic Sans MS', cursive, sans-serif;
       background: linear-gradient(to bottom, #ffeaa7, #fab1a0);
       text-align: center;
       color: #2d3436;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
     }
     h1 {
       background-color: #fd79a8;
@@ -19,8 +18,7 @@
       margin: 0;
     }
     #boxAnimation {
-      width: 120px;
-      height: 120px;
+      width: 120px; height: 120px;
       background: #fdcb6e url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
       background-size: 80%;
       border: 3px solid #e17055;
@@ -45,12 +43,13 @@
       cursor: pointer;
       box-shadow: 0 4px #00b894;
       transition: 0.2s;
+      user-select: none;
     }
     button:active {
       transform: translateY(4px);
       box-shadow: 0 2px #00b894;
     }
-    input, select, textarea {
+    input, select {
       padding: 10px;
       margin: 5px;
       font-size: 15px;
@@ -58,10 +57,6 @@
       border: 2px solid #dfe6e9;
       width: 80%;
       max-width: 320px;
-      box-sizing: border-box;
-    }
-    textarea {
-      resize: vertical;
     }
     .panel {
       display: none;
@@ -70,7 +65,7 @@
       border-radius: 10px;
       margin: 10px auto;
       width: 90%;
-      max-width: 600px;
+      max-width: 400px;
       box-shadow: 0 0 10px #b2bec3;
       color: #2d3436;
       text-align: left;
@@ -78,8 +73,6 @@
     ul {
       list-style: square;
       padding-left: 20px;
-      max-height: 200px;
-      overflow-y: auto;
     }
     hr {
       border: 1px dashed #d63031;
@@ -91,6 +84,7 @@
       min-height: 24px;
       margin-top: 10px;
       color: #0984e3;
+      min-height: 28px;
     }
     #maintenanceNotice {
       background: #ff4c4c;
@@ -113,6 +107,26 @@
       background-color: #fab1a0;
       box-shadow: none;
       cursor: not-allowed;
+    }
+    #adminLoginPanel {
+      max-width: 400px;
+      margin: 20px auto;
+      background: rgba(0,0,0,0.3);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+      text-align: center;
+    }
+    #adminPanel {
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(0,0,0,0.4);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+      text-align: left;
     }
   </style>
 </head>
@@ -166,7 +180,7 @@
   </div>
 
   <!-- Panel login admin -->
-  <div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3); color: white;">
+  <div id="adminLoginPanel">
     <h3>Login Admin</h3>
     <input type="password" id="adminPass" placeholder="Password Admin"><br>
     <button id="btnLoginAdmin">Masuk</button>
@@ -175,10 +189,10 @@
   </div>
 
   <!-- Panel admin setelah login -->
-  <div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto; background: rgba(0,0,0,0.4); color: white;">
+  <div id="adminPanel">
     <h3>Panel Admin</h3>
     <h4>Permintaan Penarikan</h4>
-    <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
+    <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto;"></ul>
     <hr>
     <h4>Mode Maintenance</h4>
     <label>Alasan Maintenance:</label><br>
@@ -193,42 +207,13 @@
 
   <audio autoplay loop id="backsound" volume="0.5">
     <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
+    Your browser tidak support audio.
   </audio>
 
   <script>
-    // Storage keys
+    // Local storage keys
     const STORAGE_POINTS = "points";
     const STORAGE_KEYS = "keys";
     const STORAGE_MESSAGES = "messages";
     const STORAGE_WITHDRAWS = "withdraws";
-    const STORAGE_MAINTENANCE = "maintenance";
-    const STORAGE_ADMIN = "adminLoggedIn";
-    const STORAGE_LAST_SUPPLY = "lastSupplyTime";
-
-    // State variables
-    let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
-    let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
-    let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
-    let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
-    let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false}');
-    let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
-    let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
-
-    // Elements
-    const pointsElem = document.getElementById("points");
-    const keysElem = document.getElementById("keys");
-    const notifElem = document.getElementById("notif");
-    const btnOpenBox = document.getElementById("btnOpenBox");
-    const btnSupply = document.getElementById("btnSupply");
-    const btnAjukanPenarikan = document.getElementById("btnAjukanPenarikan");
-    const btnLihatPesan = document.getElementById("btnLihatPesan");
-    const btnRiwayatPenarikan = document.getElementById("btnRiwayatPenarikan");
-    const btnAdminPanel = document.getElementById("btnAdminPanel");
-    const btnHapusPesan = document.getElementById("btnHapusPesan");
-    const messageList = document.getElementById("messageList");
-    const riwayatList = document.getElementById("riwayatList");
-    const pesanPanel = document.getElementById("pesan");
-    const riwayatPanel = document.getElementById("riwayat");
-    const adminLoginPanel = document.getElementById("adminLoginPanel");
-    const adminPanel = document.getElementById("adminPanel");
+    const STORAGE_MAINTENANCE =
