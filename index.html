@@ -2,60 +2,80 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Penarikan Uang</title>
+  <title>Game Tebak Gambar & Penarikan Uang</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #74ebd5, #ACB6E5);
+      margin: 0;
+      padding: 0;
     }
     .container {
-      max-width: 400px;
-      margin: auto;
+      max-width: 800px;
+      margin: 30px auto;
       background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    h2 {
+    h1, h2 {
       text-align: center;
     }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input, select, button {
+    label, select, input, button {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 4px;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
       border: 1px solid #ccc;
+      font-size: 16px;
     }
     button {
       background-color: #28a745;
       color: white;
-      border: none;
-      margin-top: 15px;
+      cursor: pointer;
     }
-    .notification {
+    #notification {
       margin-top: 20px;
       padding: 10px;
       background-color: #e7f3fe;
       border-left: 6px solid #2196F3;
+      display: none;
+    }
+    #gameCanvas {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: center;
+    }
+    #questionImage {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    #chatlog {
+      height: 150px;
+      overflow-y: auto;
+      background: #f1f1f1;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-
 <div class="container">
-  <h2>Formulir Penarikan</h2>
-  <label for="name">Nama Lengkap:</label>
-  <input type="text" id="name" placeholder="Masukkan nama lengkap">
-
-  <label for="account">Nomor Rekening:</label>
-  <input type="text" id="account" placeholder="Masukkan nomor rekening">
-
-  <label for="amount">Jumlah Penarikan:</label>
+  <h1>Game Tebak Gambar</h1>
+  <div id="gameCanvas">
+    <img id="questionImage" src="https://via.placeholder.com/400x200.png?text=Tebak+Gambar" alt="Gambar Tebakan">
+    <input type="text" id="jawaban" placeholder="Jawaban Anda">
+    <button onclick="submitJawaban()">Kirim Jawaban</button>
+    <div id="chatlog"></div>
+  </div>
+  <h2>Penarikan Uang</h2>
+  <label>Nama Lengkap:</label>
+  <input type="text" id="name">
+  <label>Nomor Rekening:</label>
+  <input type="text" id="account">
+  <label>Jumlah Penarikan:</label>
   <select id="amount">
     <option value="50000">Rp 50.000 (5.000 poin)</option>
     <option value="100000">Rp 100.000 (10.000 poin)</option>
@@ -63,98 +83,48 @@
     <option value="500000">Rp 500.000 (45.000 poin)</option>
     <option value="1000000">Rp 1.000.000 (90.000 poin)</option>
   </select>
-
   <button onclick="submitWithdrawal()">Ajukan Penarikan</button>
-
-  <div id="notification" class="notification" style="display:none;"></div>
+  <div id="notification"></div>
 </div>
-
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
-  // Konfigurasi Firebase
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  // Inisialisasi Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  // Simulasi data pengguna (untuk demonstrasi)
-  let userPoints = 100000; // Misalnya pengguna memiliki 100.000 poin
-
-  function submitWithdrawal() {
-    const name = document.getElementById('name').value.trim();
-    const account = document.getElementById('account').value.trim();
-    const amount = parseInt(document.getElementById('amount').value);
-    let requiredPoints;
-
-    switch(amount) {
-      case 50000:
-        requiredPoints = 5000;
-        break;
-      case 100000:
-        requiredPoints = 10000;
-        break;
-      case 250000:
-        requiredPoints = 22500;
-        break;
-      case 500000:
-        requiredPoints = 45000;
-        break;
-      case 1000000:
-        requiredPoints = 90000;
-        break;
-      default:
-        requiredPoints = 0;
-    }
-
-    if (!name || !account) {
-      alert("Mohon lengkapi semua data.");
-      return;
-    }
-
-    if (userPoints < requiredPoints) {
-      alert("Poin Anda tidak mencukupi untuk penarikan ini.");
-      return;
-    }
-
-    // Kurangi poin pengguna
-    userPoints -= requiredPoints;
-
-    // Simpan data penarikan ke Firebase
-    const withdrawalData = {
-      name: name,
-      account: account,
-      amount: amount,
-      pointsDeducted: requiredPoints,
-      status: "pending",
-      timestamp: new Date().toISOString()
-    };
-
-    db.ref('withdrawals').push(withdrawalData)
-      .then(() => {
-        document.getElementById('notification').style.display = 'block';
-        document.getElementById('notification').innerText = "Permintaan penarikan Anda telah diterima. Tim kami akan memprosesnya dalam waktu maksimal 24 jam. Harap tunggu konfirmasi selanjutnya.";
-        // Reset form
-        document.getElementById('name').value = '';
-        document.getElementById('account').value = '';
-        document.getElementById('amount').selectedIndex = 0;
-      })
-      .catch((error) => {
-        alert("Terjadi kesalahan: " + error.message);
-      });
-  }
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let userPoints = 100000;
+function submitJawaban() {
+  const jawab = document.getElementById("jawaban").value.toLowerCase();
+  const benar = ["kucing", "motor", "makan"];
+  const chat = document.getElementById("chatlog");
+  const point = jawab === "kucing" ? 300 : benar.includes(jawab) ? 100 : 0;
+  userPoints += point;
+  chat.innerHTML += `<div><b>Jawaban:</b> ${jawab} (${point > 0 ? '+'+point+' poin' : 'salah'})</div>`;
+  document.getElementById("jawaban").value = "";
+}
+function submitWithdrawal() {
+  const name = document.getElementById('name').value.trim();
+  const account = document.getElementById('account').value.trim();
+  const amount = parseInt(document.getElementById('amount').value);
+  let requiredPoints = amount / 10;
+  if (!name || !account) return alert("Lengkapi semua data.");
+  if (userPoints < requiredPoints) return alert("Poin tidak cukup.");
+  userPoints -= requiredPoints;
+  db.ref('withdrawals').push({ name, account, amount, timestamp: Date.now(), status: 'pending' });
+  document.getElementById('notification').style.display = 'block';
+  document.getElementById('notification').innerText =
+    "Pengajuan Anda telah diterima dan akan diproses maksimal dalam 24 jam oleh tim kami. Mohon tunggu konfirmasi selanjutnya.";
+  document.getElementById('name').value = '';
+  document.getElementById('account').value = '';
+}
 </script>
-
 </body>
 </html>
