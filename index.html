@@ -2,155 +2,266 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Event Game</title>
+  <title>Game Kotak Hadiah</title>
   <style>
-    body {
-      background: #121212;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .btn {
-      background-color: #3498db;
-      border: none;
-      color: white;
-      padding: 12px 24px;
-      margin: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .btn:hover {
-      background-color: #2980b9;
-    }
-
-    #notif {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #444;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      display: none;
-      z-index: 1000;
-    }
-
-    #box {
-      width: 120px;
-      height: 120px;
-      background: orange;
-      margin: 20px auto;
-      border-radius: 8px;
-    }
-
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    #boxAnimation { width: 100px; height: 100px; background: gold; margin: 20px auto; border-radius: 10px; text-align: center; line-height: 100px; font-weight: bold; }
     @keyframes shake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      20% { transform: translate(-2px, 2px) rotate(-2deg); }
-      40% { transform: translate(2px, -1px) rotate(1deg); }
-      60% { transform: translate(-1px, 1px) rotate(-1deg); }
-      80% { transform: translate(1px, -2px) rotate(2deg); }
-      100% { transform: translate(1px, 1px) rotate(0deg); }
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      50% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+      100% { transform: rotate(0deg); }
     }
+    .panel { display: none; margin-top: 20px; padding: 10px; background: white; border: 1px solid #ccc; border-radius: 8px; }
+    button { margin: 5px; padding: 10px 15px; }
   </style>
 </head>
 <body>
-  <div id="notif"></div>
 
-  <h1>Event Peti Hadiah</h1>
-  <p>Kunci: <span id="keyCount">0</span> | Poin: <span id="pointCount">0</span></p>
+<h1>Game Kotak Hadiah</h1>
+<div id="maintenanceNotice" style="display:none; color:red;"></div>
 
-  <div id="box"></div>
+<div id="gamePanel">
+  <div id="boxAnimation">Box</div>
+  <button id="btnOpenBox">Buka Kotak</button>
+  <p>Poin: <span id="pointDisplay">0</span></p>
+  <p>Kunci: <span id="keyDisplay">0</span></p>
+  <hr>
+  <h3>Penarikan</h3>
+  <input type="text" id="nama" placeholder="Nama"><br>
+  <input type="text" id="rekening" placeholder="Rekening"><br>
+  <input type="number" id="amount" placeholder="Jumlah Poin"><br>
+  <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
+  <hr>
+  <button id="btnLihatPesan">Lihat Pesan</button>
+  <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
+  <button id="btnAdminPanel">Admin</button>
+</div>
 
-  <button class="btn" onclick="bukaBox()">Buka Box</button>
-  <button class="btn" onclick="ambilSuplai()">Ambil Suplai</button>
+<div id="pesan" class="panel">
+  <h3>Pesan</h3>
+  <ul id="messageList"></ul>
+</div>
 
-  <script>
-    let keys = parseInt(localStorage.getItem("keys") || "0");
-    let points = parseInt(localStorage.getItem("points") || "0");
-    const STORAGE_LAST_SUPLAI = "lastSuplaiTime";
+<div id="riwayat" class="panel">
+  <h3>Riwayat Penarikan</h3>
+  <ul id="riwayatList"></ul>
+</div>
 
-    function updateKeys() {
-      localStorage.setItem("keys", keys);
-      document.getElementById("keyCount").innerText = keys;
+<div id="adminLoginPanel" class="panel">
+  <h3>Login Admin</h3>
+  <input type="password" id="adminPass" placeholder="Password"><br>
+  <button id="btnLoginAdmin">Login</button>
+  <button id="btnBatalLoginAdmin">Batal</button>
+  <p id="adminLoginNotif" style="color:red;"></p>
+</div>
+
+<div id="adminPanel" class="panel">
+  <h3>Panel Admin</h3>
+  <p>Maintenance:</p>
+  <input type="text" id="maintenanceReason" placeholder="Alasan"><br>
+  <input type="number" id="maintenanceDuration" placeholder="Durasi (menit)"><br>
+  <button id="btnStartMaintenance">Mulai</button>
+  <button id="btnStopMaintenance">Berhenti</button><br>
+  <button id="btnHapusPesan">Hapus Semua Pesan</button>
+  <button id="btnLogoutAdmin">Logout</button>
+</div>
+
+<script>
+  const STORAGE_POINTS = "game_points";
+  const STORAGE_KEYS = "game_keys";
+  const STORAGE_MESSAGES = "game_messages";
+  const STORAGE_WITHDRAWS = "game_withdraws";
+  const STORAGE_ADMIN = "admin_login";
+  const STORAGE_MAINTENANCE = "game_maintenance";
+
+  let points = parseInt(localStorage.getItem(STORAGE_POINTS)) || 0;
+  let keys = parseInt(localStorage.getItem(STORAGE_KEYS)) || 0;
+  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES)) || [];
+  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS)) || [];
+  let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
+  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE)) || null;
+
+  const rewards = [
+    { name: "10 poin", point: 10 },
+    { name: "50 poin", point: 50 },
+    { name: "100 poin", point: 100 },
+    { name: "Zonk", point: 0 },
+    { name: "2x reward next", point: -1 }
+  ];
+
+  function updatePoints() {
+    document.getElementById("pointDisplay").innerText = points;
+    localStorage.setItem(STORAGE_POINTS, points);
+  }
+
+  function updateKeys() {
+    document.getElementById("keyDisplay").innerText = keys;
+    localStorage.setItem(STORAGE_KEYS, keys);
+  }
+
+  function addMessage(msg) {
+    messages.push(msg);
+    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
+    tampilPesan();
+  }
+
+  function notif(text) {
+    alert(text);
+  }
+
+  function tampilPesan() {
+    const ul = document.getElementById("messageList");
+    ul.innerHTML = "";
+    messages.forEach(msg => {
+      const li = document.createElement("li");
+      li.textContent = msg;
+      ul.appendChild(li);
+    });
+  }
+
+  function tampilRiwayat() {
+    const ul = document.getElementById("riwayatList");
+    ul.innerHTML = "";
+    withdraws.forEach(w => {
+      const li = document.createElement("li");
+      li.textContent = `${w.nama} - ${w.rekening} - ${w.amount} poin - ${w.waktu}`;
+      ul.appendChild(li);
+    });
+  }
+
+  function togglePanel(id, show = null) {
+    document.querySelectorAll(".panel").forEach(p => p.style.display = "none");
+    const el = document.getElementById(id);
+    if (show === false) return el.style.display = "none";
+    el.style.display = "block";
+  }
+
+  function cekMaintenance() {
+    const now = Date.now();
+    if (maintenance && now < maintenance.until) {
+      document.getElementById("maintenanceNotice").style.display = "block";
+      document.getElementById("maintenanceNotice").innerText = "Maintenance: " + maintenance.reason;
+      document.getElementById("gamePanel").style.display = "none";
+    } else {
+      document.getElementById("maintenanceNotice").style.display = "none";
+      document.getElementById("gamePanel").style.display = "block";
+      localStorage.removeItem(STORAGE_MAINTENANCE);
     }
+  }
 
-    function updatePoints() {
-      localStorage.setItem("points", points);
-      document.getElementById("pointCount").innerText = points;
-    }
+  cekMaintenance();
+  updatePoints();
+  updateKeys();
+  tampilPesan();
+  tampilRiwayat();
 
-    function notif(msg) {
-      const el = document.getElementById("notif");
-      el.innerText = msg;
-      el.style.display = "block";
-      setTimeout(() => el.style.display = "none", 3000);
-    }
+  document.getElementById("btnOpenBox").addEventListener("click", function () {
+    const box = document.getElementById("boxAnimation");
+    box.style.animation = "shake 1s";
 
-    function bukaBox() {
-      if (keys <= 0) {
-        notif("Kunci tidak cukup!");
-        return;
-      }
-      keys--;
-      updateKeys();
-
-      const hadiah = [
-        { teks: "Zonk! Tidak dapat apa-apa.", poin: 0 },
-        { teks: "Selamat! Dapat 50 poin.", poin: 50 },
-        { teks: "Wow! Dapat 100 poin.", poin: 100 },
-        { teks: "Dapat 10 poin.", poin: 10 },
-        { teks: "Hadiah spesial aktif! (belum tersedia)", poin: -1 }
-      ];
-
-      const hasil = hadiah[Math.floor(Math.random() * hadiah.length)];
-
-      if (hasil.poin === -1) {
-        notif(hasil.teks);
+    setTimeout(() => {
+      box.style.animation = "none";
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+      if (reward.point === -1) {
+        addMessage("Selamat! Kamu mendapat 2x reward berikutnya!");
+        notif("2x reward berikutnya!");
+        localStorage.setItem("doubleNext", "true");
       } else {
-        points += hasil.poin;
+        let finalPoint = reward.point;
+        if (localStorage.getItem("doubleNext") === "true") {
+          finalPoint *= 2;
+          localStorage.removeItem("doubleNext");
+          addMessage("Reward digandakan jadi " + finalPoint + " poin!");
+        }
+        if (finalPoint > 0) {
+          addMessage("Kamu dapat " + finalPoint + " poin!");
+        } else {
+          addMessage("Zonk! Tidak dapat poin.");
+        }
+        points += finalPoint;
         updatePoints();
-        notif(hasil.teks);
+        notif("Kamu mendapatkan: " + reward.name);
       }
+    }, 1000);
+  });
 
-      const box = document.getElementById("box");
-      box.style.animation = "shake 0.5s";
-      setTimeout(() => box.style.animation = "", 500);
-    }
+  document.getElementById("btnAjukanPenarikan").addEventListener("click", function () {
+    const nama = document.getElementById("nama").value.trim();
+    const rekening = document.getElementById("rekening").value.trim();
+    const amount = parseInt(document.getElementById("amount").value);
 
-    function ambilSuplai() {
-      const now = Date.now();
-      const last = parseInt(localStorage.getItem(STORAGE_LAST_SUPLAI) || "0");
-      const satuJam = 60 * 60 * 1000;
+    if (!nama || !rekening) return notif("Nama dan rekening wajib diisi.");
+    if (points < amount) return notif("Poin kamu tidak cukup.");
 
-      if (now - last < satuJam) {
-        const sisa = Math.ceil((satuJam - (now - last)) / 60000);
-        notif(`Tunggu ${sisa} menit lagi untuk ambil suplai.`);
-        return;
-      }
+    withdraws.push({
+      nama,
+      rekening,
+      amount,
+      waktu: new Date().toLocaleString()
+    });
 
-      const bonusKunci = Math.floor(Math.random() * 6) + 15; // 15-20
-      const bonusPoin = Math.floor(Math.random() * 171) + 30; // 30-200
-
-      keys += bonusKunci;
-      points += bonusPoin;
-      updateKeys();
-      updatePoints();
-      localStorage.setItem(STORAGE_LAST_SUPLAI, now);
-
-      notif(`Kamu dapat ${bonusKunci} kunci & ${bonusPoin} poin dari suplai!`);
-    }
-
-    updateKeys();
+    points -= amount;
     updatePoints();
-  </script>
+    localStorage.setItem(STORAGE_WITHDRAWS, JSON.stringify(withdraws));
+    tampilRiwayat();
+    addMessage("Pengajuan penarikan oleh " + nama + " sebanyak " + amount + " poin.");
+    notif("Pengajuan dikirim!");
+  });
+
+  document.getElementById("btnLihatPesan").addEventListener("click", () => togglePanel("pesan"));
+  document.getElementById("btnRiwayatPenarikan").addEventListener("click", () => togglePanel("riwayat"));
+
+  document.getElementById("btnAdminPanel").addEventListener("click", () => {
+    if (adminLoggedIn) togglePanel("adminPanel");
+    else togglePanel("adminLoginPanel");
+  });
+
+  document.getElementById("btnLoginAdmin").addEventListener("click", () => {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === "admin123") {
+      adminLoggedIn = true;
+      localStorage.setItem(STORAGE_ADMIN, "true");
+      document.getElementById("adminLoginNotif").innerText = "";
+      togglePanel("adminLoginPanel", false);
+      togglePanel("adminPanel", true);
+    } else {
+      document.getElementById("adminLoginNotif").innerText = "Password salah!";
+    }
+  });
+
+  document.getElementById("btnBatalLoginAdmin").addEventListener("click", () => togglePanel("adminLoginPanel", false));
+
+  document.getElementById("btnLogoutAdmin").addEventListener("click", () => {
+    adminLoggedIn = false;
+    localStorage.removeItem(STORAGE_ADMIN);
+    togglePanel("adminPanel", false);
+  });
+
+  document.getElementById("btnStartMaintenance").addEventListener("click", () => {
+    const reason = document.getElementById("maintenanceReason").value.trim();
+    const duration = parseInt(document.getElementById("maintenanceDuration").value);
+
+    if (!reason || isNaN(duration)) return alert("Isi alasan dan durasi maintenance.");
+
+    const until = Date.now() + duration * 60000;
+    maintenance = { reason, until };
+    localStorage.setItem(STORAGE_MAINTENANCE, JSON.stringify(maintenance));
+    cekMaintenance();
+  });
+
+  document.getElementById("btnStopMaintenance").addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_MAINTENANCE);
+    maintenance = null;
+    cekMaintenance();
+  });
+
+  document.getElementById("btnHapusPesan").addEventListener("click", () => {
+    messages = [];
+    localStorage.removeItem(STORAGE_MESSAGES);
+    tampilPesan();
+  });
+</script>
 </body>
-</html>
+  </html>
