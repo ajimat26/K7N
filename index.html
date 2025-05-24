@@ -2,205 +2,252 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Spin Wheel Poin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spin Wheel Game & Admin Panel</title>
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      text-align: center;
-      padding: 20px;
-    }
-
-    #notification {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0,0,0,0.7);
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
       color: #fff;
-      text-align: center;
-      padding: 12px 0;
-      font-weight: bold;
-      font-size: 16px;
-      display: none;
-      z-index: 1000;
+      user-select: none;
     }
-
+    #points, #message, #adminPanel, #notification {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    #wheel-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 30px auto;
+    }
     #wheel {
-      width: 300px;
-      height: 300px;
-      border: 10px solid #333;
+      width: 320px;
+      height: 320px;
       border-radius: 50%;
-      margin: 0 auto;
+      border: 10px solid #fff;
       background: conic-gradient(
-        #ffcc00 0% 20%, 
-        #ff6699 20% 40%, 
-        #66ccff 40% 60%, 
-        #99ff99 60% 80%, 
-        #ff9966 80% 100%
+        #ff6f61 0deg 72deg,
+        #ffd700 72deg 144deg,
+        #4caf50 144deg 216deg,
+        #2196f3 216deg 288deg,
+        #9c27b0 288deg 360deg
       );
       transition: transform 4s ease-out;
+      position: relative;
     }
-
+    .label {
+      position: absolute;
+      width: 100px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      transform-origin: bottom center;
+      left: 110px;
+      top: 10px;
+    }
     #pointer {
-      width: 0; 
-      height: 0; 
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 30px solid red;
-      margin: 10px auto;
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid #fff;
     }
-
-    #spinBtn, #withdrawBtn {
-      margin: 10px;
+    button {
       padding: 10px 20px;
       font-size: 16px;
+      font-weight: bold;
+      margin: 10px;
       cursor: pointer;
     }
-
-    #points {
-      font-size: 24px;
-      margin-top: 20px;
+    #exchange-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 350px;
+      margin: auto;
     }
-
-    #withdrawArea {
-      margin-top: 30px;
-      border-top: 2px solid #ccc;
-      padding-top: 20px;
-    }
-
     input, select {
+      width: 100%;
+      margin: 5px 0;
       padding: 8px;
-      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+    #adminLogin, #adminPanel {
+      max-width: 400px;
+      margin: 20px auto;
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    #notification {
+      color: yellow;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
 
-  <div id="notification"></div>
+<div id="points">Poin: 0</div>
+<div id="notification"></div>
 
+<div id="wheel-container">
   <div id="pointer"></div>
-  <div id="wheel"></div>
-  <button id="spinBtn">Putar Wheel</button>
-
-  <div id="message"></div>
-  <div id="points">Poin: 0</div>
-
-  <div id="withdrawArea">
-    <h2>Penukaran Poin</h2>
-    <select id="withdrawAmount">
-      <option value="10000">Rp 10.000 (100 poin)</option>
-      <option value="25000">Rp 25.000 (250 poin)</option>
-      <option value="50000">Rp 50.000 (500 poin)</option>
-      <option value="100000">Rp 100.000 (1000 poin)</option>
-    </select><br>
-    <input type="text" id="fullname" placeholder="Nama Lengkap"><br>
-    <input type="text" id="rekening" placeholder="No. Rekening / E-Wallet"><br>
-    <button id="submitWithdraw">Ajukan Penarikan</button>
-    <div id="exchangeMessage"></div>
+  <div id="wheel">
+    <div class="label" style="transform: rotate(36deg)">Zonk</div>
+    <div class="label" style="transform: rotate(108deg)">+10</div>
+    <div class="label" style="transform: rotate(180deg)">+25</div>
+    <div class="label" style="transform: rotate(252deg)">+50</div>
+    <div class="label" style="transform: rotate(324deg)">2x Poin</div>
   </div>
+</div>
 
-  <script>
-    const wheel = document.getElementById('wheel');
-    const spinBtn = document.getElementById('spinBtn');
-    const message = document.getElementById('message');
-    const pointsDisplay = document.getElementById('points');
-    const withdrawAmount = document.getElementById('withdrawAmount');
-    const fullname = document.getElementById('fullname');
-    const rekening = document.getElementById('rekening');
-    const submitWithdraw = document.getElementById('submitWithdraw');
-    const exchangeMessage = document.getElementById('exchangeMessage');
+<div style="text-align:center;">
+  <button onclick="spinWheel()">Putar</button>
+</div>
 
-    let points = parseInt(localStorage.getItem('points')) || 0;
-    let spinning = false;
-    let doubleNext = false;
+<div id="message"></div>
 
-    function updatePointsDisplay() {
-      pointsDisplay.textContent = `Poin: ${points}`;
-    }
+<div id="exchange-section">
+  <h2>Tukar Poin</h2>
+  <select id="amount">
+    <option value="500">50.000 IC - 500 Poin</option>
+    <option value="1000">100.000 IC - 1000 Poin</option>
+    <option value="2500">250.000 IC - 2500 Poin</option>
+  </select>
+  <input type="text" id="fullname" placeholder="Nama lengkap">
+  <input type="text" id="account" placeholder="Nomor rekening">
+  <button onclick="submitWithdraw()">Ajukan Penarikan</button>
+  <div id="exchangeMessage"></div>
+</div>
 
-    function getRewardByAngle(angle) {
-      if (angle >= 0 && angle < 72) return { type: 'points', points: 10 };
-      if (angle >= 72 && angle < 144) return { type: 'points', points: 20 };
-      if (angle >= 144 && angle < 216) return { type: 'points', points: 50 };
-      if (angle >= 216 && angle < 288) return { type: 'double', points: 0 };
-      return { type: 'points', points: 100 };
-    }
+<div id="adminLogin">
+  <h3>Login Admin</h3>
+  <input type="text" id="adminUser" placeholder="Username">
+  <input type="password" id="adminPass" placeholder="Password">
+  <button onclick="loginAdmin()">Login</button>
+</div>
 
-    function rotateWheel() {
-      if (spinning) return;
-      spinning = true;
+<div id="adminPanel" style="display:none;">
+  <h2>Admin Panel</h2>
+  <div>Total Poin: <span id="totalPoints">0</span></div>
+  <h3>Riwayat Penarikan:</h3>
+  <ul id="withdrawList"></ul>
+</div>
 
-      const extraDegrees = Math.floor(Math.random() * 360);
-      const rotateTo = 1440 + extraDegrees;
-      wheel.style.transform = `rotate(${rotateTo}deg)`;
+<script>
+  let points = parseInt(localStorage.getItem("points")) || 0;
+  let doubleNext = false;
+  const notification = document.getElementById("notification");
 
-      setTimeout(() => {
-        const finalAngle = rotateTo % 360;
-        const reward = getRewardByAngle(finalAngle);
+  function updatePointsDisplay() {
+    document.getElementById("points").textContent = "Poin: " + points;
+    localStorage.setItem("points", points);
+  }
 
-        let gainedPoints = reward.points;
-        if (reward.type === 'double') {
+  function spinWheel() {
+    const wheel = document.getElementById("wheel");
+    const deg = Math.floor(3600 + Math.random() * 360);
+    wheel.style.transform = `rotate(${deg}deg)`;
+    const angle = deg % 360;
+
+    setTimeout(() => {
+      let reward = "";
+      if (angle >= 0 && angle < 72) reward = "zonk";
+      else if (angle < 144) reward = "+10";
+      else if (angle < 216) reward = "+25";
+      else if (angle < 288) reward = "+50";
+      else reward = "double";
+
+      let earned = 0;
+      switch (reward) {
+        case "zonk":
+          earned = 0;
+          break;
+        case "+10":
+          earned = 10;
+          break;
+        case "+25":
+          earned = 25;
+          break;
+        case "+50":
+          earned = 50;
+          break;
+        case "double":
           doubleNext = true;
-          message.textContent = 'Putaran selanjutnya 2x poin!';
-          showNotification('Berhasil dapat "2x Poin"! Putaran selanjutnya digandakan!');
-        } else {
-          if (doubleNext) {
-            gainedPoints *= 2;
-            doubleNext = false;
-            showNotification(`Poin digandakan! Kamu dapat ${gainedPoints} poin.`);
-          } else {
-            showNotification(`Kamu dapat ${gainedPoints} poin.`);
-          }
-          points += gainedPoints;
-          message.textContent = `Kamu mendapatkan ${gainedPoints} poin!`;
-          localStorage.setItem('points', points);
-          updatePointsDisplay();
-        }
-
-        spinning = false;
-      }, 4000);
-    }
-
-    function showNotification(msg, duration = 3000) {
-      const notif = document.getElementById("notification");
-      notif.textContent = msg;
-      notif.style.display = "block";
-      setTimeout(() => {
-        notif.style.display = "none";
-      }, duration);
-    }
-
-    spinBtn.addEventListener('click', rotateWheel);
-
-    submitWithdraw.addEventListener('click', () => {
-      const selected = parseInt(withdrawAmount.value);
-      const name = fullname.value.trim();
-      const acc = rekening.value.trim();
-
-      const cost = selected / 100;
-
-      if (points >= cost && name && acc) {
-        points -= cost;
-        localStorage.setItem('points', points);
-        updatePointsDisplay();
-        exchangeMessage.textContent = 'Penarikan berhasil diajukan!';
-        showNotification('Penarikan berhasil diajukan!');
-        submitWithdraw.disabled = true;
-
-        // Simpan data ke Firebase atau log jika diperlukan
-        const timestamp = Date.now();
-        console.log({ name, acc, amount: selected, timestamp });
-
-        fullname.value = '';
-        rekening.value = '';
-      } else {
-        showNotification('Gagal: Pastikan data lengkap & poin mencukupi.', 4000);
+          break;
       }
-    });
 
+      if (reward !== "double") {
+        earned = doubleNext ? earned * 2 : earned;
+        doubleNext = false;
+        points += earned;
+        notification.textContent = `Kamu mendapatkan ${earned} poin!`;
+      } else {
+        notification.textContent = `Selanjutnya poinmu akan dikalikan 2!`;
+      }
+
+      updatePointsDisplay();
+    }, 4000);
+  }
+
+  function submitWithdraw() {
+    const amount = parseInt(document.getElementById("amount").value);
+    const name = document.getElementById("fullname").value;
+    const acc = document.getElementById("account").value;
+
+    if (!name || !acc) {
+      alert("Harap isi nama dan rekening.");
+      return;
+    }
+    if (points < amount) {
+      document.getElementById("exchangeMessage").textContent = "Poin tidak cukup!";
+      return;
+    }
+
+    points -= amount;
     updatePointsDisplay();
-  </script>
+    document.getElementById("exchangeMessage").textContent = "Permintaan penarikan diajukan!";
+
+    // Simpan ke localStorage simulasi data penarikan
+    let history = JSON.parse(localStorage.getItem("withdraws") || "[]");
+    history.push({ name, acc, amount });
+    localStorage.setItem("withdraws", JSON.stringify(history));
+  }
+
+  function loginAdmin() {
+    const user = document.getElementById("adminUser").value;
+    const pass = document.getElementById("adminPass").value;
+    if (user === "admin" && pass === "admin123") {
+      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("adminLogin").style.display = "none";
+      showAdminData();
+    } else {
+      alert("Login gagal!");
+    }
+  }
+
+  function showAdminData() {
+    document.getElementById("totalPoints").textContent = localStorage.getItem("points") || 0;
+    const list = document.getElementById("withdrawList");
+    list.innerHTML = "";
+    const data = JSON.parse(localStorage.getItem("withdraws") || "[]");
+    data.forEach((d) => {
+      const li = document.createElement("li");
+      li.textContent = `${d.name} - ${d.acc} - ${d.amount} poin`;
+      list.appendChild(li);
+    });
+  }
+
+  updatePointsDisplay();
+</script>
 
 </body>
-</html>
+  </html>
