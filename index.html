@@ -3,32 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Spin Wheel Game & Admin Panel</title>
+  <title>Spin Wheel Game Fix</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      color: #fff;
-      user-select: none;
-      overflow-x: hidden;
+      margin: 0; font-family: Arial, sans-serif; background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: #fff; user-select: none; overflow-x: hidden;
     }
-    #points, #message, #adminPanel, #notification {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
+    #points, #notification {
+      text-align: center; margin-top: 20px; font-weight: bold;
     }
     #wheel-container {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 30px auto;
+      position: relative; width: 320px; height: 320px; margin: 30px auto;
     }
     #wheel {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      border: 10px solid #fff;
+      width: 320px; height: 320px; border-radius: 50%; border: 10px solid #fff;
       background: conic-gradient(
         #ff6f61 0deg 72deg,
         #ffd700 72deg 144deg,
@@ -36,146 +24,57 @@
         #2196f3 216deg 288deg,
         #9c27b0 288deg 360deg
       );
-      transition: transform 4s ease-out;
+      transition: transform 4s cubic-bezier(.25,.1,.25,1);
       position: relative;
     }
     .label {
-      position: absolute;
-      width: 100px;
-      text-align: center;
-      color: white;
-      font-weight: bold;
-      left: 50%;
-      top: 50%;
-      /* Fix posisi label supaya tepat tengah tiap segmen */
+      position: absolute; width: 100px; text-align: center; color: white; font-weight: bold;
+      left: 50%; top: 50%;
+      font-size: 18px; user-select: none; pointer-events: none;
+      /* Posisi label tepat di tengah tiap segmen: rotasi segmen + setengah 72deg */
       transform-origin: 0 -130px;
-      font-size: 18px;
-      user-select: none;
-      pointer-events: none;
     }
     #pointer {
-      position: absolute;
-      top: -20px;
-      left: 50%;
+      position: absolute; top: -20px; left: 50%;
       transform: translateX(-50%);
-      width: 0;
-      height: 0;
+      width: 0; height: 0;
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
       border-bottom: 40px solid #fff;
       user-select: none;
     }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      margin: 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
+      padding: 10px 20px; font-size: 16px; font-weight: bold; margin: 10px;
+      cursor: pointer; border-radius: 8px; border: none;
       transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: rgba(255,255,255,0.2);
-    }
-    #exchange-section {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 350px;
-      margin: 30px auto;
-      user-select: none;
-    }
-    input, select {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
-    #adminLogin, #adminPanel {
-      max-width: 400px;
-      margin: 20px auto;
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 10px;
-      user-select: none;
-    }
-    #notification {
-      color: yellow;
-      font-size: 16px;
-      min-height: 20px;
-    }
-    #notifHistory {
-      max-width: 400px;
-      margin: 10px auto;
-      padding: 10px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      font-size: 14px;
-      max-height: 120px;
-      overflow-y: auto;
-      user-select: none;
-    }
-    /* Tombol icon pesan */
+    button:hover { background-color: rgba(255,255,255,0.2); }
     #messageBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #2196f3;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
+      position: fixed; bottom: 20px; right: 20px; background: #2196f3;
+      border-radius: 50%; width: 50px; height: 50px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
       transition: background-color 0.3s;
     }
-    #messageBtn:hover {
-      background: #1769aa;
-    }
-    /* Icon pesan SVG */
-    #messageBtn svg {
-      fill: white;
-      width: 28px;
-      height: 28px;
-    }
-    /* Panel pesan */
+    #messageBtn:hover { background: #1769aa; }
+    #messageBtn svg { fill: white; width: 28px; height: 28px; }
     #messagePanel {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      width: 320px;
-      max-height: 400px;
-      background: rgba(0,0,0,0.8);
-      border-radius: 15px;
-      padding: 15px;
-      color: #fff;
-      font-size: 14px;
-      overflow-y: auto;
-      display: none;
-      z-index: 1000;
-      box-shadow: 0 0 20px rgba(0,0,0,0.7);
-      user-select: text;
+      position: fixed; bottom: 80px; right: 20px; width: 320px; max-height: 400px;
+      background: rgba(0,0,0,0.8); border-radius: 15px; padding: 15px; color: #fff;
+      font-size: 14px; overflow-y: auto; display: none; z-index: 1000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7); user-select: text;
     }
     #messagePanel h3 {
-      margin-top: 0;
-      font-size: 18px;
-      margin-bottom: 10px;
-      text-align: center;
+      margin-top: 0; font-size: 18px; margin-bottom: 10px; text-align: center;
     }
     #closeMsgPanel {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 20px;
-      user-select: none;
+      position: absolute; top: 8px; right: 12px; cursor: pointer; font-weight: bold;
+      font-size: 20px; user-select: none;
+    }
+    #messageContent div {
+      margin-bottom: 6px;
+      border-bottom: 1px solid #555;
+      padding-bottom: 4px;
     }
   </style>
 </head>
@@ -183,11 +82,14 @@
 
 <div id="points">Poin: 0</div>
 <div id="notification"></div>
-<div id="notifHistory"></div>
 
 <div id="wheel-container">
   <div id="pointer"></div>
   <div id="wheel">
+    <!-- Label hadiahnya harus di tengah tiap segmen: 
+         segmen 0-72deg tengah 36deg,
+         72-144deg tengah 108deg,
+         dst -->
     <div class="label" style="transform: rotate(36deg)">Zonk</div>
     <div class="label" style="transform: rotate(108deg)">+10</div>
     <div class="label" style="transform: rotate(180deg)">+25</div>
@@ -197,40 +99,11 @@
 </div>
 
 <div style="text-align:center;">
-  <button onclick="spinWheel()">Putar</button>
-</div>
-
-<div id="message"></div>
-
-<div id="exchange-section">
-  <h2>Tukar Poin</h2>
-  <select id="amount">
-    <option value="500">50.000 IC - 500 Poin</option>
-    <option value="1000">100.000 IC - 1000 Poin</option>
-    <option value="2500">250.000 IC - 2500 Poin</option>
-  </select>
-  <input type="text" id="fullname" placeholder="Nama lengkap" />
-  <input type="text" id="account" placeholder="Nomor rekening" />
-  <button onclick="submitWithdraw()">Ajukan Penarikan</button>
-  <div id="exchangeMessage"></div>
-</div>
-
-<div id="adminLogin">
-  <h3>Login Admin</h3>
-  <input type="text" id="adminUser" placeholder="Username" />
-  <input type="password" id="adminPass" placeholder="Password" />
-  <button onclick="loginAdmin()">Login</button>
-</div>
-
-<div id="adminPanel" style="display:none;">
-  <h2>Admin Panel</h2>
-  <div>Total Poin: <span id="totalPoints">0</span></div>
-  <h3>Riwayat Penarikan:</h3>
-  <ul id="withdrawList"></ul>
+  <button id="spinBtn">Putar</button>
 </div>
 
 <!-- Tombol Icon Pesan -->
-<div id="messageBtn" title="Lihat Pesan / Riwayat Notifikasi" onclick="toggleMessagePanel()">
+<div id="messageBtn" title="Lihat Pesan / Riwayat Notifikasi">
   <svg viewBox="0 0 24 24">
     <path d="M20 2H4C2.897 2 2 2.897 2 4v16l4-4h14c1.103 0 2-0.897 2-2V4c0-1.103-0.897-2-2-2zM6 12v-2h12v2H6z"/>
   </svg>
@@ -238,46 +111,65 @@
 
 <!-- Panel Pesan -->
 <div id="messagePanel">
-  <div id="closeMsgPanel" onclick="toggleMessagePanel()">×</div>
+  <div id="closeMsgPanel">×</div>
   <h3>Riwayat Notifikasi</h3>
   <div id="messageContent">Belum ada pesan.</div>
 </div>
 
 <script>
+  // State dan elemen
   let points = parseInt(localStorage.getItem("points")) || 0;
   let doubleNext = false;
   let notifHistory = JSON.parse(localStorage.getItem("notifHistory") || "[]");
 
+  const pointsEl = document.getElementById("points");
+  const notifEl = document.getElementById("notification");
+  const notifContentEl = document.getElementById("messageContent");
+  const wheel = document.getElementById("wheel");
+  const spinBtn = document.getElementById("spinBtn");
+  const messageBtn = document.getElementById("messageBtn");
+  const messagePanel = document.getElementById("messagePanel");
+  const closeMsgPanel = document.getElementById("closeMsgPanel");
+
+  // Update tampilan poin
   function updatePointsDisplay() {
-    document.getElementById("points").textContent = "Poin: " + points;
+    pointsEl.textContent = "Poin: " + points;
     localStorage.setItem("points", points);
   }
 
+  // Render notif history di panel pesan
+  function renderNotifHistory() {
+    if (notifHistory.length === 0) {
+      notifContentEl.textContent = "Belum ada pesan.";
+    } else {
+      notifContentEl.innerHTML = notifHistory
+        .map(n => `<div>• ${n}</div>`).join("");
+    }
+  }
+
+  // Tambah notif ke riwayat dan update tampilan
   function addNotification(msg) {
-    document.getElementById("notification").textContent = msg;
+    notifEl.textContent = msg;
     notifHistory.push(msg);
-    if (notifHistory.length > 20) notifHistory.shift(); // simpan 20 pesan terakhir
+    if (notifHistory.length > 20) notifHistory.shift();
     localStorage.setItem("notifHistory", JSON.stringify(notifHistory));
     renderNotifHistory();
   }
 
-  function renderNotifHistory() {
-    if (notifHistory.length === 0) {
-      document.getElementById("messageContent").textContent = "Belum ada pesan.";
-    } else {
-      document.getElementById("messageContent").innerHTML = notifHistory
-        .map(n => `<div>- ${n}</div>`).join("");
-    }
-  }
-
+  // Logika spin wheel
   function spinWheel() {
-    const wheel = document.getElementById("wheel");
-    const deg = Math.floor(3600 + Math.random() * 360);
+    spinBtn.disabled = true;
+    notifEl.textContent = "Memutar roda...";
+    let deg = 3600 + Math.floor(Math.random() * 360); // Putar beberapa kali + offset acak
+    wheel.style.transition = "transform 4s cubic-bezier(.25,.1,.25,1)";
     wheel.style.transform = `rotate(${deg}deg)`;
-    const angle = deg % 360;
 
     setTimeout(() => {
+      let angle = deg % 360;
       let reward = "";
+
+      // Hitung segmen sesuai angle, tiap segmen 72 derajat
+      // Pusat segmen: 36,108,180,252,324
       if (angle >= 0 && angle < 72) reward = "zonk";
       else if (angle < 144) reward = "+10";
       else if (angle < 216) reward = "+25";
@@ -285,26 +177,42 @@
       else reward = "double";
 
       let earned = 0;
-      switch (reward) {
-        case "zonk": earned = 0; break;
-        case "+10": earned = 10; break;
-        case "+25": earned = 25; break;
-        case "+50": earned = 50; break;
-        case "double": doubleNext = true; break;
-      }
-
-      if (reward !== "double") {
-        earned = doubleNext ? earned * 2 : earned;
-        doubleNext = false;
+      if (reward === "double") {
+        doubleNext = true;
+        addNotification("Putaran selanjutnya akan mendapat 2x poin!");
+      } else {
+        earned = parseInt(reward.replace("+",""));
+        if (doubleNext) {
+          earned *= 2;
+          doubleNext = false;
+        }
         points += earned;
         addNotification(`+${earned} poin didapatkan!`);
-      } else {
-        addNotification("Putaran selanjutnya akan mendapat 2x poin!");
       }
 
       updatePointsDisplay();
+      spinBtn.disabled = false;
     }, 4000);
   }
 
-  function submitWithdraw() {
-    const amount =
+  // Toggle panel pesan
+  function toggleMessagePanel() {
+    if (messagePanel.style.display === "none" || messagePanel.style.display === "") {
+      messagePanel.style.display = "block";
+    } else {
+      messagePanel.style.display = "none";
+    }
+  }
+
+  // Inisialisasi awal
+  updatePointsDisplay();
+  renderNotifHistory();
+
+  // Event listeners
+  spinBtn.addEventListener("click", spinWheel);
+  messageBtn.addEventListener("click", toggleMessagePanel);
+  closeMsgPanel.addEventListener("click", toggleMessagePanel);
+</script>
+
+</body>
+</
