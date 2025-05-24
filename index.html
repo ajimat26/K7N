@@ -1,163 +1,102 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UANGDUTY SAFD</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <title>GameUang</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fff; padding: 20px; }
-    .hidden { display: none; }
-    .panel { margin-bottom: 20px; }
-    .chat-box { border: 1px solid #ccc; padding: 10px; height: 150px; overflow-y: scroll; background: #f9f9f9; }
-    .chat-input { margin-top: 10px; }
-    button { margin-top: 5px; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://source.unsplash.com/1600x900/?nature,background') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+    }
+    button, input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .hidden {
+      display: none;
+    }
+    #game-section button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #chat-box {
+      height: 100px;
+      overflow-y: scroll;
+      background: #f5f5f5;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>UANGDUTY SAFD</h1>
-  
-  <div id="auth-panel">
-    <input type="text" id="namaLengkap" placeholder="Nama Lengkap"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <button onclick="register()">Daftar</button>
-    <button onclick="login()">Login</button>
-  </div>
+  <div class="container">
+    <h1>GameUang</h1>
+    <div id="auth-section">
+      <input id="fullname" placeholder="Nama Lengkap">
+      <input id="password" type="password" placeholder="Password">
+      <button onclick="register()">Daftar</button>
+      <button onclick="login()">Masuk</button>
+    </div><div id="game-section" class="hidden">
+  <h2 id="welcome"></h2>
+  <p>Poin kamu: <span id="points">0</span></p>
+  <button onclick="spinGame()">Main Spin</button>
+  <button onclick="playPuzzle()">Tebak Gambar</button>
+  <button onclick="requestWithdraw()">Ajukan Penarikan</button>
 
-  <div id="main-panel" class="hidden">
-    <h2>Selamat datang, <span id="user-display"></span></h2>
+  <div id="chat-box"></div>
+  <input id="chat-input" placeholder="Tulis pesan...">
+  <button onclick="sendChat()">Kirim</button>
+</div>
 
-    <div class="panel">
-      <button onclick="mainSpin()">Main Spin</button>
-      <button onclick="mainPuzzle()">Tebak Gambar</button>
-    </div>
-
-    <div class="panel">
-      <h3>Poin: <span id="poin-user">0</span></h3>
-      <button onclick="ajukanPenukaran()">Ajukan Penukaran</button>
-    </div>
-
-    <div class="panel">
-      <h3>Chat</h3>
-      <div class="chat-box" id="chat-box"></div>
-      <input type="text" id="chat-message" class="chat-input">
-      <button onclick="sendChat()">Kirim</button>
-    </div>
-  </div>
-
-  <script>
+  </div>  <audio autoplay loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-sunny.mp3" type="audio/mp3">
+  </audio>  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
       databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "uangduty",
-      storageBucket: "uangduty.firebasestorage.app",
+      storageBucket: "uangduty.appspot.com",
       messagingSenderId: "598905752132",
       appId: "1:598905752132:web:9b764840e51c13a3044a11"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentUser = null;
+    let userRef = null;
 
     function register() {
-      const nama = document.getElementById('namaLengkap').value;
-      const pass = document.getElementById('password').value;
-      if (!nama || !pass) return alert("Isi nama dan password");
+      const name = document.getElementById('fullname').value;
+      const password = document.getElementById('password').value;
+      const email = `${name.replace(/\s+/g, '')}@uang.com`;
 
-      db.ref('users/' + nama).once('value', (snap) => {
-        if (snap.exists()) return alert("Akun sudah terdaftar");
-        db.ref('users/' + nama).set({ password: pass, poin: 0 });
-        alert("Pendaftaran berhasil");
-      });
-    }
-
-    function login() {
-      const nama = document.getElementById('namaLengkap').value;
-      const pass = document.getElementById('password').value;
-      db.ref('users/' + nama).once('value', (snap) => {
-        if (!snap.exists()) return alert("Akun tidak ditemukan");
-        if (snap.val().password !== pass) return alert("Password salah");
-        currentUser = nama;
-        document.getElementById('auth-panel').classList.add('hidden');
-        document.getElementById('main-panel').classList.remove('hidden');
-        document.getElementById('user-display').innerText = nama;
-        listenToChat();
-        loadPoin();
-      });
-    }
-
-    function loadPoin() {
-      db.ref('users/' + currentUser + '/poin').on('value', (snap) => {
-        document.getElementById('poin-user').innerText = snap.val();
-      });
-    }
-
-    function mainSpin() {
-      const hasil = Math.random();
-      let poin = 0;
-      if (hasil < 0.3) poin = 0; // zonk
-      else if (hasil < 0.5) poin = 100; // kecil
-      else if (hasil < 0.7) poin = 250; // sedang
-      else if (hasil < 0.9) poin = 500; // besar
-      else poin = 2; // 2x poin (bonus diatur nanti)
-
-      if (poin === 2) {
-        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
-          let cur = snap.val() || 0;
-          db.ref('users/' + currentUser + '/poin').set(cur * 2);
-        });
-        alert("Poin kamu digandakan!");
-      } else {
-        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
-          let cur = snap.val() || 0;
-          db.ref('users/' + currentUser + '/poin').set(cur + poin);
-        });
-        alert("Kamu dapat: " + poin + " poin");
-      }
-    }
-
-    function mainPuzzle() {
-      let jawaban = prompt("Gambar: [Kucing Menangis], Jawabanmu?");
-      if (jawaban && jawaban.toLowerCase() === "kucing menangis") {
-        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
-          let cur = snap.val() || 0;
-          db.ref('users/' + currentUser + '/poin').set(cur + 300);
-        });
-        alert("Benar! +300 poin");
-      } else {
-        alert("Salah!");
-      }
-    }
-
-    function ajukanPenukaran() {
-      let jumlah = prompt("Jumlah yang ingin ditarik (contoh: 50000)?");
-      let norek = prompt("Masukkan nomor rekening kamu:");
-      db.ref('penarikan').push({ nama: currentUser, jumlah: jumlah, norek: norek, waktu: Date.now() });
-      alert("Pengajuan berhasil, tunggu admin memproses");
-    }
-
-    function sendChat() {
-      let isi = document.getElementById('chat-message').value;
-      if (!isi) return;
-      db.ref('chat').push({ nama: currentUser, pesan: isi });
-      document.getElementById('chat-message').value = "";
-    }
-
-    function listenToChat() {
-      db.ref('chat').on('child_added', (snap) => {
-        const msg = snap.val();
-        const box = document.getElementById('chat-box');
-        const el = document.createElement('div');
-        el.textContent = msg.nama + ": " + msg.pesan;
-        box.appendChild(el);
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-  </script>
-</body>
-        </html>
-  
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          const uid = userCredential.user.uid;
+          db.ref('users/' + uid).set({
+            name: name,
+            points: 0
+          });
+          alert("Registrasi berhasil");
