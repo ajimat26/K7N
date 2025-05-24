@@ -10,7 +10,10 @@
       getDatabase,
       ref,
       onValue,
-      runTransaction
+      runTransaction,
+      get,
+      child,
+      set,
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -24,36 +27,59 @@
       measurementId: "G-TJL9K6YDL9"
     };
 
-    // Initialize Firebase
+    // Init Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // DOM elements
     const uangTotalEl = document.getElementById("uangTotal");
     const topTierEl = document.getElementById("topTier");
     const notifEl = document.getElementById("notif");
     const btnWithdraw = document.getElementById("btnWithdraw");
+    const btnClaimKey = document.getElementById("btnClaimKey");
+    const userPointsEl = document.getElementById("userPoints");
+    const userPenarikanEl = document.getElementById("userPenarikan");
 
-    // Contoh user id dan nama, ganti dengan autentikasi sebenarnya
+    // User data (ganti sesuai autentikasi)
     const userId = "user123";
     const userName = "Pemain123";
 
     const userRef = ref(db, `users/${userId}`);
     const globalUangRef = ref(db, "totalUang");
+    const keySupplyRef = ref(db, "keySupply");
 
-    // Set default total uang 50 juta jika belum ada
+    // Inisialisasi total uang 50 juta jika belum ada
     runTransaction(globalUangRef, (current) => {
       if (current === null) return 50000000;
       return current;
     });
 
-    // Update tampilan uang global realtime
+    // Inisialisasi key supply 10 jika belum ada
+    runTransaction(keySupplyRef, (current) => {
+      if (current === null) return 10;
+      return current;
+    });
+
+    // Update tampilan total uang global realtime
     onValue(globalUangRef, (snapshot) => {
       const val = snapshot.val();
       uangTotalEl.textContent = "Rp " + (val ?? 0).toLocaleString("id-ID");
-      updateTopTier();
     });
 
-    // Fungsi menampilkan notifikasi singkat
+    // Update tampilan key supply realtime
+    onValue(keySupplyRef, (snapshot) => {
+      const val = snapshot.val();
+      document.getElementById("keySupplyCount").textContent = val ?? 0;
+    });
+
+    // Update data user realtime
+    onValue(userRef, (snapshot) => {
+      const data = snapshot.val();
+      userPointsEl.textContent = (data?.points ?? 10000).toLocaleString("id-ID");
+      userPenarikanEl.textContent = (data?.penarikan ?? 0).toLocaleString("id-ID");
+    });
+
+    // Fungsi menampilkan notifikasi
     function showNotif(msg, className = "text-green-600") {
       notifEl.textContent = msg;
       notifEl.className = `text-center text-sm mt-2 ${className}`;
@@ -62,7 +88,7 @@
       }, 3000);
     }
 
-    // Fungsi update Top Tier secara realtime dan urut
+    // Update top 3 penarikan realtime
     function updateTopTier() {
       const usersRef = ref(db, "users");
       onValue(usersRef, (snapshot) => {
@@ -76,7 +102,7 @@
             topTierEl.innerHTML = "<li>Belum ada penarikan.</li>";
           } else {
             topTierEl.innerHTML = sorted.map((u, i) =>
-              `<li><strong>${i + 1}.</strong> ${u.nama || "Anonim"} - ${u.penarikan.toLocaleString("id-ID")} Poin</li>`
+              `<li><strong>${i + 1}.</strong> ${u.nama || "Anonim"} - Rp ${u.penarikan.toLocaleString("id-ID")}</li>`
             ).join("");
           }
         } else {
@@ -84,46 +110,60 @@
         }
       });
     }
+    updateTopTier();
 
-    // Penarikan poin user (contoh 1000 poin per klik)
+    // Fungsi tarik uang 1000 poin
     btnWithdraw.onclick = () => {
-      const jumlahTarik = 1000;
+      const tarikJumlah = 1000;
+
       runTransaction(userRef, (user) => {
         if (user === null) {
-          // user baru, set default poin dan nama
-          user = {
-            points: 10000, // contoh poin awal user
-            nama: userName,
-            penarikan: 0
-          };
+          user = { points: 10000, nama: userName, penarikan: 0 };
         }
 
-        if (user.points >= jumlahTarik) {
-          user.points -= jumlahTarik;
-          user.penarikan = (user.penarikan || 0) + jumlahTarik;
+        if (user.points >= tarikJumlah) {
+          user.points -= tarikJumlah;
+          user.penarikan = (user.penarikan || 0) + tarikJumlah;
 
-          // Kurangi total uang global
           runTransaction(globalUangRef, (uangGlobal) => {
-            if ((uangGlobal ?? 0) >= jumlahTarik) {
-              return uangGlobal - jumlahTarik;
+            if ((uangGlobal ?? 0) >= tarikJumlah) {
+              return uangGlobal - tarikJumlah;
             } else {
               showNotif("Uang global tidak cukup!", "text-red-600");
               return uangGlobal;
             }
           });
 
-          showNotif(`Penarikan berhasil! ${jumlahTarik.toLocaleString("id-ID")} poin ditarik.`);
+          showNotif(`Penarikan Rp ${tarikJumlah.toLocaleString("id-ID")} berhasil.`);
         } else {
           showNotif("Poin tidak cukup untuk ditarik!", "text-red-600");
         }
+
         return user;
       });
     };
 
-    // Inisialisasi Top Tier
-    updateTopTier();
-
+    // Fungsi klaim hadiah kunci
+    btnClaimKey.onclick = () => {
+      get(keySupplyRef).then((snapshot) => {
+        const currentKeys = snapshot.val() ?? 0;
+        if (currentKeys > 0) {
+          runTransaction(keySupplyRef, (kunci) => {
+            if ((kunci ?? 0) > 0) {
+              return kunci - 1;
+            } else {
+              showNotif("Kunci sudah habis!", "text-red-600");
+              return kunci;
+            }
+          });
+          showNotif("Berhasil klaim 1 kunci!");
+        } else {
+          showNotif("Kunci sudah habis!", "text-red-600");
+        }
+      });
+    };
   </script>
+
   <style>
     body {
       background: #eef2ff;
@@ -134,7 +174,7 @@
     .container {
       background: white; padding: 2rem;
       border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      width: 320px;
+      width: 350px;
       text-align: center;
     }
     button {
@@ -156,24 +196,44 @@
     ul {
       list-style: none;
       padding-left: 0;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+      font-weight: 500;
     }
     li {
+      margin: 0.3rem 0;
+    }
+    p {
+      font-weight: 600;
       margin: 0.5rem 0;
-      font-weight: 500;
-      color: #333;
+    }
+    #notif {
+      min-height: 24px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Kotak Hadiah</h1>
-    <p>Total Uang Global: <strong id="uangTotal">Rp 50.000.000</strong></p>
+    <h1>Kotak Hadiah Realtime</h1>
 
-    <button id="btnWithdraw">Tarik 1000 Poin</button>
+    <p>Total Uang Global: <span id="uangTotal">Rp 50.000.000</span></p>
 
-    <h2>Top Tier Penarikan</h2>
-    <ul id="topTier"><li>Memuat data...</li></ul>
+    <p><strong>Data Kamu:</strong></p>
+    <p>Poin: <span id="userPoints">0</span></p>
+    <p>Total Penarikan: <span id="userPenarikan">0</span></p>
+
+    <button id="btnWithdraw">Tarik Rp 1.000</button>
+
+    <h2>Hadiah Suplay</h2>
+    <p>Sisa Kunci: <span id="keySupplyCount">0</span></p>
+    <button id="btnClaimKey">Klaim 1 Kunci</button>
+
+    <h2>Top 3 Penarikan Terbesar</h2>
+    <ul id="topTier">
+      <li>Memuat data...</li>
+    </ul>
 
     <p id="notif"></p>
   </div>
