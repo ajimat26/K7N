@@ -12,14 +12,12 @@
       margin: 0;
       padding: 0;
     }
-
     h1 {
       background-color: #fd79a8;
       color: white;
       padding: 15px;
       margin: 0;
     }
-
     #boxAnimation {
       width: 120px;
       height: 120px;
@@ -30,7 +28,6 @@
       margin: 20px auto;
       box-shadow: 0 0 10px #d63031;
     }
-
     @keyframes shake {
       0% { transform: rotate(0deg); }
       25% { transform: rotate(10deg); }
@@ -38,7 +35,6 @@
       75% { transform: rotate(10deg); }
       100% { transform: rotate(0deg); }
     }
-
     button {
       background-color: #55efc4;
       border: none;
@@ -50,23 +46,11 @@
       box-shadow: 0 4px #00b894;
       transition: 0.2s;
     }
-
     button:active {
       transform: translateY(4px);
       box-shadow: 0 2px #00b894;
     }
-
-    input {
-      padding: 10px;
-      margin: 5px;
-      font-size: 15px;
-      border: 2px solid #dfe6e9;
-      border-radius: 8px;
-      width: 80%;
-      max-width: 300px;
-    }
-
-    select {
+    input, select, textarea {
       padding: 10px;
       margin: 5px;
       font-size: 15px;
@@ -74,8 +58,11 @@
       border: 2px solid #dfe6e9;
       width: 80%;
       max-width: 320px;
+      box-sizing: border-box;
     }
-
+    textarea {
+      resize: vertical;
+    }
     .panel {
       display: none;
       background: white;
@@ -83,32 +70,28 @@
       border-radius: 10px;
       margin: 10px auto;
       width: 90%;
-      max-width: 400px;
+      max-width: 600px;
       box-shadow: 0 0 10px #b2bec3;
       color: #2d3436;
-    }
-
-    ul {
       text-align: left;
-      list-style: square;
-      max-height: 150px;
-      overflow-y: auto;
-      padding-left: 20px;
     }
-
+    ul {
+      list-style: square;
+      padding-left: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
     hr {
       border: 1px dashed #d63031;
       width: 80%;
       margin: 20px auto;
     }
-
     #notif {
       font-weight: bold;
       min-height: 24px;
       margin-top: 10px;
       color: #0984e3;
     }
-
     #maintenanceNotice {
       background: #ff4c4c;
       padding: 10px;
@@ -119,7 +102,6 @@
       font-weight: bold;
       display: none;
     }
-
     #btnSupply {
       background-color: #fd79a8;
       box-shadow: 0 4px #d63031;
@@ -127,28 +109,11 @@
       font-size: 18px;
       margin-top: 15px;
     }
-
     #btnSupply:disabled {
       background-color: #fab1a0;
       box-shadow: none;
       cursor: not-allowed;
     }
-
-    #adminLoginPanel, #adminPanel {
-      color: white;
-      background: rgba(0,0,0,0.3);
-    }
-
-    #adminLoginPanel input {
-      width: 100%;
-    }
-
-    #adminPanel ul {
-      max-height: 200px;
-      overflow-y: auto;
-      padding-left: 15px;
-    }
-
   </style>
 </head>
 <body>
@@ -201,7 +166,7 @@
   </div>
 
   <!-- Panel login admin -->
-  <div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto;">
+  <div id="adminLoginPanel" class="panel" style="max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3); color: white;">
     <h3>Login Admin</h3>
     <input type="password" id="adminPass" placeholder="Password Admin"><br>
     <button id="btnLoginAdmin">Masuk</button>
@@ -210,7 +175,7 @@
   </div>
 
   <!-- Panel admin setelah login -->
-  <div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto;">
+  <div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto; background: rgba(0,0,0,0.4); color: white;">
     <h3>Panel Admin</h3>
     <h4>Permintaan Penarikan</h4>
     <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
@@ -231,26 +196,39 @@
     Your browser does not support the audio element.
   </audio>
 
-<script>
-  // Storage keys
-  const STORAGE_POINTS = "points";
-  const STORAGE_KEYS = "keys";
-  const STORAGE_MESSAGES = "messages";
-  const STORAGE_WITHDRAWS = "withdraws";
-  const STORAGE_MAINTENANCE = "maintenance";
-  const STORAGE_ADMIN = "adminLoggedIn";
-  const STORAGE_LAST_SUPPLY = "lastSupplyTime";
+  <script>
+    // Storage keys
+    const STORAGE_POINTS = "points";
+    const STORAGE_KEYS = "keys";
+    const STORAGE_MESSAGES = "messages";
+    const STORAGE_WITHDRAWS = "withdraws";
+    const STORAGE_MAINTENANCE = "maintenance";
+    const STORAGE_ADMIN = "adminLoggedIn";
+    const STORAGE_LAST_SUPPLY = "lastSupplyTime";
 
-  // Load data or defaults
-  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
-  let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
-  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
-  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
-  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false,"reason":"","until":0}');
-  let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
-  let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
+    // State variables
+    let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
+    let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
+    let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
+    let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
+    let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false}');
+    let adminLoggedIn = localStorage.getItem(STORAGE_ADMIN) === "true";
+    let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
 
-  // Elements
-  const pointsElem = document.getElementById("points");
-  const keysElem = document.getElementById("keys");
-  const notifElem = document.getElementById("notif");
+    // Elements
+    const pointsElem = document.getElementById("points");
+    const keysElem = document.getElementById("keys");
+    const notifElem = document.getElementById("notif");
+    const btnOpenBox = document.getElementById("btnOpenBox");
+    const btnSupply = document.getElementById("btnSupply");
+    const btnAjukanPenarikan = document.getElementById("btnAjukanPenarikan");
+    const btnLihatPesan = document.getElementById("btnLihatPesan");
+    const btnRiwayatPenarikan = document.getElementById("btnRiwayatPenarikan");
+    const btnAdminPanel = document.getElementById("btnAdminPanel");
+    const btnHapusPesan = document.getElementById("btnHapusPesan");
+    const messageList = document.getElementById("messageList");
+    const riwayatList = document.getElementById("riwayatList");
+    const pesanPanel = document.getElementById("pesan");
+    const riwayatPanel = document.getElementById("riwayat");
+    const adminLoginPanel = document.getElementById("adminLoginPanel");
+    const adminPanel = document.getElementById("adminPanel");
