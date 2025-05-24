@@ -2,213 +2,232 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Random Box Game</title>
+  <title>Game Kotak Hadiah</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #7f7fd5, #86a8e7, #91eae4);
-      color: white;
+      background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+      color: #fff;
       text-align: center;
-      margin: 0;
       padding: 20px;
     }
+    h1 { margin-bottom: 10px; }
     button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-weight: bold;
-      border-radius: 10px;
+      background: #28a745;
+      color: #fff;
       border: none;
-      background: #4CAF50;
-      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 5px;
+      font-size: 16px;
       cursor: pointer;
     }
-    button:hover {
-      background: #45a049;
+    button:hover { background: #218838; }
+    select, input {
+      width: 80%;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
     }
     #boxAnimation {
+      width: 120px;
+      height: 120px;
       margin: 20px auto;
-      width: 100px;
-      height: 100px;
-      background: url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
       background-size: contain;
+      background-repeat: no-repeat;
       animation: none;
     }
     @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(5deg); }
-      75% { transform: rotate(-5deg); }
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
     }
-    .panel { display: none; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 10px auto; width: 90%; max-width: 500px; }
-    select, input { padding: 10px; width: 100%; margin-top: 5px; margin-bottom: 10px; border-radius: 8px; border: none; }
+    .panel {
+      display: none;
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>Random Box Game</h1>
+
+  <h1>Game Kotak Hadiah</h1>
   <div id="boxAnimation"></div>
   <button onclick="openBox()">Buka Kotak</button>
-  <div id="notification"></div>
-  <h2>Poin: <span id="points">0</span></h2>
+  <div id="notif"></div>
+  <h3>Poin: <span id="points">0</span></h3>
 
-  <div>
-    <h3>Penarikan Poin</h3>
-    <select id="amount">
-      <option value="200">50.000 IC - 200 poin</option>
-      <option value="400">100.000 IC - 400 poin</option>
-      <option value="1000">250.000 IC - 1000 poin</option>
-      <option value="2000">500.000 IC - 2000 poin</option>
-      <option value="4000">1.000.000 IC - 4000 poin</option>
-      <option value="8000">2.000.000 IC - 8000 poin</option>
-    </select>
-    <input type="text" id="fullname" placeholder="Nama Lengkap" />
-    <input type="text" id="account" placeholder="Nomor Rekening" />
-    <button onclick="submitWithdraw()">Ajukan Penarikan</button>
-    <div id="exchangeMessage"></div>
-  </div>
+  <hr>
 
-  <button onclick="togglePanel('messagesPanel')">Pesan</button>
-  <button onclick="togglePanel('withdrawPanel')">Riwayat Penarikan</button>
-  <button onclick="togglePanel('adminPanel')">Panel Admin</button>
+  <h3>Penarikan Poin</h3>
+  <select id="amount">
+    <option value="200">50.000 IC - 200 poin</option>
+    <option value="400">100.000 IC - 400 poin</option>
+    <option value="1000">250.000 IC - 1000 poin</option>
+    <option value="2000">500.000 IC - 2000 poin</option>
+    <option value="4000">1.000.000 IC - 4000 poin</option>
+    <option value="8000">2.000.000 IC - 8000 poin</option>
+  </select><br>
+  <input type="text" id="nama" placeholder="Nama Lengkap"><br>
+  <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
+  <button onclick="ajukanPenarikan()">Ajukan Penarikan</button>
 
-  <div id="messagesPanel" class="panel">
+  <hr>
+
+  <button onclick="togglePanel('pesan')">Lihat Pesan</button>
+  <button onclick="togglePanel('riwayat')">Riwayat Penarikan</button>
+  <button onclick="togglePanel('admin')">Admin Panel</button>
+  <button onclick="window.open('https://wa.me/6283891019471','_blank')">Kasih Saran ke Developer</button>
+
+  <div id="pesan" class="panel">
     <h3>Pesan</h3>
-    <ul id="messagesList"></ul>
-    <button onclick="clearMessages()">Hapus Pesan</button>
+    <ul id="messageList"></ul>
+    <button onclick="hapusPesan()">Hapus Semua Pesan</button>
   </div>
 
-  <div id="withdrawPanel" class="panel">
+  <div id="riwayat" class="panel">
     <h3>Riwayat Penarikan</h3>
-    <ul id="withdrawList"></ul>
+    <ul id="riwayatList"></ul>
   </div>
 
-  <div id="adminPanel" class="panel">
+  <div id="admin" class="panel">
     <h3>Panel Admin</h3>
-    <input type="password" id="adminPass" placeholder="Password Admin" />
-    <button onclick="confirmWithdraw()">Konfirmasi Penarikan</button>
+    <input type="password" id="adminPass" placeholder="Password Admin"><br>
+    <button onclick="konfirmasiPenarikan()">Konfirmasi Semua Penarikan</button>
   </div>
 
-  <audio id="backsound" loop autoplay>
+  <audio autoplay loop id="backsound">
     <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
   </audio>
 
   <script>
-    let points = parseInt(localStorage.getItem("points")) || 0;
+    let points = parseInt(localStorage.getItem("points") || "0");
     let messages = JSON.parse(localStorage.getItem("messages") || "[]");
     let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
-
-    const rewards = [
-      { name: "Zonk", points: 0 },
-      { name: "+10 Poin", points: 10 },
-      { name: "+50 Poin", points: 50 },
-      { name: "+100 Poin", points: 100 },
-      { name: "2x Poin Berikutnya", points: -1 }
-    ];
     let doubleNext = false;
 
+    const rewards = [
+      {name: "Zonk", point: 0},
+      {name: "+10 Poin", point: 10},
+      {name: "+50 Poin", point: 50},
+      {name: "+100 Poin", point: 100},
+      {name: "2x Reward Berikutnya", point: -1}
+    ];
+
     function updatePoints() {
-      document.getElementById("points").textContent = points;
+      document.getElementById("points").innerText = points;
       localStorage.setItem("points", points);
     }
 
     function openBox() {
       const box = document.getElementById("boxAnimation");
-      box.style.animation = "shake 1s ease";
+      box.style.animation = "shake 1s";
+      setTimeout(() => box.style.animation = "none", 1000);
 
       setTimeout(() => {
-        box.style.animation = "none";
-        const r = rewards[Math.floor(Math.random() * rewards.length)];
-        let earned = 0;
-        if (r.points === -1) {
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        let earned = reward.point;
+        if (reward.point === -1) {
           doubleNext = true;
-          notify("Bonus 2x Poin di kotak berikutnya!");
-          addMessage("Mendapatkan 2x Poin berikutnya!");
+          addMessage("Mendapatkan 2x reward berikutnya!");
+          notif("2x reward berikutnya aktif!");
         } else {
-          earned = doubleNext ? r.points * 2 : r.points;
-          doubleNext = false;
+          if (doubleNext) {
+            earned *= 2;
+            doubleNext = false;
+          }
           points += earned;
-          notify(`Mendapatkan ${earned} poin! (${r.name})`);
-          addMessage(`Box reward: ${r.name} (+${earned} poin)`);
+          notif(`Kamu mendapat ${earned} poin! (${reward.name})`);
+          addMessage(`Dapat: ${reward.name} (+${earned} poin)`);
         }
         updatePoints();
       }, 1000);
     }
 
-    function notify(msg) {
-      document.getElementById("notification").textContent = msg;
+    function notif(teks) {
+      document.getElementById("notif").innerText = teks;
     }
 
-    function addMessage(msg) {
-      messages.push(msg);
+    function addMessage(text) {
+      messages.push(text);
       if (messages.length > 50) messages.shift();
       localStorage.setItem("messages", JSON.stringify(messages));
-      renderMessages();
+      tampilPesan();
     }
 
-    function renderMessages() {
-      const list = document.getElementById("messagesList");
-      list.innerHTML = "";
+    function tampilPesan() {
+      const ul = document.getElementById("messageList");
+      ul.innerHTML = "";
       messages.forEach(m => {
         const li = document.createElement("li");
         li.textContent = m;
-        list.appendChild(li);
+        ul.appendChild(li);
       });
     }
 
-    function clearMessages() {
+    function hapusPesan() {
       messages = [];
       localStorage.setItem("messages", "[]");
-      renderMessages();
+      tampilPesan();
     }
 
     function togglePanel(id) {
-      const panels = ["messagesPanel", "withdrawPanel", "adminPanel"];
-      panels.forEach(p => document.getElementById(p).style.display = "none");
+      ['pesan','riwayat','admin'].forEach(p => {
+        document.getElementById(p).style.display = "none";
+      });
       document.getElementById(id).style.display = "block";
-      if (id === "withdrawPanel") renderWithdraws();
-      if (id === "messagesPanel") renderMessages();
+      if (id === "pesan") tampilPesan();
+      if (id === "riwayat") tampilRiwayat();
     }
 
-    function submitWithdraw() {
-      const amount = parseInt(document.getElementById("amount").value);
-      const name = document.getElementById("fullname").value;
-      const acc = document.getElementById("account").value;
+    function ajukanPenarikan() {
+      const nama = document.getElementById("nama").value.trim();
+      const rekening = document.getElementById("rekening").value.trim();
+      const jumlah = parseInt(document.getElementById("amount").value);
 
-      if (!name || !acc || points < amount) {
-        notify("Data tidak lengkap atau poin tidak cukup.");
+      if (!nama || !rekening || points < jumlah) {
+        notif("Isi data dengan benar dan pastikan poin cukup!");
         return;
       }
 
-      points -= amount;
-      updatePoints();
-      withdraws.push({ name, acc, amount, confirmed: false });
+      points -= jumlah;
+      withdraws.push({ nama, rekening, jumlah, konfirmasi: false });
       localStorage.setItem("withdraws", JSON.stringify(withdraws));
-      notify("Penarikan diajukan.");
-      addMessage(`Penarikan diajukan: ${name}, ${acc}, ${amount} poin`);
+      updatePoints();
+      addMessage(`Ajukan penarikan: ${nama}, ${jumlah} poin`);
+      notif("Penarikan diajukan!");
     }
 
-    function renderWithdraws() {
-      const list = document.getElementById("withdrawList");
-      list.innerHTML = "";
-      withdraws.forEach((w, i) => {
+    function tampilRiwayat() {
+      const ul = document.getElementById("riwayatList");
+      ul.innerHTML = "";
+      withdraws.forEach(w => {
         const li = document.createElement("li");
-        li.textContent = `${w.name} - ${w.acc} - ${w.amount} poin - ${w.confirmed ? "Sudah dikonfirmasi" : "Menunggu konfirmasi"}`;
-        list.appendChild(li);
+        li.textContent = `${w.nama} - ${w.rekening} - ${w.jumlah} poin - ${w.konfirmasi ? "✅" : "⏳"}`;
+        ul.appendChild(li);
       });
     }
 
-    function confirmWithdraw() {
+    function konfirmasiPenarikan() {
       const pass = document.getElementById("adminPass").value;
-      if (pass !== "admin123") {
+      if (pass !== "opicantik") {
         alert("Password salah!");
         return;
       }
-      withdraws = withdraws.map(w => ({ ...w, confirmed: true }));
+      withdraws = withdraws.map(w => ({...w, konfirmasi: true}));
       localStorage.setItem("withdraws", JSON.stringify(withdraws));
-      notify("Semua penarikan dikonfirmasi.");
-      renderWithdraws();
+      notif("Semua penarikan telah dikonfirmasi.");
+      tampilRiwayat();
     }
 
     updatePoints();
-    renderMessages();
   </script>
+
 </body>
-</html>
+  </html>
