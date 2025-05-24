@@ -1,187 +1,118 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Spin Game - Tukar Poin</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(145deg, #8fd3f4, #84fab0);
-    overflow-x: hidden;
-    color: #333;
-  }
-  header {
-    padding: 20px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  #points {
-    font-size: 24px;
-    font-weight: bold;
-  }
-  #wheel-container {
-    width: 350px;
-    height: 350px;
-    margin: 30px auto;
-    position: relative;
-  }
-  #wheel {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 12px solid #fff;
-    background: conic-gradient(
-      #ffc107 0deg 72deg,
-      #4caf50 72deg 144deg,
-      #03a9f4 144deg 216deg,
-      #e91e63 216deg 288deg,
-      #9c27b0 288deg 360deg
-    );
-    transition: transform 4s ease-out;
-  }
-  #pointer {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 30px solid red;
-  }
-  #spinBtn {
-    display: block;
-    margin: 20px auto;
-    padding: 15px 30px;
-    background: #673ab7;
-    color: #fff;
-    border: none;
-    font-size: 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-  #spinBtn:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-  }
-  #rewardLabel {
-    text-align: center;
-    font-size: 20px;
-    margin-top: 10px;
-    font-weight: bold;
-  }
-  #exchange-section {
-    max-width: 400px;
-    margin: 30px auto;
-    background: #ffffffcc;
-    padding: 20px;
-    border-radius: 12px;
-  }
-  label, select, input, button {
-    display: block;
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  select, input {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  button#submitWithdraw {
-    background: #009688;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin Game Rewards</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #f0f8ff, #e6f7ff);
+      font-family: 'Bubblegum Sans', cursive;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3rem;
+    }
+    #wheel {
+      width: 300px;
+      height: 300px;
+      border: 10px solid #fff;
+      border-radius: 50%;
+      margin: 2rem auto;
+      background: url('https://i.imgur.com/UopO93v.png') no-repeat center;
+      background-size: cover;
+    }
+    #spinBtn {
+      font-size: 1.5rem;
+      padding: 1rem 2rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    #pointsDisplay {
+      font-size: 1.7rem;
+      margin-top: 1rem;
+    }
+    #redeemBtn {
+      margin-top: 1rem;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.2rem;
+      background: #f39c12;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Game Spin - Tukar Poin</h1>
-    <div id="points">Poin: 0</div>
-  </header>
-  <div id="wheel-container">
-    <div id="pointer"></div>
-    <div id="wheel"></div>
-  </div>
-  <button id="spinBtn">Putar</button>
-  <div id="rewardLabel"></div>
-  <div id="exchange-section">
-    <h2>Penukaran Poin</h2>
-    <label for="withdrawAmount">Jumlah Penarikan:</label>
-    <select id="withdrawAmount">
-      <option value="500">50.000 IC - 500 Poin</option>
-      <option value="1000">100.000 IC - 1000 Poin</option>
-      <option value="2500">250.000 IC - 2500 Poin</option>
-      <option value="5000">500.000 IC - 5000 Poin</option>
-    </select>
-    <label for="fullname">Nama Lengkap:</label>
-    <input type="text" id="fullname" placeholder="Nama lengkap...">
-    <label for="rekening">Nomor Rekening:</label>
-    <input type="text" id="rekening" placeholder="Nomor rekening...">
-    <button id="submitWithdraw">Ajukan Penarikan</button>
-  </div>
-<script>
-let points = parseInt(localStorage.getItem("points")) || 0;
-const wheel = document.getElementById("wheel");
-const spinBtn = document.getElementById("spinBtn");
-const rewardLabel = document.getElementById("rewardLabel");
-const pointsDisplay = document.getElementById("points");
+  <h1>Spin & Win Poin!</h1>
+  <div id="wheel"></div>
+  <button id="spinBtn">SPIN!</button>
+  <div id="pointsDisplay">Total Poin: <span id="points">0</span></div>
+  <button id="redeemBtn">Tukar Poin</button>
 
-function updatePointsDisplay() {
-  pointsDisplay.textContent = `Poin: ${points}`;
-  localStorage.setItem("points", points);
-}
+  <audio id="spinSound" src="https://www.soundjay.com/button/sounds/button-30.mp3"></audio>
 
-const segments = [
-  { label: "Zonk", points: 0 },
-  { label: "+10 Poin", points: 10 },
-  { label: "+20 Poin", points: 20 },
-  { label: "+50 Poin", points: 50 },
-  { label: "+100 Poin", points: 100 },
-];
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.firebasestorage.app",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:9b764840e51c13a3044a11"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-let spinning = false;
-spinBtn.addEventListener("click", () => {
-  if (spinning) return;
-  spinning = true;
-  const deg = Math.floor(3600 + Math.random() * 360);
-  wheel.style.transform = `rotate(${deg}deg)`;
-  const selected = Math.floor((deg % 360) / (360 / segments.length));
-  setTimeout(() => {
-    const reward = segments[(segments.length - selected) % segments.length];
-    points += reward.points;
-    updatePointsDisplay();
-    rewardLabel.textContent = `Selamat! Kamu mendapat ${reward.label}`;
-    spinning = false;
-  }, 4000);
-});
+    let points = parseInt(localStorage.getItem("spinPoints")) || 0;
+    const pointDisplay = document.getElementById("points");
+    pointDisplay.innerText = points;
 
-updatePointsDisplay();
+    const rewards = ["ZONK", 50, 30, "GANDAKAN", 75, 15, "ZONK", 25];
+    const spinBtn = document.getElementById("spinBtn");
+    const wheel = document.getElementById("wheel");
+    const spinSound = document.getElementById("spinSound");
 
-document.getElementById("submitWithdraw").addEventListener("click", () => {
-  const amount = parseInt(document.getElementById("withdrawAmount").value);
-  const name = document.getElementById("fullname").value;
-  const rekening = document.getElementById("rekening").value;
-  if (!name || !rekening) {
-    alert("Nama dan nomor rekening harus diisi!");
-    return;
-  }
-  if (points < amount) {
-    alert("Poin tidak cukup.");
-    return;
-  }
-  points -= amount;
-  updatePointsDisplay();
-  rewardLabel.textContent = "Permintaan penarikan sedang diproses dalam waktu 24 jam kerja.";
-});
-</script>
+    spinBtn.onclick = () => {
+      spinSound.play();
+      const resultIndex = Math.floor(Math.random() * rewards.length);
+      const result = rewards[resultIndex];
+
+      wheel.style.transition = "transform 4s ease-out";
+      wheel.style.transform = `rotate(${1440 + resultIndex * 45}deg)`;
+
+      setTimeout(() => {
+        if (result === "ZONK") alert("Zonk! Coba lagi ya.");
+        else if (result === "GANDAKAN") {
+          points *= 2;
+          alert("Poin kamu digandakan!");
+        } else {
+          points += result;
+          alert(`Kamu dapat ${result} poin!`);
+        }
+        pointDisplay.innerText = points;
+        localStorage.setItem("spinPoints", points);
+      }, 4000);
+    };
+
+    document.getElementById("redeemBtn").onclick = () => {
+      const name = prompt("Masukkan nama lengkap kamu:");
+      const rekening = prompt("Masukkan nomor rekening kamu:");
+      if (name && rekening) {
+        db.ref("penarikan/").push({ name, rekening, poin: points });
+        alert("Permintaan sedang diproses. Harap tunggu dalam waktu maksimal 24 jam.");
+      }
+    };
+  </script>
 </body>
 </html>
