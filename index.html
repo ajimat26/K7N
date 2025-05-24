@@ -1,264 +1,163 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Chat Mirip WhatsApp Web</title>
-<style>
-  /* Reset */
-  * {
-    box-sizing: border-box;
-  }
-  body, html {
-    margin: 0; padding: 0; height: 100%;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f2f5;
-  }
-
-  #app {
-    display: flex;
-    height: 100vh;
-    max-width: 1200px;
-    margin: auto;
-    background: white;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-  }
-
-  /* Sidebar kiri (daftar chat / login) */
-  #sidebar {
-    width: 320px;
-    border-right: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #sidebar header {
-    background: #075E54;
-    color: white;
-    padding: 15px 20px;
-    font-size: 20px;
-    font-weight: bold;
-  }
-
-  #loginForm {
-    padding: 20px;
-    flex-shrink: 0;
-  }
-
-  #loginForm input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-
-  #loginForm button {
-    width: 100%;
-    padding: 12px;
-    background: #25D366;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-  }
-
-  /* Area chat */
-  #chatArea {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #chatHeader {
-    height: 60px;
-    background: #f0f2f5;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    font-weight: 600;
-    font-size: 18px;
-  }
-
-  #messages {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: url('https://i.imgur.com/9p4X2bM.png') center center repeat;
-    background-size: 50px;
-  }
-
-  #messages li {
-    max-width: 70%;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    border-radius: 7.5px;
-    font-size: 15px;
-    line-height: 1.3;
-    word-wrap: break-word;
-  }
-
-  #messages li.me {
-    background: #dcf8c6;
-    margin-left: auto;
-    border-bottom-right-radius: 0;
-  }
-
-  #messages li.other {
-    background: white;
-    border-bottom-left-radius: 0;
-  }
-
-  #inputArea {
-    display: flex;
-    padding: 10px 20px;
-    border-top: 1px solid #ddd;
-    background: #f0f2f5;
-  }
-
-  #inputMsg {
-    flex-grow: 1;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 15px;
-    font-size: 16px;
-    outline: none;
-  }
-
-  #btnSend {
-    margin-left: 10px;
-    background: #25D366;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #btnSend svg {
-    fill: white;
-    width: 20px;
-    height: 20px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UANGDUTY SAFD</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fff; padding: 20px; }
+    .hidden { display: none; }
+    .panel { margin-bottom: 20px; }
+    .chat-box { border: 1px solid #ccc; padding: 10px; height: 150px; overflow-y: scroll; background: #f9f9f9; }
+    .chat-input { margin-top: 10px; }
+    button { margin-top: 5px; }
+  </style>
 </head>
 <body>
+  <h1>UANGDUTY SAFD</h1>
+  
+  <div id="auth-panel">
+    <input type="text" id="namaLengkap" placeholder="Nama Lengkap"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="register()">Daftar</button>
+    <button onclick="login()">Login</button>
+  </div>
 
-<div id="app">
-  <div id="sidebar">
-    <header>WhatsApp Web</header>
-    <div id="loginForm">
-      <input id="userId" type="text" placeholder="ID kamu (misal: user123)" />
-      <input id="chatWith" type="text" placeholder="Chat dengan ID (misal: user456)" />
-      <button id="btnLogin">Login & Mulai Chat</button>
+  <div id="main-panel" class="hidden">
+    <h2>Selamat datang, <span id="user-display"></span></h2>
+
+    <div class="panel">
+      <button onclick="mainSpin()">Main Spin</button>
+      <button onclick="mainPuzzle()">Tebak Gambar</button>
+    </div>
+
+    <div class="panel">
+      <h3>Poin: <span id="poin-user">0</span></h3>
+      <button onclick="ajukanPenukaran()">Ajukan Penukaran</button>
+    </div>
+
+    <div class="panel">
+      <h3>Chat</h3>
+      <div class="chat-box" id="chat-box"></div>
+      <input type="text" id="chat-message" class="chat-input">
+      <button onclick="sendChat()">Kirim</button>
     </div>
   </div>
 
-  <div id="chatArea" style="display:none;">
-    <div id="chatHeader"></div>
-    <ul id="messages"></ul>
-    <div id="inputArea">
-      <input id="inputMsg" type="text" placeholder="Ketik pesan..." autocomplete="off" />
-      <button id="btnSend" title="Kirim pesan">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.firebasestorage.app",
+      messagingSenderId: "598905752132",
+      appId: "1:598905752132:web:9b764840e51c13a3044a11"
+    };
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script>
-  // Config Firebase kamu
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-    authDomain: "uangduty.firebaseapp.com",
-    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "uangduty",
-    storageBucket: "uangduty.firebasestorage.app",
-    messagingSenderId: "598905752132",
-    appId: "1:598905752132:web:7be400c23de21665044a11",
-    measurementId: "G-TJL9K6YDL9"
-  };
+    let currentUser = null;
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+    function register() {
+      const nama = document.getElementById('namaLengkap').value;
+      const pass = document.getElementById('password').value;
+      if (!nama || !pass) return alert("Isi nama dan password");
 
-  let currentUser = null;
-  let chatWithUser = null;
-  let chatId = null;
-
-  const loginForm = document.getElementById('loginForm');
-  const chatArea = document.getElementById('chatArea');
-  const chatHeader = document.getElementById('chatHeader');
-  const messagesList = document.getElementById('messages');
-  const inputMsg = document.getElementById('inputMsg');
-
-  document.getElementById('btnLogin').onclick = () => {
-    const userId = document.getElementById('userId').value.trim();
-    const chatWithId = document.getElementById('chatWith').value.trim();
-    if (!userId || !chatWithId) {
-      alert('Isi kedua ID dulu ya!');
-      return;
-    }
-    currentUser = userId;
-    chatWithUser = chatWithId;
-    chatId = userId < chatWithId ? userId + '_' + chatWithId : chatWithId + '_' + userId;
-
-    loginForm.style.display = 'none';
-    chatArea.style.display = 'flex';
-    chatHeader.textContent = 'Chat dengan: ' + chatWithUser;
-
-    loadMessages();
-  };
-
-  function loadMessages() {
-    const messagesRef = db.ref('chats/' + chatId);
-    messagesRef.off();
-    messagesRef.on('value', snapshot => {
-      const data = snapshot.val();
-      messagesList.innerHTML = '';
-      if (!data) return;
-      Object.entries(data).forEach(([key, msg]) => {
-        const li = document.createElement('li');
-        li.textContent = msg.text;
-        li.className = msg.from === currentUser ? 'me' : 'other';
-        messagesList.appendChild(li);
+      db.ref('users/' + nama).once('value', (snap) => {
+        if (snap.exists()) return alert("Akun sudah terdaftar");
+        db.ref('users/' + nama).set({ password: pass, poin: 0 });
+        alert("Pendaftaran berhasil");
       });
-      messagesList.scrollTop = messagesList.scrollHeight;
-    });
-  }
+    }
 
-  document.getElementById('btnSend').onclick = sendMessage;
-  inputMsg.addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendMessage();
-  });
+    function login() {
+      const nama = document.getElementById('namaLengkap').value;
+      const pass = document.getElementById('password').value;
+      db.ref('users/' + nama).once('value', (snap) => {
+        if (!snap.exists()) return alert("Akun tidak ditemukan");
+        if (snap.val().password !== pass) return alert("Password salah");
+        currentUser = nama;
+        document.getElementById('auth-panel').classList.add('hidden');
+        document.getElementById('main-panel').classList.remove('hidden');
+        document.getElementById('user-display').innerText = nama;
+        listenToChat();
+        loadPoin();
+      });
+    }
 
-  function sendMessage() {
-    const text = inputMsg.value.trim();
-    if (!text) return;
+    function loadPoin() {
+      db.ref('users/' + currentUser + '/poin').on('value', (snap) => {
+        document.getElementById('poin-user').innerText = snap.val();
+      });
+    }
 
-    const messagesRef = db.ref('chats/' + chatId);
-    const newMsgRef = messagesRef.push();
-    newMsgRef.set({
-      from: currentUser,
-      to: chatWithUser,
-      text: text,
-      createdAt: Date.now()
-    });
+    function mainSpin() {
+      const hasil = Math.random();
+      let poin = 0;
+      if (hasil < 0.3) poin = 0; // zonk
+      else if (hasil < 0.5) poin = 100; // kecil
+      else if (hasil < 0.7) poin = 250; // sedang
+      else if (hasil < 0.9) poin = 500; // besar
+      else poin = 2; // 2x poin (bonus diatur nanti)
 
-    inputMsg.value = '';
-  }
-</script>
+      if (poin === 2) {
+        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
+          let cur = snap.val() || 0;
+          db.ref('users/' + currentUser + '/poin').set(cur * 2);
+        });
+        alert("Poin kamu digandakan!");
+      } else {
+        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
+          let cur = snap.val() || 0;
+          db.ref('users/' + currentUser + '/poin').set(cur + poin);
+        });
+        alert("Kamu dapat: " + poin + " poin");
+      }
+    }
 
+    function mainPuzzle() {
+      let jawaban = prompt("Gambar: [Kucing Menangis], Jawabanmu?");
+      if (jawaban && jawaban.toLowerCase() === "kucing menangis") {
+        db.ref('users/' + currentUser + '/poin').once('value').then((snap) => {
+          let cur = snap.val() || 0;
+          db.ref('users/' + currentUser + '/poin').set(cur + 300);
+        });
+        alert("Benar! +300 poin");
+      } else {
+        alert("Salah!");
+      }
+    }
+
+    function ajukanPenukaran() {
+      let jumlah = prompt("Jumlah yang ingin ditarik (contoh: 50000)?");
+      let norek = prompt("Masukkan nomor rekening kamu:");
+      db.ref('penarikan').push({ nama: currentUser, jumlah: jumlah, norek: norek, waktu: Date.now() });
+      alert("Pengajuan berhasil, tunggu admin memproses");
+    }
+
+    function sendChat() {
+      let isi = document.getElementById('chat-message').value;
+      if (!isi) return;
+      db.ref('chat').push({ nama: currentUser, pesan: isi });
+      document.getElementById('chat-message').value = "";
+    }
+
+    function listenToChat() {
+      db.ref('chat').on('child_added', (snap) => {
+        const msg = snap.val();
+        const box = document.getElementById('chat-box');
+        const el = document.createElement('div');
+        el.textContent = msg.nama + ": " + msg.pesan;
+        box.appendChild(el);
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+  </script>
 </body>
-  </html>
+        </html>
+  
