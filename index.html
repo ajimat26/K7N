@@ -2,122 +2,123 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Kotak Hadiah - Admin & Maintenance</title>
+<title>Game Kotak Hadiah</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f9d423, #ff4e50);
+    background: linear-gradient(135deg, #a8e6a3, #6bc56b);
     color: #333;
     margin: 0; padding: 20px;
     text-align: center;
     user-select: none;
   }
   h1 {
-    background: #e91e63;
-    color: #fff;
-    margin-bottom: 20px;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  }
-  #box {
-    width: 150px; height: 150px;
-    margin: 20px auto;
-    background-color: #ffcc80;
-    border-radius: 15px;
-    box-shadow: 0 0 15px #fb8c00;
-    line-height: 150px;
-    font-size: 48px;
-    color: #6d4c41;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    user-select:none;
-  }
-  #box:hover:not(.disabled) {
-    background-color: #ffb74d;
-  }
-  button {
-    margin: 10px 5px;
-    padding: 12px 24px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    background-color: #ff7043;
+    background-color: #379237;
     color: white;
-    box-shadow: 0 5px #bf360c;
-    transition: background-color 0.2s;
-    user-select:none;
-  }
-  button:hover:not(:disabled) {
-    background-color: #ff5722;
-  }
-  button:active:not(:disabled) {
-    box-shadow: 0 2px #bf360c;
-    transform: translateY(3px);
-  }
-  button:disabled {
-    background-color: #ccc;
-    color: #666;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-  input, select {
-    padding: 10px;
-    margin: 10px auto;
-    width: 80%;
-    max-width: 320px;
-    border-radius: 10px;
-    border: 2px solid #f57c00;
-    font-size: 18px;
-    display: block;
-    box-sizing: border-box;
-  }
-  #notif {
-    margin-top: 15px;
-    font-weight: bold;
-    color: #004d40;
-    min-height: 24px;
-    font-size: 18px;
-  }
-  .panel {
-    margin-top: 20px;
-    background-color: #ffe0b2;
     padding: 15px;
-    border-radius: 12px;
-    max-width: 420px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: left;
+    margin: 0 0 20px 0;
+    border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
   }
-  .adminOnly {
-    background: #d32f2f !important;
+  #boxAnimation {
+    width: 120px;
+    height: 120px;
+    background: #55cc55 url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
+    background-size: 80%;
+    border: 3px solid #3a863a;
+    border-radius: 15px;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 0 12px #3a863a;
   }
-  .confirmed {
-    text-decoration: line-through;
-    color: gray;
+  @keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+  }
+  button {
+    background-color: #3a863a;
+    border: none;
+    padding: 12px 25px;
+    margin: 8px 5px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 4px #2e672e;
+    transition: 0.2s;
+    min-width: 140px;
+  }
+  button:hover {
+    background-color: #2e672e;
+  }
+  button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px #2e672e;
+  }
+  button:disabled {
+    background-color: #9ccc9c;
+    box-shadow: none;
+    cursor: not-allowed;
+    color: #555;
+  }
+  input, select, textarea {
+    padding: 10px;
+    margin: 5px;
+    font-size: 15px;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 320px;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .panel {
+    display: none;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px auto 30px auto;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 15px #4caf50aa;
+    color: #2d3436;
+    text-align: left;
   }
   ul {
+    list-style: square;
     padding-left: 20px;
   }
-  ul li {
-    margin-bottom: 8px;
+  hr {
+    border: 1px dashed #379237;
+    width: 80%;
+    margin: 20px auto;
   }
-  ul li button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    font-size: 14px;
-  }
-  #maintenanceMsg {
-    background: #b71c1c;
-    color: white;
-    padding: 12px;
+  #notif {
     font-weight: bold;
-    margin-bottom: 20px;
-    border-radius: 10px;
+    min-height: 24px;
+    margin-top: 10px;
+    color: #1b5e20;
+  }
+  #maintenanceNotice {
+    background: #ff4c4c;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 15px auto 30px auto;
+    max-width: 400px;
+    color: white;
+    font-weight: bold;
     display: none;
+  }
+  #btnSupply {
+    background-color: #2e7d32;
+    box-shadow: 0 4px #1b5e20;
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 15px;
+    min-width: 220px;
   }
 </style>
 </head>
@@ -125,118 +126,101 @@
 
 <h1>Game Kotak Hadiah</h1>
 
-<div id="maintenanceMsg"></div>
+<div id="maintenanceNotice"></div>
 
-<div id="box" title="Klik untuk buka kotak" tabindex="0">🎁</div>
+<div id="gamePanel">
+  <div id="boxAnimation"></div>
+  <button id="btnOpenBox">Buka Kotak</button>
+  <div id="notif"></div>
 
-<button id="btnOpenBox">Buka Kotak</button>
-<button id="btnSupply">Ambil Box Suplai (1x per jam)</button>
+  <h3>Poin: <span id="points">0</span></h3>
+  <h3>Kunci: <span id="keys">0</span></h3>
 
-<div id="notif"></div>
+  <button id="btnSupply">Ambil Box Suplai (1x per jam)</button>
 
-<hr>
+  <hr>
 
-<h3>Poin: <span id="points">0</span></h3>
-<h3>Kunci: <span id="keys">0</span></h3>
+  <h3>Penarikan Poin</h3>
+  <select id="amount">
+    <option value="200">50.000 IC - 200 poin</option>
+    <option value="400">100.000 IC - 400 poin</option>
+    <option value="1000">250.000 IC - 1000 poin</option>
+    <option value="2000">500.000 IC - 2000 poin</option>
+    <option value="4000">1.000.000 IC - 4000 poin</option>
+    <option value="8000">2.000.000 IC - 8000 poin</option>
+  </select><br>
+  <input type="text" id="nama" placeholder="Nama Lengkap"><br>
+  <input type="text" id="rekening" placeholder="Nomor Rekening"><br>
+  <button id="btnAjukanPenarikan">Ajukan Penarikan</button>
 
-<hr>
+  <hr>
 
-<select id="amount">
-  <option value="200">50.000 IC - 200 poin</option>
-  <option value="400">100.000 IC - 400 poin</option>
-  <option value="1000">250.000 IC - 1000 poin</option>
-  <option value="2000">500.000 IC - 2000 poin</option>
-  <option value="4000">1.000.000 IC - 4000 poin</option>
-  <option value="8000">2.000.000 IC - 8000 poin</option>
-</select>
+  <button id="btnLihatPesan">Lihat Pesan</button>
+  <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
+  <button id="btnAdminPanel">Login Admin</button>
+  <button onclick="window.open('https://wa.me/6283891019471','_blank')">Kasih Saran ke Developer</button>
 
-<input type="text" id="nama" placeholder="Nama Lengkap" />
-<input type="text" id="rekening" placeholder="Nomor Rekening" />
+  <div id="pesan" class="panel">
+    <h3>Pesan</h3>
+    <ul id="messageList"></ul>
+    <button id="btnHapusPesan">Hapus Semua Pesan</button>
+  </div>
 
-<button id="btnAjukanPenarikan">Ajukan Penarikan</button>
-
-<hr>
-
-<button id="btnLihatPesan">Lihat Pesan</button>
-<button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
-<button id="btnKonfirmasiPenarikan" style="display:none;">Konfirmasi Penarikan (Admin Only)</button>
-<button id="btnToggleMaintenance" style="display:none;">Toggle Maintenance Mode (Admin Only)</button>
-
-<div id="pesanPanel" class="panel" style="display:none;">
-  <h3>Pesan</h3>
-  <ul id="messageList"></ul>
-  <button id="btnHapusPesan">Hapus Semua Pesan</button>
+  <div id="riwayat" class="panel">
+    <h3>Riwayat Penarikan</h3>
+    <ul id="riwayatList"></ul>
+  </div>
 </div>
 
-<div id="riwayatPanel" class="panel" style="display:none;">
-  <h3>Riwayat Penarikan</h3>
-  <ul id="riwayatList"></ul>
+<!-- Panel login admin -->
+<div id="adminLoginPanel" class="panel" style="background: #2e7d32; color: white;">
+  <h3>Login Admin</h3>
+  <input type="password" id="adminPass" placeholder="Password Admin"><br>
+  <button id="btnLoginAdmin">Masuk</button>
+  <button id="btnBatalLoginAdmin">Batal</button>
+  <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
 </div>
 
-<div id="konfirmasiPanel" class="panel" style="display:none;">
-  <h3>Konfirmasi Penarikan</h3>
-  <ul id="konfirmasiList"></ul>
+<!-- Panel admin setelah login -->
+<div id="adminPanel" class="panel" style="background: #1b5e20; color: white;">
+  <h3>Panel Admin</h3>
+  <h4>Permintaan Penarikan</h4>
+  <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto;"></ul>
+  <hr>
+  <h4>Mode Maintenance</h4>
+  <label>Alasan Maintenance:</label><br>
+  <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
+  <label>Durasi Maintenance (menit):</label><br>
+  <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
+  <button id="btnStartMaintenance">Mulai Maintenance</button>
+  <button id="btnStopMaintenance">Hentikan Maintenance</button>
+  <hr>
+  <button id="btnLogoutAdmin">Logout Admin</button>
 </div>
 
 <script>
-  const ADMIN_USERNAME = "admin";
+  // Kunci password admin
+  const ADMIN_PASSWORD = "admin123";
 
-  let currentUser = localStorage.getItem('currentUser');
-  if(!currentUser){
-    currentUser = prompt("Masukkan username (admin untuk akses admin):", "guest");
-    if(!currentUser) currentUser = "guest";
-    localStorage.setItem('currentUser', currentUser);
-  }
-  const isAdmin = (currentUser.toLowerCase() === ADMIN_USERNAME);
+  // Keys localStorage
+  const STORAGE_POINTS = "points";
+  const STORAGE_KEYS = "keys";
+  const STORAGE_MESSAGES = "messages";
+  const STORAGE_WITHDRAWS = "withdraws";
+  const STORAGE_MAINTENANCE = "maintenance";
+  const STORAGE_ADMIN = "adminLoggedIn";
+  const STORAGE_LAST_SUPPLY = "lastSupplyTime";
 
-  // Data default
-  let points = parseInt(localStorage.getItem('points')) || 0;
-  let keys = parseInt(localStorage.getItem('keys')) || 0;
-  let messages = JSON.parse(localStorage.getItem('messages')) || ["Selamat datang di game!"];
-  let riwayatPenarikan = JSON.parse(localStorage.getItem('riwayatPenarikan')) || [];
-  let penarikanPending = JSON.parse(localStorage.getItem('penarikanPending')) || [];
-  let lastSupplyTime = parseInt(localStorage.getItem('lastSupplyTime')) || 0;
-  let maintenanceMode = (localStorage.getItem('maintenanceMode') === "true") || false;
-  let maintenanceReason = localStorage.getItem('maintenanceReason') || "";
+  // State
+  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
+  let keys = parseInt(localStorage.getItem(STORAGE_KEYS) || "0");
+  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
+  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
+  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || '{"active":false}');
+  let adminLoggedIn = (localStorage.getItem(STORAGE_ADMIN) === "true");
+  let lastSupplyTime = parseInt(localStorage.getItem(STORAGE_LAST_SUPPLY) || "0");
 
-  // Elemen UI
-  const notif = document.getElementById('notif');
-  const pointsEl = document.getElementById('points');
-  const keysEl = document.getElementById('keys');
-  const messageList = document.getElementById('messageList');
-  const riwayatList = document.getElementById('riwayatList');
-  const konfirmasiList = document.getElementById('konfirmasiList');
-  const pesanPanel = document.getElementById('pesanPanel');
-  const riwayatPanel = document.getElementById('riwayatPanel');
-  const konfirmasiPanel = document.getElementById('konfirmasiPanel');
-  const btnKonfirmasi = document.getElementById('btnKonfirmasiPenarikan');
-  const btnToggleMaintenance = document.getElementById('btnToggleMaintenance');
-  const maintenanceMsg = document.getElementById('maintenanceMsg');
-
-  const box = document.getElementById('box');
-  const btnOpenBox = document.getElementById('btnOpenBox');
-  const btnSupply = document.getElementById('btnSupply');
-  const btnAjukanPenarikan = document.getElementById('btnAjukanPenarikan');
-  const btnLihatPesan = document.getElementById('btnLihatPesan');
-  const btnRiwayatPenarikan = document.getElementById('btnRiwayatPenarikan');
-  const btnHapusPesan = document.getElementById('btnHapusPesan');
-
-  const inputNama = document.getElementById('nama');
-  const inputRekening = document.getElementById('rekening');
-  const selectAmount = document.getElementById('amount');
-
-  // Update UI poin dan kunci
-  function updatePointsKeys(){
-    pointsEl.textContent = points;
-    keysEl.textContent = keys;
-  }
-
-  // Save semua data ke localStorage
-  function saveData(){
-    localStorage.setItem('points', points);
-    localStorage.setItem('keys', keys);
-    localStorage.setItem('messages', JSON.stringify(messages));
-    localStorage.setItem('riwayatPenarikan', JSON.stringify(riwayatPenarikan));
-    localStorage.setItem('penarikanPending', JSON.stringify(penarikanPending));
-    localStorage.setItem('lastSupplyTime', lastSupplyTime);
-    localStorage.setItem('maintenanceMode', maintenance
+  // Elemen
+  const pointsSpan = document.getElementById("points");
+  const keysSpan = document.getElementById("keys");
+  const notifDiv = document.getElement
