@@ -1,130 +1,228 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Game Tebak Gambar & Penarikan Uang</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #74ebd5, #ACB6E5);
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 800px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    label, select, input, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      cursor: pointer;
-    }
-    #notification {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #e7f3fe;
-      border-left: 6px solid #2196F3;
-      display: none;
-    }
-    #gameCanvas {
-      width: 100%;
-      max-width: 600px;
-      margin: 20px auto;
-      text-align: center;
-    }
-    #questionImage {
-      max-width: 100%;
-      border-radius: 10px;
-    }
-    #chatlog {
-      height: 150px;
-      overflow-y: auto;
-      background: #f1f1f1;
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 5px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game Spin Bubble - Dapatkan Poin</title>
+<style>
+  body {
+    margin: 0; 
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    color: #fff;
+    user-select: none;
+  }
+
+  #points {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(0,0,0,0.5);
+  }
+
+  #spinBtn {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff6f61;
+    border-radius: 50%;
+    border: none;
+    width: 120px;
+    height: 120px;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 0 20px #ff6f61;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    outline: none;
+  }
+  #spinBtn:active {
+    transform: translateX(-50%) scale(0.95);
+  }
+
+  #message {
+    position: fixed;
+    bottom: 190px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: 600;
+    padding: 10px 25px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 30px;
+    text-align: center;
+    min-width: 220px;
+    user-select: none;
+  }
+
+  /* Bubble style */
+  .bubble {
+    position: absolute;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255,255,255,0.8);
+    animation-timing-function: linear;
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
-<div class="container">
-  <h1>Game Tebak Gambar</h1>
-  <div id="gameCanvas">
-    <img id="questionImage" src="https://via.placeholder.com/400x200.png?text=Tebak+Gambar" alt="Gambar Tebakan">
-    <input type="text" id="jawaban" placeholder="Jawaban Anda">
-    <button onclick="submitJawaban()">Kirim Jawaban</button>
-    <div id="chatlog"></div>
-  </div>
-  <h2>Penarikan Uang</h2>
-  <label>Nama Lengkap:</label>
-  <input type="text" id="name">
-  <label>Nomor Rekening:</label>
-  <input type="text" id="account">
-  <label>Jumlah Penarikan:</label>
-  <select id="amount">
-    <option value="50000">Rp 50.000 (5.000 poin)</option>
-    <option value="100000">Rp 100.000 (10.000 poin)</option>
-    <option value="250000">Rp 250.000 (22.500 poin)</option>
-    <option value="500000">Rp 500.000 (45.000 poin)</option>
-    <option value="1000000">Rp 1.000.000 (90.000 poin)</option>
-  </select>
-  <button onclick="submitWithdrawal()">Ajukan Penarikan</button>
-  <div id="notification"></div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<div id="points">Poin: 0</div>
+<button id="spinBtn">SPIN</button>
+<div id="message"></div>
+
 <script>
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let userPoints = 100000;
-function submitJawaban() {
-  const jawab = document.getElementById("jawaban").value.toLowerCase();
-  const benar = ["kucing", "motor", "makan"];
-  const chat = document.getElementById("chatlog");
-  const point = jawab === "kucing" ? 300 : benar.includes(jawab) ? 100 : 0;
-  userPoints += point;
-  chat.innerHTML += `<div><b>Jawaban:</b> ${jawab} (${point > 0 ? '+'+point+' poin' : 'salah'})</div>`;
-  document.getElementById("jawaban").value = "";
-}
-function submitWithdrawal() {
-  const name = document.getElementById('name').value.trim();
-  const account = document.getElementById('account').value.trim();
-  const amount = parseInt(document.getElementById('amount').value);
-  let requiredPoints = amount / 10;
-  if (!name || !account) return alert("Lengkapi semua data.");
-  if (userPoints < requiredPoints) return alert("Poin tidak cukup.");
-  userPoints -= requiredPoints;
-  db.ref('withdrawals').push({ name, account, amount, timestamp: Date.now(), status: 'pending' });
-  document.getElementById('notification').style.display = 'block';
-  document.getElementById('notification').innerText =
-    "Pengajuan Anda telah diterima dan akan diproses maksimal dalam 24 jam oleh tim kami. Mohon tunggu konfirmasi selanjutnya.";
-  document.getElementById('name').value = '';
-  document.getElementById('account').value = '';
-}
+  // Backsound
+  const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/11/audio_c2eb2b5d05.mp3?filename=upbeat-corporate-ambient-8083.mp3');
+  audio.loop = true;
+  audio.volume = 0.15;
+  audio.play();
+
+  // Points and spin logic
+  let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
+  const pointsDisplay = document.getElementById('points');
+  const spinBtn = document.getElementById('spinBtn');
+  const message = document.getElementById('message');
+
+  const rewards = [
+    { type: 'zonk', chance: 30, message: 'Zonk! Tidak dapat poin.' },
+    { type: 'small', chance: 30, value: 10, message: '+10 Poin' },
+    { type: 'medium', chance: 20, value: 25, message: '+25 Poin' },
+    { type: 'big', chance: 15, value: 50, message: '+50 Poin' },
+    { type: 'double', chance: 5, message: 'Gandakan poin! Spin berikutnya dapat 2x lipat' }
+  ];
+
+  let doubleNext = false;
+
+  function weightedRandom(rewards) {
+    let total = rewards.reduce((acc, r) => acc + r.chance, 0);
+    let rand = Math.random() * total;
+    let sum = 0;
+    for (let r of rewards) {
+      sum += r.chance;
+      if (rand <= sum) return r;
+    }
+  }
+
+  function updatePointsDisplay() {
+    pointsDisplay.textContent = `Poin: ${points}`;
+  }
+
+  function createBubble(text, x, y, size, color) {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.left = x + 'px';
+    bubble.style.top = y + 'px';
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.lineHeight = size + 'px';
+    bubble.style.fontWeight = '700';
+    bubble.style.fontSize = (size/3) + 'px';
+    bubble.style.color = color || '#fff';
+    bubble.style.textAlign = 'center';
+    bubble.style.userSelect = 'none';
+    bubble.textContent = text;
+    document.body.appendChild(bubble);
+
+    // Animate bubble floating upwards and fading
+    let posY = y;
+    let alpha = 1;
+    const speed = Math.random() * 1 + 0.5;
+    const floatInterval = setInterval(() => {
+      posY -= speed;
+      alpha -= 0.02;
+      bubble.style.top = posY + 'px';
+      bubble.style.opacity = alpha;
+      if (alpha <= 0) {
+        clearInterval(floatInterval);
+        bubble.remove();
+      }
+    }, 30);
+  }
+
+  spinBtn.onclick = () => {
+    spinBtn.disabled = true;
+    message.textContent = "Memutar...";
+    
+    // Spin sound
+    const spinSound = new Audio('https://cdn.pixabay.com/download/audio/2021/10/07/audio_8a868bf6ca.mp3?filename=slot-machine-spin-7077.mp3');
+    spinSound.volume = 0.4;
+    spinSound.play();
+
+    setTimeout(() => {
+      let reward = weightedRandom(rewards);
+      if (reward.type === 'zonk') {
+        message.textContent = reward.message;
+        createBubble('Zonk', window.innerWidth/2 - 40, window.innerHeight - 200, 80, '#ff4444');
+      } else if (reward.type === 'double') {
+        doubleNext = true;
+        message.textContent = reward.message;
+        createBubble('2x', window.innerWidth/2 - 30, window.innerHeight - 200, 80, '#ffd700');
+      } else {
+        let rewardPoints = reward.value;
+        if (doubleNext) {
+          rewardPoints *= 2;
+          doubleNext = false;
+          message.textContent = reward.message + ' (x2)';
+        } else {
+          message.textContent = reward.message;
+        }
+        points += rewardPoints;
+        localStorage.setItem('points', points);
+        updatePointsDisplay();
+        createBubble('+' + rewardPoints, window.innerWidth/2 - 40, window.innerHeight - 200, 80, '#4caf50');
+      }
+      spinBtn.disabled = false;
+    }, 2200);
+  };
+
+  updatePointsDisplay();
+
+  // Animate floating background bubbles
+  function createBackgroundBubble() {
+    const size = Math.random() * 60 + 20;
+    const x = Math.random() * window.innerWidth;
+    const y = window.innerHeight + size;
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.left = x + 'px';
+    bubble.style.top = y + 'px';
+    bubble.style.background = 'rgba(255,255,255,0.15)';
+    bubble.style.boxShadow = '0 0 15px rgba(255,255,255,0.4)';
+    bubble.style.animation = `floatUp ${10 + Math.random()*10}s linear forwards`;
+    document.body.appendChild(bubble);
+
+    let posY = y;
+    const speed = Math.random() * 0.3 + 0.15;
+    const interval = setInterval(() => {
+      posY -= speed;
+      bubble.style.top = posY + 'px';
+      if (posY < -size) {
+        clearInterval(interval);
+        bubble.remove();
+      }
+    }, 30);
+  }
+
+  setInterval(createBackgroundBubble, 800);
+
+  // CSS animation keyframes added dynamically
+  const styleSheet = document.styleSheets[0];
+  styleSheet.insertRule(`@keyframes floatUp {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-100vh); opacity: 0; }
+  }`, styleSheet.cssRules.length);
+
 </script>
+
 </body>
 </html>
