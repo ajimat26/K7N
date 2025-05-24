@@ -1,121 +1,258 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Dana Kaget Reyzen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <title>Dana Kaget Real-time</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    #claimSection, #adminSection { margin-top: 20px; }
+    #popup { display: none; position: fixed; top: 30%; left: 40%; background: white; border: 2px solid black; padding: 20px; }
+    .hidden { display: none; }
+  </style>
 </head>
-<body class="bg-blue-50 min-h-screen flex items-center justify-center text-center p-4">
-  <div id="mainApp" class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-    <h1 class="text-2xl font-bold text-blue-600 mb-4">Dana Kaget Reyzen</h1>
-    <div id="totalUang" class="text-xl font-semibold text-green-700 mb-2">Memuat...</div>
+<body>
 
-    <input type="text" id="namaInput" placeholder="Nama Anda" class="w-full border p-2 rounded mb-2"/>
-    <input type="text" id="norekInput" placeholder="Nomor Rekening IC" class="w-full border p-2 rounded mb-4"/>
+<h1>Dana Kaget 50 Juta - Klaim Hadiah Anda!</h1>
 
-    <button onclick="klaimHadiah()" id="klaimBtn" class="bg-blue-600 text-white py-2 w-full rounded mb-2">Klaim Hadiah</button>
+<div>
+  <b>Total Uang Tersisa: </b><span id="totalMoneyDisplay">Loading...</span>
+</div>
 
-    <div id="notifikasi" class="text-sm text-gray-600"></div>
-    <button onclick="aksesAdmin()" class="text-xs text-blue-500 underline mt-4">REYZEN Only</button>
+<div id="claimSection">
+  <h2>Klaim Hadiah</h2>
+  <input type="text" id="nameInput" placeholder="Masukkan nama Anda" /><br><br>
+  <input type="text" id="rekeningInput" placeholder="Masukkan nomor rekening IC" /><br><br>
+  <button id="claimBtn">Klaim Hadiah</button>
+  <div id="claimStatus"></div>
+</div>
+
+<div>
+  <h2>Top 3 Penarik Terbesar</h2>
+  <ol id="topTierList">
+    <li>Loading...</li>
+  </ol>
+</div>
+
+<div id="popup">
+  <p>Hadiah Anda akan diproses dalam 24 jam.<br>Jika tidak diproses berarti Reyzen sedang badmood.</p>
+  <button onclick="closePopup()">Tutup</button>
+</div>
+
+<hr>
+
+<div>
+  <button id="adminLoginBtn">Login Admin (REYZEN Only)</button>
+</div>
+
+<div id="adminSection" class="hidden">
+  <h2>Panel Admin</h2>
+  <button id="resetMoneyBtn">Reset Total Uang ke 50 Juta</button><br><br>
+  <button id="pauseToggleBtn">Toggle Pause Klaim</button><br><br>
+  <div>
+    <h3>Daftar Pemenang</h3>
+    <table border="1" cellpadding="5" id="winnersTable">
+      <thead>
+        <tr><th>Nama</th><th>Rekening</th><th>Jumlah</th><th>Waktu</th><th>Status</th><th>Aksi</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6">Loading...</td></tr>
+      </tbody>
+    </table>
   </div>
+</div>
 
-  <div id="adminPanel" class="hidden bg-white p-6 rounded-xl shadow-xl w-full max-w-md mt-6">
-    <h2 class="text-xl font-bold text-red-500 mb-4">Admin Panel</h2>
-    <input id="adminUang" type="number" placeholder="Set Total Uang" class="border p-2 w-full rounded mb-2" />
-    <button onclick="setTotalUang()" class="bg-green-600 text-white py-2 w-full rounded mb-2">Set Uang</button>
-    <button onclick="resetData()" class="bg-red-600 text-white py-2 w-full rounded mb-2">Reset Semua Data</button>
-    <button onclick="togglePause()" class="bg-yellow-500 text-white py-2 w-full rounded mb-2">Toggle Pause Klaim</button>
-    <div id="semuaData" class="text-left text-sm mt-2"></div>
-  </div>
+<script>
+  // Firebase config (isi dengan milik kamu)
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.firebasestorage.app",
+    messagingSenderId: "598905752132",
+    appId: "1:598905752132:web:7be400c23de21665044a11",
+    measurementId: "G-TJL9K6YDL9"
+  };
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:7be400c23de21665044a11"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    const totalUangRef = db.ref("hadiah/total");
-    const pauseRef = db.ref("hadiah/pause");
-    const klaimRef = db.ref("klaim");
+  // Elements
+  const totalMoneyDisplay = document.getElementById('totalMoneyDisplay');
+  const topTierList = document.getElementById('topTierList');
+  const claimBtn = document.getElementById('claimBtn');
+  const nameInput = document.getElementById('nameInput');
+  const rekeningInput = document.getElementById('rekeningInput');
+  const claimStatus = document.getElementById('claimStatus');
+  const popup = document.getElementById('popup');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const adminSection = document.getElementById('adminSection');
+  const resetMoneyBtn = document.getElementById('resetMoneyBtn');
+  const pauseToggleBtn = document.getElementById('pauseToggleBtn');
+  const winnersTableBody = document.querySelector('#winnersTable tbody');
 
-    let paused = false;
+  let paused = false;
+  let currentTotalMoney = 0;
+  let adminLoggedIn = false;
 
-    // Pantau realtime uang dan pause
-    totalUangRef.on("value", snap => {
-      const total = snap.val() ?? 0;
-      document.getElementById("totalUang").innerText = "Sisa Hadiah: Rp" + total.toLocaleString("id-ID");
-    });
+  // Load totalMoney real-time
+  db.ref('totalMoney').on('value', snapshot => {
+    const val = snapshot.val();
+    currentTotalMoney = val ?? 50000000;
+    totalMoneyDisplay.textContent = "Rp " + currentTotalMoney.toLocaleString('id-ID');
+  });
 
-    pauseRef.on("value", snap => {
-      paused = snap.val() === true;
-    });
+  // Load paused state
+  db.ref('paused').on('value', snapshot => {
+    paused = snapshot.val() ?? false;
+    pauseToggleBtn.textContent = paused ? "Resume Klaim" : "Pause Klaim";
+  });
 
-    function klaimHadiah() {
-      const nama = document.getElementById("namaInput").value.trim();
-      const norek = document.getElementById("norekInput").value.trim();
-      const notifikasi = document.getElementById("notifikasi");
-      if (paused) return notifikasi.innerText = "Klaim sedang dijeda karena Reyzen badmood.";
-      if (!nama || !norek) return notifikasi.innerText = "Isi semua kolom!";
-
-      const jumlah = Math.floor(Math.random() * 2000000) + 10000;
-      totalUangRef.transaction(current => {
-        if (current >= jumlah) return current - jumlah;
-        return;
-      });
-
-      const waktu = Date.now();
-      klaimRef.child(waktu).set({ nama, norek, jumlah, status: "Diproses", waktu });
-      window.location.href = "#top-tier";
-      document.getElementById("mainApp").innerHTML = `
-        <h2 class='text-xl font-bold'>Terima kasih ${nama}!</h2>
-        <p class='mt-2'>Hadiah akan diproses dalam 24 jam jika Reyzen tidak badmood.</p>
-      `;
-    }
-
-    function aksesAdmin() {
-      const kode = prompt("Masukkan Kode Rahasia Admin:");
-      if (kode === "reyzen123") document.getElementById("adminPanel").classList.remove("hidden");
-    }
-
-    function setTotalUang() {
-      const val = parseInt(document.getElementById("adminUang").value);
-      if (!isNaN(val)) totalUangRef.set(val);
-    }
-
-    function togglePause() {
-      pauseRef.once("value", snap => {
-        const current = snap.val();
-        pauseRef.set(!current);
-      });
-    }
-
-    function resetData() {
-      if (confirm("Yakin reset semua data?")) {
-        totalUangRef.set(20000000);
-        klaimRef.remove();
-        db.ref("topTier").remove();
-        alert("Data berhasil direset.");
+  // Load top tier real-time
+  db.ref('topTier').on('value', snapshot => {
+    const data = snapshot.val() || {};
+    // Sort by totalWithdrawn descending
+    const sorted = Object.entries(data).sort((a,b) => b[1].totalWithdrawn - a[1].totalWithdrawn);
+    topTierList.innerHTML = '';
+    for(let i=0; i<3; i++) {
+      if(sorted[i]) {
+        const [userId, user] = sorted[i];
+        const li = document.createElement('li');
+        li.textContent = `${user.name} - Rp ${user.totalWithdrawn.toLocaleString('id-ID')}`;
+        topTierList.appendChild(li);
+      } else {
+        const li = document.createElement('li');
+        li.textContent = '-';
+        topTierList.appendChild(li);
       }
     }
+  });
 
-    klaimRef.on("value", snap => {
-      const data = snap.val() ?? {};
-      let isi = "<strong>Semua Klaim:</strong><br/>";
-      Object.values(data).forEach(d => {
-        isi += `${d.nama} - Rp${d.jumlah.toLocaleString("id-ID")} (${d.status})<br/>`;
-      });
-      document.getElementById("semuaData").innerHTML = isi;
+  // Load all claims for admin panel
+  function loadClaimsForAdmin() {
+    db.ref('claims').once('value').then(snapshot => {
+      const claims = snapshot.val() || {};
+      winnersTableBody.innerHTML = '';
+      for (const claimId in claims) {
+        const c = claims[claimId];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.name}</td>
+          <td>${c.rekening}</td>
+          <td>Rp ${c.amount.toLocaleString('id-ID')}</td>
+          <td>${new Date(c.timestamp).toLocaleString()}</td>
+          <td>${c.paid ? 'Lunas' : 'Belum'}</td>
+          <td>${c.paid ? '' : `<button onclick="markAsPaid('${claimId}')">Lunas</button>`}</td>
+        `;
+        winnersTableBody.appendChild(tr);
+      }
     });
-  </script>
+  }
+
+  // Claim button click handler
+  claimBtn.onclick = () => {
+    const name = nameInput.value.trim();
+    const rekening = rekeningInput.value.trim();
+    if (!name || !rekening) {
+      claimStatus.textContent = "Nama dan nomor rekening harus diisi!";
+      return;
+    }
+    if (paused) {
+      claimStatus.textContent = "Klaim sedang di-pause. Coba lagi nanti.";
+      return;
+    }
+    if (currentTotalMoney <= 0) {
+      claimStatus.textContent = "Uang sudah habis!";
+      return;
+    }
+    // Generate random amount (misal 500 ribu - 3 juta)
+    const maxClaim = Math.min(3000000, currentTotalMoney);
+    const minClaim = 500000;
+    const amount = Math.floor(Math.random() * (maxClaim - minClaim + 1)) + minClaim;
+
+    // Update database atomically
+    const totalMoneyRef = db.ref('totalMoney');
+    totalMoneyRef.transaction(current => {
+      if (current === null) return 50000000;
+      if (current < amount) return; // abort transaction
+      return current - amount;
+    }).then(result => {
+      if (!result.committed) {
+        claimStatus.textContent = "Uang tidak cukup, coba lagi.";
+        return;
+      }
+      // Save claim
+      const newClaimRef = db.ref('claims').push();
+      const claimData = {
+        name,
+        rekening,
+        amount,
+        timestamp: Date.now(),
+        paid: false
+      };
+      newClaimRef.set(claimData);
+
+      // Update topTier
+      const topTierRef = db.ref('topTier');
+      topTierRef.child(name).transaction(currentTotal => {
+        return (currentTotal || 0) + amount;
+      });
+
+      claimStatus.textContent = "Berhasil klaim Rp " + amount.toLocaleString('id-ID');
+      showPopup();
+
+      // Clear input
+      nameInput.value = '';
+      rekeningInput.value = '';
+    });
+  };
+
+  // Show popup
+  function showPopup() {
+    popup.style.display = 'block';
+  }
+  function closePopup() {
+    popup.style.display = 'none';
+  }
+  window.closePopup = closePopup; // expose to global for inline onclick
+
+  // Admin login (simple prompt, jangan digunakan di production)
+  adminLoginBtn.onclick = () => {
+    const code = prompt("Masukkan kode admin REYZEN:");
+    if (code === "REYZEN123") {
+      adminLoggedIn = true;
+      adminSection.classList.remove('hidden');
+      adminLoginBtn.style.display = 'none';
+      loadClaimsForAdmin();
+    } else {
+      alert("Kode salah!");
+    }
+  };
+
+  // Reset total uang
+  resetMoneyBtn.onclick = () => {
+    if (!adminLoggedIn) return alert("Login dulu!");
+    if (confirm("Reset total uang ke 50 juta?")) {
+      db.ref('totalMoney').set(50000000);
+      alert("Total uang di-reset.");
+    }
+  };
+
+  // Pause toggle
+  pauseToggleBtn.onclick = () => {
+    if (!adminLoggedIn) return alert("Login dulu!");
+    db.ref('paused').set(!paused);
+  };
+
+  // Mark claim as paid
+  window.markAsPaid = (claimId) => {
+    if (!adminLoggedIn) return alert("Login dulu!");
+    db.ref('claims/' + claimId + '/paid').set(true);
+    loadClaimsForAdmin();
+  };
+
+</script>
+
 </body>
-</html>
+  </html>
