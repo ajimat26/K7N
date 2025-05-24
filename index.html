@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Kotak Hadiah - Persistent & Admin</title>
+<title>Game Kotak Hadiah - Admin & Maintenance</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,7 +33,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
-  #box:hover {
+  #box:hover:not(.disabled) {
     background-color: #ffb74d;
   }
   button {
@@ -48,12 +48,18 @@
     box-shadow: 0 5px #bf360c;
     transition: background-color 0.2s;
   }
-  button:hover {
+  button:hover:not(:disabled) {
     background-color: #ff5722;
   }
-  button:active {
+  button:active:not(:disabled) {
     box-shadow: 0 2px #bf360c;
     transform: translateY(3px);
+  }
+  button:disabled {
+    background-color: #ccc;
+    color: #666;
+    box-shadow: none;
+    cursor: not-allowed;
   }
   input, select {
     padding: 10px;
@@ -102,13 +108,24 @@
     padding: 5px 10px;
     font-size: 14px;
   }
+  #maintenanceMsg {
+    background: #b71c1c;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    display: none;
+  }
 </style>
 </head>
 <body>
 
 <h1>Game Kotak Hadiah</h1>
 
-<div id="box" title="Klik untuk buka kotak">🎁</div>
+<div id="maintenanceMsg"></div>
+
+<div id="box" title="Klik untuk buka kotak" tabindex="0">🎁</div>
 
 <button id="btnOpenBox">Buka Kotak</button>
 <button id="btnSupply">Ambil Box Suplai (1x per jam)</button>
@@ -140,7 +157,8 @@
 
 <button id="btnLihatPesan">Lihat Pesan</button>
 <button id="btnRiwayatPenarikan">Riwayat Penarikan</button>
-<button id="btnKonfirmasiPenarikan" style="display:none;">Konfirmasi Penarikan (Admin)</button>
+<button id="btnKonfirmasiPenarikan" style="display:none;">Konfirmasi Penarikan (Admin Only)</button>
+<button id="btnToggleMaintenance" style="display:none;">Toggle Maintenance Mode (Admin Only)</button>
 
 <div id="pesanPanel" class="panel" style="display:none;">
   <h3>Pesan</h3>
@@ -158,10 +176,7 @@
   <ul id="konfirmasiList"></ul>
 </div>
 
-<audio id="clickSound" src="https://actions.google.com/sounds/v1/ui/click.ogg" preload="auto"></audio>
-
 <script>
-  // Inisialisasi user admin dan user biasa
   const ADMIN_USERNAME = "admin";
 
   let currentUser = localStorage.getItem('currentUser');
@@ -172,17 +187,17 @@
   }
   const isAdmin = (currentUser.toLowerCase() === ADMIN_USERNAME);
 
-  // Data simpan di localStorage
-  // Struktur:
-  // points, keys, messages[], riwayatPenarikan[], penarikanPending[]
-  let points = 0;
-  let keys = 0;
-  let messages = [];
-  let riwayatPenarikan = [];
-  let penarikanPending = [];
-  let lastSupplyTime = 0;
+  // Data default
+  let points = parseInt(localStorage.getItem('points')) || 0;
+  let keys = parseInt(localStorage.getItem('keys')) || 0;
+  let messages = JSON.parse(localStorage.getItem('messages')) || ["Selamat datang di game!"];
+  let riwayatPenarikan = JSON.parse(localStorage.getItem('riwayatPenarikan')) || [];
+  let penarikanPending = JSON.parse(localStorage.getItem('penarikanPending')) || [];
+  let lastSupplyTime = parseInt(localStorage.getItem('lastSupplyTime')) || 0;
+  let maintenanceMode = (localStorage.getItem('maintenanceMode') === "true") || false;
+  let maintenanceReason = localStorage.getItem('maintenanceReason') || "";
 
-  // Elements
+  // Elemen UI
   const notif = document.getElementById('notif');
   const pointsEl = document.getElementById('points');
   const keysEl = document.getElementById('keys');
@@ -193,6 +208,8 @@
   const riwayatPanel = document.getElementById('riwayatPanel');
   const konfirmasiPanel = document.getElementById('konfirmasiPanel');
   const btnKonfirmasi = document.getElementById('btnKonfirmasiPenarikan');
+  const btnToggleMaintenance = document.getElementById('btnToggleMaintenance');
+  const maintenanceMsg = document.getElementById('maintenanceMsg');
 
   const box = document.getElementById('box');
   const btnOpenBox = document.getElementById('btnOpenBox');
@@ -201,14 +218,18 @@
   const btnLihatPesan = document.getElementById('btnLihatPesan');
   const btnRiwayatPenarikan = document.getElementById('btnRiwayatPenarikan');
   const btnHapusPesan = document.getElementById('btnHapusPesan');
-  const btnKonfirmasiPenarikan = document.getElementById('btnKonfirmasiPenarikan');
-  const clickSound = document.getElementById('clickSound');
 
   const inputNama = document.getElementById('nama');
   const inputRekening = document.getElementById('rekening');
   const selectAmount = document.getElementById('amount');
 
-  // Main simpan load fungsi
+  // Update UI poin dan kunci
+  function updatePointsKeys(){
+    pointsEl.textContent = points;
+    keysEl.textContent = keys;
+  }
+
+  // Save semua data ke localStorage
   function saveData(){
     localStorage.setItem('points', points);
     localStorage.setItem('keys', keys);
@@ -216,10 +237,43 @@
     localStorage.setItem('riwayatPenarikan', JSON.stringify(riwayatPenarikan));
     localStorage.setItem('penarikanPending', JSON.stringify(penarikanPending));
     localStorage.setItem('lastSupplyTime', lastSupplyTime);
+    localStorage.setItem('maintenanceMode', maintenanceMode);
+    localStorage.setItem('maintenanceReason', maintenanceReason);
   }
-  function loadData(){
-    points = parseInt(localStorage.getItem('points')) || 0;
-    keys = parseInt(localStorage.getItem('keys')) || 0;
-    messages = JSON.parse(localStorage.getItem('messages')) || ["Selamat datang di game!"];
-    riwayatPenarikan = JSON.parse(localStorage.getItem('riwayatPenarikan')) || [];
-    penarikanPending = JSON.parse(localStorage.getItem('
+
+  // Render daftar pesan
+  function renderMessages(){
+    messageList.innerHTML = "";
+    messages.forEach((msg, i) => {
+      const li = document.createElement('li');
+      li.textContent = msg;
+      messageList.appendChild(li);
+    });
+  }
+
+  // Render riwayat penarikan
+  function renderRiwayat(){
+    riwayatList.innerHTML = "";
+    if(riwayatPenarikan.length === 0){
+      riwayatList.innerHTML = "<li>Belum ada riwayat penarikan.</li>";
+      return;
+    }
+    riwayatPenarikan.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.textContent = `Nama: ${item.nama} | Rek: ${item.rekening} | Jumlah: ${item.amount} poin | Status: ${item.status}`;
+      riwayatList.appendChild(li);
+    });
+  }
+
+  // Render daftar penarikan pending untuk admin konfirmasi
+  function renderKonfirmasi(){
+    konfirmasiList.innerHTML = "";
+    if(penarikanPending.length === 0){
+      konfirmasiList.innerHTML = "<li>Tidak ada penarikan yang perlu dikonfirmasi.</li>";
+      return;
+    }
+    penarikanPending.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.textContent = `Nama: ${item.nama} | Rek: ${item.rekening} | Jumlah: ${item.amount} poin`;
+      const btnConfirm = document.createElement('button');
+      btnConfirm.textContent = "Konfirmasi";
