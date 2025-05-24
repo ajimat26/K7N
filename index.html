@@ -1,65 +1,84 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Game Kotak Hadiah</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom right, #4facfe, #00f2fe);
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 { margin-bottom: 10px; }
-    button {
-      background: #28a745;
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      margin: 5px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button:hover { background: #218838; }
-    select, input {
-      width: 80%;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 6px;
-      border: none;
-    }
-    #boxAnimation {
-      width: 120px;
-      height: 120px;
-      margin: 20px auto;
-      background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      animation: none;
-    }
-    @keyframes shake {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(10deg); }
-      50% { transform: rotate(-10deg); }
-      75% { transform: rotate(10deg); }
-      100% { transform: rotate(0deg); }
-    }
-    .panel {
-      display: none;
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Game Kotak Hadiah</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+  }
+  h1 { margin-bottom: 10px; }
+  button {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover { background: #218838; }
+  select, input, textarea {
+    width: 80%;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+  }
+  #boxAnimation {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: none;
+  }
+  @keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .panel {
+    display: none;
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  #notif {
+    margin-top: 10px;
+    font-weight: bold;
+    min-height: 24px;
+  }
+  #maintenanceNotice {
+    background: #ff4c4c;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 15px auto;
+    max-width: 400px;
+  }
+</style>
 </head>
 <body>
 
-  <h1>Game Kotak Hadiah</h1>
+<h1>Game Kotak Hadiah</h1>
+
+<div id="maintenanceNotice" style="display:none;"></div>
+
+<div id="gamePanel">
   <div id="boxAnimation"></div>
-  <button onclick="openBox()">Buka Kotak</button>
+  <button id="btnOpenBox" onclick="openBox()">Buka Kotak</button>
   <div id="notif"></div>
   <h3>Poin: <span id="points">0</span></h3>
 
@@ -82,7 +101,7 @@
 
   <button onclick="togglePanel('pesan')">Lihat Pesan</button>
   <button onclick="togglePanel('riwayat')">Riwayat Penarikan</button>
-  <button onclick="togglePanel('admin')">Admin Panel</button>
+  <button onclick="showAdminLogin()">Admin Panel</button>
   <button onclick="window.open('https://wa.me/6283891019471','_blank')">Kasih Saran ke Developer</button>
 
   <div id="pesan" class="panel">
@@ -95,139 +114,152 @@
     <h3>Riwayat Penarikan</h3>
     <ul id="riwayatList"></ul>
   </div>
+</div>
 
-  <div id="admin" class="panel">
-    <h3>Panel Admin</h3>
-    <input type="password" id="adminPass" placeholder="Password Admin"><br>
-    <button onclick="konfirmasiPenarikan()">Konfirmasi Semua Penarikan</button>
-  </div>
+<!-- Panel login admin -->
+<div id="adminLoginPanel" class="panel" style="display:none; max-width:400px; margin: 20px auto; background: rgba(0,0,0,0.3);">
+  <h3>Login Admin</h3>
+  <input type="password" id="adminPass" placeholder="Password Admin"><br>
+  <button onclick="loginAdmin()">Masuk</button>
+  <button onclick="closeAdminLogin()">Batal</button>
+  <div id="adminLoginNotif" style="color:#ff8080; margin-top:10px;"></div>
+</div>
 
-  <audio autoplay loop id="backsound">
-    <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
-  </audio>
+<!-- Panel admin setelah login -->
+<div id="adminPanel" class="panel" style="max-width:600px; margin: 20px auto; background: rgba(0,0,0,0.4); display:none;">
+  <h3>Panel Admin</h3>
+  
+  <h4>Permintaan Penarikan</h4>
+  <ul id="pendingWithdrawList" style="max-height:200px; overflow-y:auto; text-align:left;"></ul>
 
-  <script>
-    let points = parseInt(localStorage.getItem("points") || "0");
-    let messages = JSON.parse(localStorage.getItem("messages") || "[]");
-    let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    let doubleNext = false;
+  <hr>
+  <h4>Mode Maintenance</h4>
+  <label>Alasan Maintenance:</label><br>
+  <textarea id="maintenanceReason" rows="2" placeholder="Tulis alasan maintenance..."></textarea><br>
+  <label>Durasi Maintenance (menit):</label><br>
+  <input type="number" id="maintenanceDuration" min="1" max="1440" placeholder="Misal: 30"><br>
+  <button onclick="startMaintenance()">Mulai Maintenance</button>
+  <button onclick="stopMaintenance()">Hentikan Maintenance</button>
 
-    const rewards = [
-      {name: "Zonk", point: 0},
-      {name: "+10 Poin", point: 10},
-      {name: "+50 Poin", point: 50},
-      {name: "+100 Poin", point: 100},
-      {name: "2x Reward Berikutnya", point: -1}
-    ];
+  <hr>
+  <button onclick="logoutAdmin()">Logout Admin</button>
+</div>
 
-    function updatePoints() {
-      document.getElementById("points").innerText = points;
-      localStorage.setItem("points", points);
-    }
+<audio autoplay loop id="backsound" volume="0.5">
+  <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
-    function openBox() {
-      const box = document.getElementById("boxAnimation");
-      box.style.animation = "shake 1s";
-      setTimeout(() => box.style.animation = "none", 1000);
+<script>
+  // Data localStorage keys
+  const STORAGE_POINTS = "points";
+  const STORAGE_MESSAGES = "messages";
+  const STORAGE_WITHDRAWS = "withdraws";
+  const STORAGE_MAINTENANCE = "maintenance";
 
-      setTimeout(() => {
-        const reward = rewards[Math.floor(Math.random() * rewards.length)];
-        let earned = reward.point;
-        if (reward.point === -1) {
-          doubleNext = true;
-          addMessage("Mendapatkan 2x reward berikutnya!");
-          notif("2x reward berikutnya aktif!");
-        } else {
-          if (doubleNext) {
-            earned *= 2;
-            doubleNext = false;
-          }
-          points += earned;
-          notif(`Kamu mendapat ${earned} poin! (${reward.name})`);
-          addMessage(`Dapat: ${reward.name} (+${earned} poin)`);
-        }
-        updatePoints();
-      }, 1000);
-    }
+  // State
+  let points = parseInt(localStorage.getItem(STORAGE_POINTS) || "0");
+  let messages = JSON.parse(localStorage.getItem(STORAGE_MESSAGES) || "[]");
+  let withdraws = JSON.parse(localStorage.getItem(STORAGE_WITHDRAWS) || "[]");
+  let maintenance = JSON.parse(localStorage.getItem(STORAGE_MAINTENANCE) || null);
 
-    function notif(teks) {
-      document.getElementById("notif").innerText = teks;
-    }
+  let doubleNext = false;
+  let adminLoggedIn = false;
 
-    function addMessage(text) {
-      messages.push(text);
-      if (messages.length > 50) messages.shift();
-      localStorage.setItem("messages", JSON.stringify(messages));
-      tampilPesan();
-    }
+  const rewards = [
+    {name: "Zonk", point: 0},
+    {name: "+10 Poin", point: 10},
+    {name: "+50 Poin", point: 50},
+    {name: "+100 Poin", point: 100},
+    {name: "2x Reward Berikutnya", point: -1}
+  ];
 
-    function tampilPesan() {
-      const ul = document.getElementById("messageList");
-      ul.innerHTML = "";
-      messages.forEach(m => {
-        const li = document.createElement("li");
-        li.textContent = m;
-        ul.appendChild(li);
-      });
-    }
+  // Update point display
+  function updatePoints() {
+    document.getElementById("points").innerText = points;
+    localStorage.setItem(STORAGE_POINTS, points);
+  }
 
-    function hapusPesan() {
+  // Show notification
+  function notif(teks) {
+    document.getElementById("notif").innerText = teks;
+  }
+
+  // Add message to history
+  function addMessage(text) {
+    messages.push(text);
+    if (messages.length > 50) messages.shift();
+    localStorage.setItem(STORAGE_MESSAGES, JSON.stringify(messages));
+    tampilPesan();
+  }
+
+  // Display messages
+  function tampilPesan() {
+    const ul = document.getElementById("messageList");
+    ul.innerHTML = "";
+    messages.forEach(m => {
+      const li = document.createElement("li");
+      li.textContent = m;
+      ul.appendChild(li);
+    });
+  }
+
+  // Clear all messages
+  function hapusPesan() {
+    if(confirm("Yakin ingin hapus semua pesan?")) {
       messages = [];
-      localStorage.setItem("messages", "[]");
+      localStorage.setItem(STORAGE_MESSAGES, "[]");
       tampilPesan();
+      notif("Semua pesan telah dihapus.");
+    }
+  }
+
+  // Show/hide panels game side
+  function togglePanel(id) {
+    ['pesan','riwayat','adminLoginPanel'].forEach(p => {
+      document.getElementById(p).style.display = "none";
+    });
+    // Note: adminPanel hanya muncul setelah login
+    if(id === "pesan") tampilPesan();
+    if(id === "riwayat") tampilRiwayat();
+    if(document.getElementById(id)) document.getElementById(id).style.display = "block";
+  }
+
+  // Open box logic
+  function openBox() {
+    if (maintenance && maintenance.active) {
+      alert(`Game sedang maintenance!\nAlasan: ${maintenance.reason}\nSisa waktu: ${timeRemainingMaintenance()} menit`);
+      return;
     }
 
-    function togglePanel(id) {
-      ['pesan','riwayat','admin'].forEach(p => {
-        document.getElementById(p).style.display = "none";
-      });
-      document.getElementById(id).style.display = "block";
-      if (id === "pesan") tampilPesan();
-      if (id === "riwayat") tampilRiwayat();
-    }
+    const box = document.getElementById("boxAnimation");
+    box.style.animation = "shake 1s";
+    setTimeout(() => box.style.animation = "none", 1000);
 
-    function ajukanPenarikan() {
-      const nama = document.getElementById("nama").value.trim();
-      const rekening = document.getElementById("rekening").value.trim();
-      const jumlah = parseInt(document.getElementById("amount").value);
-
-      if (!nama || !rekening || points < jumlah) {
-        notif("Isi data dengan benar dan pastikan poin cukup!");
-        return;
+    setTimeout(() => {
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+      let earned = reward.point;
+      if (reward.point === -1) {
+        doubleNext = true;
+        addMessage("Mendapatkan 2x reward berikutnya!");
+        notif("2x reward berikutnya aktif!");
+      } else {
+        if (doubleNext) {
+          earned *= 2;
+          doubleNext = false;
+        }
+        points += earned;
+        notif(`Kamu mendapat ${earned} poin! (${reward.name})`);
+        addMessage(`Dapat: ${reward.name} (+${earned} poin)`);
       }
-
-      points -= jumlah;
-      withdraws.push({ nama, rekening, jumlah, konfirmasi: false });
-      localStorage.setItem("withdraws", JSON.stringify(withdraws));
       updatePoints();
-      addMessage(`Ajukan penarikan: ${nama}, ${jumlah} poin`);
-      notif("Penarikan diajukan!");
-    }
+    }, 1000);
+  }
 
-    function tampilRiwayat() {
-      const ul = document.getElementById("riwayatList");
-      ul.innerHTML = "";
-      withdraws.forEach(w => {
-        const li = document.createElement("li");
-        li.textContent = `${w.nama} - ${w.rekening} - ${w.jumlah} poin - ${w.konfirmasi ? "✅" : "⏳"}`;
-        ul.appendChild(li);
-      });
-    }
+  // Ajukan penarikan
+  function ajukanPenarikan() {
+    const nama = document.getElementById("nama").value.trim();
+    const rekening = document.getElementById("rekening").value.trim();
+    const jumlah = parseInt(document.getElementById("amount").value);
 
-    function konfirmasiPenarikan() {
-      const pass = document.getElementById("adminPass").value;
-      if (pass !== "opicantik") {
-        alert("Password salah!");
-        return;
-      }
-      withdraws = withdraws.map(w => ({...w, konfirmasi: true}));
-      localStorage.setItem("withdraws", JSON.stringify(withdraws));
-      notif("Semua penarikan telah dikonfirmasi.");
-      tampilRiwayat();
-    }
-
-    updatePoints();
-  </script>
-
-</body>
-  </html>
+    if (!nama || !rekening) {
