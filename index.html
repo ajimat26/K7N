@@ -2,315 +2,213 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Random Box Game & Admin Panel</title>
+  <title>Random Box Game</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      color: #fff;
-      user-select: none;
+      background: linear-gradient(135deg, #7f7fd5, #86a8e7, #91eae4);
+      color: white;
       text-align: center;
-    }
-    #points, #message, #adminPanel, #notification {
-      margin-top: 20px;
-      font-weight: bold;
+      margin: 0;
+      padding: 20px;
     }
     button {
       padding: 10px 20px;
-      font-size: 16px;
-      font-weight: bold;
       margin: 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background-color: #2196f3;
-      color: white;
-      transition: background-color 0.3s ease;
-    }
-    button:hover:not(:disabled) {
-      background-color: #0b7dda;
-    }
-    button:disabled {
-      background-color: #999;
-      cursor: not-allowed;
-    }
-    #exchange-section {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 400px;
-      margin: 20px auto;
-      color: #fff;
-    }
-    input, select {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-    }
-    #adminLogin, #adminPanel, #messagesPanel, #withdrawHistoryPanel {
-      max-width: 450px;
-      margin: 20px auto;
-      background: rgba(0,0,0,0.3);
-      padding: 15px;
+      font-weight: bold;
       border-radius: 10px;
-      color: #fff;
-      text-align: left;
-    }
-    #messagesPanel, #withdrawHistoryPanel {
-      max-height: 180px;
-      overflow-y: auto;
-    }
-    #messagesPanel, #withdrawHistoryPanel {
-      display: none;
-    }
-    #notification {
-      color: yellow;
-      font-size: 16px;
-      min-height: 24px;
-    }
-    #boxCanvas {
-      margin: 20px auto;
-      background: #004c99;
-      border-radius: 20px;
-      display: block;
+      border: none;
+      background: #4CAF50;
+      color: white;
       cursor: pointer;
     }
-    /* Simple bouncing animation for box */
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
+    button:hover {
+      background: #45a049;
     }
+    #boxAnimation {
+      margin: 20px auto;
+      width: 100px;
+      height: 100px;
+      background: url('https://cdn-icons-png.flaticon.com/512/189/189689.png') no-repeat center;
+      background-size: contain;
+      animation: none;
+    }
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      75% { transform: rotate(-5deg); }
+    }
+    .panel { display: none; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 10px auto; width: 90%; max-width: 500px; }
+    select, input { padding: 10px; width: 100%; margin-top: 5px; margin-bottom: 10px; border-radius: 8px; border: none; }
   </style>
 </head>
 <body>
-
-  <div id="points">Poin: 0</div>
+  <h1>Random Box Game</h1>
+  <div id="boxAnimation"></div>
+  <button onclick="openBox()">Buka Kotak</button>
   <div id="notification"></div>
+  <h2>Poin: <span id="points">0</span></h2>
 
-  <!-- Kotak dengan canvas 2D animasi -->
-  <canvas id="boxCanvas" width="150" height="150" title="Klik untuk buka kotak"></canvas>
-
-  <div id="message"></div>
-
-  <div id="exchange-section">
-    <h2>Tukar Poin</h2>
+  <div>
+    <h3>Penarikan Poin</h3>
     <select id="amount">
-      <option value="100000">100.000 IC - 100.000 Poin</option>
-      <option value="250000">250.000 IC - 250.000 Poin</option>
-      <option value="500000">500.000 IC - 500.000 Poin</option>
-      <option value="1000000">1.000.000 IC - 1.000.000 Poin</option>
-      <option value="2000000">2.000.000 IC - 2.000.000 Poin</option>
+      <option value="200">50.000 IC - 200 poin</option>
+      <option value="400">100.000 IC - 400 poin</option>
+      <option value="1000">250.000 IC - 1000 poin</option>
+      <option value="2000">500.000 IC - 2000 poin</option>
+      <option value="4000">1.000.000 IC - 4000 poin</option>
+      <option value="8000">2.000.000 IC - 8000 poin</option>
     </select>
-    <input type="text" id="fullname" placeholder="Nama lengkap" />
-    <input type="text" id="account" placeholder="Nomor rekening" />
+    <input type="text" id="fullname" placeholder="Nama Lengkap" />
+    <input type="text" id="account" placeholder="Nomor Rekening" />
     <button onclick="submitWithdraw()">Ajukan Penarikan</button>
-    <div id="exchangeMessage" style="margin-top:10px;"></div>
+    <div id="exchangeMessage"></div>
   </div>
 
-  <button onclick="toggleMessagesPanel()">Lihat Pesan</button>
-  <button onclick="toggleWithdrawHistoryPanel()">Lihat Riwayat Penarikan</button>
+  <button onclick="togglePanel('messagesPanel')">Pesan</button>
+  <button onclick="togglePanel('withdrawPanel')">Riwayat Penarikan</button>
+  <button onclick="togglePanel('adminPanel')">Panel Admin</button>
 
-  <div id="messagesPanel">
-    <h3>Riwayat Pesan</h3>
+  <div id="messagesPanel" class="panel">
+    <h3>Pesan</h3>
     <ul id="messagesList"></ul>
     <button onclick="clearMessages()">Hapus Pesan</button>
   </div>
 
-  <div id="withdrawHistoryPanel">
+  <div id="withdrawPanel" class="panel">
     <h3>Riwayat Penarikan</h3>
     <ul id="withdrawList"></ul>
   </div>
 
-  <div id="adminLogin">
-    <h3>Login Admin</h3>
-    <input type="text" id="adminUser" placeholder="Username" />
-    <input type="password" id="adminPass" placeholder="Password" />
-    <button onclick="loginAdmin()">Login</button>
+  <div id="adminPanel" class="panel">
+    <h3>Panel Admin</h3>
+    <input type="password" id="adminPass" placeholder="Password Admin" />
+    <button onclick="confirmWithdraw()">Konfirmasi Penarikan</button>
   </div>
 
-  <div id="adminPanel" style="display:none;">
-    <h2>Admin Panel</h2>
-    <div>Total Poin: <span id="totalPoints">0</span></div>
-    <h3>Riwayat Penarikan:</h3>
-    <ul id="withdrawListAdmin"></ul>
-    <button onclick="logoutAdmin()">Logout</button>
-  </div>
+  <audio id="backsound" loop autoplay>
+    <source src="https://ia902905.us.archive.org/31/items/money-heist-free-fire/Money%20Heist%20x%20Free%20Fire.mp3" type="audio/mpeg">
+  </audio>
 
-  <div style="max-width:400px; margin: 20px auto; text-align:center;">
-    <button id="toggleMusicBtn" onclick="toggleMusic()">Play Backsound</button>
-    <audio id="backsound" loop src="https://cdn.pixabay.com/download/audio/2021/11/16/audio_c931aeaf0b.mp3?filename=happy-upbeat-11260.mp3"></audio>
-  </div>
+  <script>
+    let points = parseInt(localStorage.getItem("points")) || 0;
+    let messages = JSON.parse(localStorage.getItem("messages") || "[]");
+    let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
 
-<script>
-  let points = parseInt(localStorage.getItem("points")) || 0;
-  let messages = JSON.parse(localStorage.getItem("messages") || "[]");
-  let withdraws = JSON.parse(localStorage.getItem("withdraws") || "[]");
+    const rewards = [
+      { name: "Zonk", points: 0 },
+      { name: "+10 Poin", points: 10 },
+      { name: "+50 Poin", points: 50 },
+      { name: "+100 Poin", points: 100 },
+      { name: "2x Poin Berikutnya", points: -1 }
+    ];
+    let doubleNext = false;
 
-  const notification = document.getElementById("notification");
-  const boxCanvas = document.getElementById("boxCanvas");
-  const ctx = boxCanvas.getContext("2d");
-
-  const rewards = [
-    { name: "Zonk", points: 0 },
-    { name: "+10 Poin", points: 10 },
-    { name: "+25 Poin", points: 25 },
-    { name: "+50 Poin", points: 50 },
-    { name: "2x Poin Berikutnya", points: -1 } // Special
-  ];
-
-  let doubleNext = false;
-  let isOpening = false;
-
-  // Gambar box 2D sederhana
-  function drawBox(open = false, frame = 0) {
-    ctx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
-    ctx.fillStyle = "#004c99";
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 5;
-    ctx.lineJoin = "round";
-
-    // Box base
-    ctx.fillRect(25, 50, 100, 70);
-    ctx.strokeRect(25, 50, 100, 70);
-
-    if (!open) {
-      // Tutup box
-      ctx.fillStyle = "#007bff";
-      ctx.fillRect(25, 30, 100, 30);
-      ctx.strokeRect(25, 30, 100, 30);
-      // Animasi tutup (berubah warna sedikit)
-      if(frame % 2 === 0) {
-        ctx.fillStyle = "#3399ff";
-        ctx.fillRect(25, 30, 100, 5);
-      }
-    } else {
-      // Animasi buka kotak: tutup terangkat (naik)
-      let openHeight = Math.min(frame * 5, 30);
-      ctx.fillStyle = "#007bff";
-      ctx.fillRect(25, 30 - openHeight, 100, 30);
-      ctx.strokeRect(25, 30 - openHeight, 100, 30);
+    function updatePoints() {
+      document.getElementById("points").textContent = points;
+      localStorage.setItem("points", points);
     }
-  }
 
-  // Animasi buka kotak selama 3 detik
-  function animateOpenBox(callback) {
-    let frame = 0;
-    drawBox(false, frame);
-    const interval = setInterval(() => {
-      frame++;
-      drawBox(true, frame);
-      if(frame >= 6) {
-        clearInterval(interval);
-        callback();
-      }
-    }, 500);
-  }
+    function openBox() {
+      const box = document.getElementById("boxAnimation");
+      box.style.animation = "shake 1s ease";
 
-  function updatePointsDisplay() {
-    document.getElementById("points").textContent = "Poin: " + points;
-    localStorage.setItem("points", points);
-  }
+      setTimeout(() => {
+        box.style.animation = "none";
+        const r = rewards[Math.floor(Math.random() * rewards.length)];
+        let earned = 0;
+        if (r.points === -1) {
+          doubleNext = true;
+          notify("Bonus 2x Poin di kotak berikutnya!");
+          addMessage("Mendapatkan 2x Poin berikutnya!");
+        } else {
+          earned = doubleNext ? r.points * 2 : r.points;
+          doubleNext = false;
+          points += earned;
+          notify(`Mendapatkan ${earned} poin! (${r.name})`);
+          addMessage(`Box reward: ${r.name} (+${earned} poin)`);
+        }
+        updatePoints();
+      }, 1000);
+    }
 
-  function addMessage(text) {
-    messages.push(text);
-    if (messages.length > 50) messages.shift(); // batasi pesan 50
-    localStorage.setItem("messages", JSON.stringify(messages));
-    if(document.getElementById("messagesPanel").style.display === "block") {
+    function notify(msg) {
+      document.getElementById("notification").textContent = msg;
+    }
+
+    function addMessage(msg) {
+      messages.push(msg);
+      if (messages.length > 50) messages.shift();
+      localStorage.setItem("messages", JSON.stringify(messages));
       renderMessages();
     }
-  }
 
-  function renderMessages() {
-    const list = document.getElementById("messagesList");
-    list.innerHTML = "";
-    messages.forEach((msg) => {
-      const li = document.createElement("li");
-      li.textContent = msg;
-      list.appendChild(li);
-    });
-  }
+    function renderMessages() {
+      const list = document.getElementById("messagesList");
+      list.innerHTML = "";
+      messages.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = m;
+        list.appendChild(li);
+      });
+    }
 
-  function toggleMessagesPanel() {
-    const panel = document.getElementById("messagesPanel");
-    const withdrawPanel = document.getElementById("withdrawHistoryPanel");
-    if(panel.style.display === "block") {
-      panel.style.display = "none";
-    } else {
-      panel.style.display = "block";
-      withdrawPanel.style.display = "none";
+    function clearMessages() {
+      messages = [];
+      localStorage.setItem("messages", "[]");
       renderMessages();
     }
-  }
 
-  function toggleWithdrawHistoryPanel() {
-    const panel = document.getElementById("withdrawHistoryPanel");
-    const messagesPanel = document.getElementById("messagesPanel");
-    if(panel.style.display === "block") {
-      panel.style.display = "none";
-    } else {
-      panel.style.display = "block";
-      messagesPanel.style.display = "none";
-      renderWithdrawHistory();
+    function togglePanel(id) {
+      const panels = ["messagesPanel", "withdrawPanel", "adminPanel"];
+      panels.forEach(p => document.getElementById(p).style.display = "none");
+      document.getElementById(id).style.display = "block";
+      if (id === "withdrawPanel") renderWithdraws();
+      if (id === "messagesPanel") renderMessages();
     }
-  }
 
-  function clearMessages() {
-    messages = [];
-    localStorage.setItem("messages", JSON.stringify(messages));
+    function submitWithdraw() {
+      const amount = parseInt(document.getElementById("amount").value);
+      const name = document.getElementById("fullname").value;
+      const acc = document.getElementById("account").value;
+
+      if (!name || !acc || points < amount) {
+        notify("Data tidak lengkap atau poin tidak cukup.");
+        return;
+      }
+
+      points -= amount;
+      updatePoints();
+      withdraws.push({ name, acc, amount, confirmed: false });
+      localStorage.setItem("withdraws", JSON.stringify(withdraws));
+      notify("Penarikan diajukan.");
+      addMessage(`Penarikan diajukan: ${name}, ${acc}, ${amount} poin`);
+    }
+
+    function renderWithdraws() {
+      const list = document.getElementById("withdrawList");
+      list.innerHTML = "";
+      withdraws.forEach((w, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${w.name} - ${w.acc} - ${w.amount} poin - ${w.confirmed ? "Sudah dikonfirmasi" : "Menunggu konfirmasi"}`;
+        list.appendChild(li);
+      });
+    }
+
+    function confirmWithdraw() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass !== "admin123") {
+        alert("Password salah!");
+        return;
+      }
+      withdraws = withdraws.map(w => ({ ...w, confirmed: true }));
+      localStorage.setItem("withdraws", JSON.stringify(withdraws));
+      notify("Semua penarikan dikonfirmasi.");
+      renderWithdraws();
+    }
+
+    updatePoints();
     renderMessages();
-  }
-
-  function openBox() {
-    if(isOpening) return;
-    isOpening = true;
-    boxCanvas.style.pointerEvents = "none";
-    notification.textContent = "Membuka kotak...";
-    animateOpenBox(() => {
-      // Tentukan hadiah random
-      let rewardIndex = Math.floor(Math.random() * rewards.length);
-      let reward = rewards[rewardIndex];
-      let earned = 0;
-
-      if(reward.points === -1) { // 2x poin berikutnya
-        doubleNext = true;
-        notification.textContent = "Selanjutnya poinmu akan dikalikan 2!";
-        addMessage("Mendapatkan bonus 2x poin berikutnya!");
-      } else {
-        earned = doubleNext ? reward.points * 2 : reward.points;
-        doubleNext = false;
-        points += earned;
-        notification.textContent = `Kamu mendapatkan ${earned} poin (${reward.name})!`;
-        addMessage(`Mendapatkan hadiah: ${reward.name} (${earned} poin)`);
-      }
-      updatePointsDisplay();
-      boxCanvas.style.pointerEvents = "auto";
-      isOpening = false;
-    });
-  }
-
-  boxCanvas.addEventListener("click", openBox);
-
-  function submitWithdraw() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const name = document.getElementById("fullname").value.trim();
-    const acc = document.getElementById("account").value.trim();
-
-    if (!name || !acc) {
-      alert("Harap isi nama dan rekening.");
-      return;
-    }
-    if (points < amount) {
-      document.getElementById("exchangeMessage").textContent = "Poin tidak cukup!";
-      return;
-    }
-
-    // Set status "pending"
-    const newWithdraw = { name, acc, amount, status: "pending" };
-
-    withdraws.push(newWithdraw);
-    localStorage.setItem("withdraws", JSON.stringify
+  </script>
+</body>
+</html>
