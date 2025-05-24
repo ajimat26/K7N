@@ -1,118 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spin Game Rewards</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap">
+  <meta charset="UTF-8" />
+  <title>Spin Wheel Poin</title>
   <style>
     body {
-      background: linear-gradient(to bottom right, #f0f8ff, #e6f7ff);
-      font-family: 'Bubblegum Sans', cursive;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
       text-align: center;
-      padding: 2rem;
+      padding: 20px;
     }
-    h1 {
-      font-size: 3rem;
+
+    #notification {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      text-align: center;
+      padding: 12px 0;
+      font-weight: bold;
+      font-size: 16px;
+      display: none;
+      z-index: 1000;
     }
+
     #wheel {
       width: 300px;
       height: 300px;
-      border: 10px solid #fff;
+      border: 10px solid #333;
       border-radius: 50%;
-      margin: 2rem auto;
-      background: url('https://i.imgur.com/UopO93v.png') no-repeat center;
-      background-size: cover;
+      margin: 0 auto;
+      background: conic-gradient(
+        #ffcc00 0% 20%, 
+        #ff6699 20% 40%, 
+        #66ccff 40% 60%, 
+        #99ff99 60% 80%, 
+        #ff9966 80% 100%
+      );
+      transition: transform 4s ease-out;
     }
-    #spinBtn {
-      font-size: 1.5rem;
-      padding: 1rem 2rem;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 12px;
+
+    #pointer {
+      width: 0; 
+      height: 0; 
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid red;
+      margin: 10px auto;
+    }
+
+    #spinBtn, #withdrawBtn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
       cursor: pointer;
     }
-    #pointsDisplay {
-      font-size: 1.7rem;
-      margin-top: 1rem;
+
+    #points {
+      font-size: 24px;
+      margin-top: 20px;
     }
-    #redeemBtn {
-      margin-top: 1rem;
-      padding: 0.8rem 1.5rem;
-      font-size: 1.2rem;
-      background: #f39c12;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
+
+    #withdrawArea {
+      margin-top: 30px;
+      border-top: 2px solid #ccc;
+      padding-top: 20px;
+    }
+
+    input, select {
+      padding: 8px;
+      margin: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Spin & Win Poin!</h1>
+
+  <div id="notification"></div>
+
+  <div id="pointer"></div>
   <div id="wheel"></div>
-  <button id="spinBtn">SPIN!</button>
-  <div id="pointsDisplay">Total Poin: <span id="points">0</span></div>
-  <button id="redeemBtn">Tukar Poin</button>
+  <button id="spinBtn">Putar Wheel</button>
 
-  <audio id="spinSound" src="https://www.soundjay.com/button/sounds/button-30.mp3"></audio>
+  <div id="message"></div>
+  <div id="points">Poin: 0</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <div id="withdrawArea">
+    <h2>Penukaran Poin</h2>
+    <select id="withdrawAmount">
+      <option value="10000">Rp 10.000 (100 poin)</option>
+      <option value="25000">Rp 25.000 (250 poin)</option>
+      <option value="50000">Rp 50.000 (500 poin)</option>
+      <option value="100000">Rp 100.000 (1000 poin)</option>
+    </select><br>
+    <input type="text" id="fullname" placeholder="Nama Lengkap"><br>
+    <input type="text" id="rekening" placeholder="No. Rekening / E-Wallet"><br>
+    <button id="submitWithdraw">Ajukan Penarikan</button>
+    <div id="exchangeMessage"></div>
+  </div>
+
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.firebasestorage.app",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:9b764840e51c13a3044a11"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spinBtn');
+    const message = document.getElementById('message');
+    const pointsDisplay = document.getElementById('points');
+    const withdrawAmount = document.getElementById('withdrawAmount');
+    const fullname = document.getElementById('fullname');
+    const rekening = document.getElementById('rekening');
+    const submitWithdraw = document.getElementById('submitWithdraw');
+    const exchangeMessage = document.getElementById('exchangeMessage');
 
-    let points = parseInt(localStorage.getItem("spinPoints")) || 0;
-    const pointDisplay = document.getElementById("points");
-    pointDisplay.innerText = points;
+    let points = parseInt(localStorage.getItem('points')) || 0;
+    let spinning = false;
+    let doubleNext = false;
 
-    const rewards = ["ZONK", 50, 30, "GANDAKAN", 75, 15, "ZONK", 25];
-    const spinBtn = document.getElementById("spinBtn");
-    const wheel = document.getElementById("wheel");
-    const spinSound = document.getElementById("spinSound");
+    function updatePointsDisplay() {
+      pointsDisplay.textContent = `Poin: ${points}`;
+    }
 
-    spinBtn.onclick = () => {
-      spinSound.play();
-      const resultIndex = Math.floor(Math.random() * rewards.length);
-      const result = rewards[resultIndex];
+    function getRewardByAngle(angle) {
+      if (angle >= 0 && angle < 72) return { type: 'points', points: 10 };
+      if (angle >= 72 && angle < 144) return { type: 'points', points: 20 };
+      if (angle >= 144 && angle < 216) return { type: 'points', points: 50 };
+      if (angle >= 216 && angle < 288) return { type: 'double', points: 0 };
+      return { type: 'points', points: 100 };
+    }
 
-      wheel.style.transition = "transform 4s ease-out";
-      wheel.style.transform = `rotate(${1440 + resultIndex * 45}deg)`;
+    function rotateWheel() {
+      if (spinning) return;
+      spinning = true;
+
+      const extraDegrees = Math.floor(Math.random() * 360);
+      const rotateTo = 1440 + extraDegrees;
+      wheel.style.transform = `rotate(${rotateTo}deg)`;
 
       setTimeout(() => {
-        if (result === "ZONK") alert("Zonk! Coba lagi ya.");
-        else if (result === "GANDAKAN") {
-          points *= 2;
-          alert("Poin kamu digandakan!");
-        } else {
-          points += result;
-          alert(`Kamu dapat ${result} poin!`);
-        }
-        pointDisplay.innerText = points;
-        localStorage.setItem("spinPoints", points);
-      }, 4000);
-    };
+        const finalAngle = rotateTo % 360;
+        const reward = getRewardByAngle(finalAngle);
 
-    document.getElementById("redeemBtn").onclick = () => {
-      const name = prompt("Masukkan nama lengkap kamu:");
-      const rekening = prompt("Masukkan nomor rekening kamu:");
-      if (name && rekening) {
-        db.ref("penarikan/").push({ name, rekening, poin: points });
-        alert("Permintaan sedang diproses. Harap tunggu dalam waktu maksimal 24 jam.");
+        let gainedPoints = reward.points;
+        if (reward.type === 'double') {
+          doubleNext = true;
+          message.textContent = 'Putaran selanjutnya 2x poin!';
+          showNotification('Berhasil dapat "2x Poin"! Putaran selanjutnya digandakan!');
+        } else {
+          if (doubleNext) {
+            gainedPoints *= 2;
+            doubleNext = false;
+            showNotification(`Poin digandakan! Kamu dapat ${gainedPoints} poin.`);
+          } else {
+            showNotification(`Kamu dapat ${gainedPoints} poin.`);
+          }
+          points += gainedPoints;
+          message.textContent = `Kamu mendapatkan ${gainedPoints} poin!`;
+          localStorage.setItem('points', points);
+          updatePointsDisplay();
+        }
+
+        spinning = false;
+      }, 4000);
+    }
+
+    function showNotification(msg, duration = 3000) {
+      const notif = document.getElementById("notification");
+      notif.textContent = msg;
+      notif.style.display = "block";
+      setTimeout(() => {
+        notif.style.display = "none";
+      }, duration);
+    }
+
+    spinBtn.addEventListener('click', rotateWheel);
+
+    submitWithdraw.addEventListener('click', () => {
+      const selected = parseInt(withdrawAmount.value);
+      const name = fullname.value.trim();
+      const acc = rekening.value.trim();
+
+      const cost = selected / 100;
+
+      if (points >= cost && name && acc) {
+        points -= cost;
+        localStorage.setItem('points', points);
+        updatePointsDisplay();
+        exchangeMessage.textContent = 'Penarikan berhasil diajukan!';
+        showNotification('Penarikan berhasil diajukan!');
+        submitWithdraw.disabled = true;
+
+        // Simpan data ke Firebase atau log jika diperlukan
+        const timestamp = Date.now();
+        console.log({ name, acc, amount: selected, timestamp });
+
+        fullname.value = '';
+        rekening.value = '';
+      } else {
+        showNotification('Gagal: Pastikan data lengkap & poin mencukupi.', 4000);
       }
-    };
+    });
+
+    updatePointsDisplay();
   </script>
+
 </body>
 </html>
