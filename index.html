@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Spin Bubble - Dapatkan Poin</title>
+<title>Game Spin Wheel & Penukaran Poin</title>
 <style>
   body {
     margin: 0; 
-    overflow: hidden;
+    overflow-x: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
     color: #fff;
@@ -16,56 +16,134 @@
 
   #points {
     position: fixed;
-    top: 20px;
+    top: 15px;
     left: 20px;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     text-shadow: 0 0 6px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+
+  #wheel-container {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 80px auto 20px;
+    user-select: none;
+  }
+
+  #wheel {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    border: 10px solid #fff;
+    box-shadow: 0 0 15px #fff;
+    background: conic-gradient(
+      #ff6f61 0deg 72deg,
+      #ffd700 72deg 144deg,
+      #4caf50 144deg 216deg,
+      #2196f3 216deg 288deg,
+      #9c27b0 288deg 360deg
+    );
+    transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  #pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid #fff;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
   }
 
   #spinBtn {
-    position: fixed;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
+    display: block;
+    margin: 20px auto;
     background: #ff6f61;
     border-radius: 50%;
     border: none;
-    width: 120px;
-    height: 120px;
-    font-size: 28px;
+    width: 110px;
+    height: 110px;
+    font-size: 24px;
     font-weight: 700;
     color: white;
-    box-shadow: 0 0 20px #ff6f61;
+    box-shadow: 0 0 25px #ff6f61;
     cursor: pointer;
     transition: transform 0.2s ease;
     outline: none;
   }
   #spinBtn:active {
-    transform: translateX(-50%) scale(0.95);
+    transform: scale(0.95);
   }
 
   #message {
-    position: fixed;
-    bottom: 190px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 20px;
-    font-weight: 600;
-    padding: 10px 25px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 30px;
     text-align: center;
-    min-width: 220px;
+    margin-top: 15px;
+    font-weight: 600;
+    font-size: 18px;
+    min-height: 30px;
     user-select: none;
   }
 
-  /* Bubble style */
+  #exchange-section {
+    max-width: 320px;
+    margin: 30px auto;
+    background: rgba(255 255 255 / 0.15);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 10px #00000050;
+  }
+
+  #exchange-section h2 {
+    margin: 0 0 15px;
+    text-align: center;
+  }
+
+  label, select, input, button {
+    display: block;
+    width: 100%;
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  select, input {
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+  }
+
+  button {
+    background: #4caf50;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 12px #4caf50;
+    transition: background 0.3s ease;
+  }
+  button:hover:not(:disabled) {
+    background: #43a047;
+  }
+  button:disabled {
+    background: #9e9e9e;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  /* Bubble background */
   .bubble {
     position: absolute;
-    background: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.3);
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(255,255,255,0.8);
+    box-shadow: 0 0 10px rgba(255,255,255,0.6);
     animation-timing-function: linear;
     pointer-events: none;
     user-select: none;
@@ -75,154 +153,87 @@
 <body>
 
 <div id="points">Poin: 0</div>
-<button id="spinBtn">SPIN</button>
+
+<div id="wheel-container">
+  <div id="pointer"></div>
+  <div id="wheel"></div>
+</div>
+
+<button id="spinBtn">PUTAR</button>
 <div id="message"></div>
 
-<script>
-  // Backsound
-  const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/11/audio_c2eb2b5d05.mp3?filename=upbeat-corporate-ambient-8083.mp3');
-  audio.loop = true;
-  audio.volume = 0.15;
-  audio.play();
+<div id="exchange-section">
+  <h2>Tukar Poin Jadi Uang IC</h2>
+  <label for="withdrawAmount">Pilih jumlah penarikan:</label>
+  <select id="withdrawAmount">
+    <option value="50000">50.000 IC - 500 Poin</option>
+    <option value="100000">100.000 IC - 1000 Poin</option>
+    <option value="250000">250.000 IC - 2500 Poin</option>
+    <option value="500000">500.000 IC - 5000 Poin</option>
+    <option value="1000000">1.000.000 IC - 10000 Poin</option>
+  </select>
 
-  // Points and spin logic
+  <label for="fullname">Nama Lengkap:</label>
+  <input type="text" id="fullname" placeholder="Masukkan nama lengkap" />
+
+  <label for="rekening">Nomor Rekening:</label>
+  <input type="text" id="rekening" placeholder="Masukkan nomor rekening" />
+
+  <button id="submitWithdraw" disabled>Ajukan Penarikan</button>
+  <div id="exchangeMessage" style="color:#ffc107; font-weight:600; text-align:center;"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+  // Firebase config - ganti dengan config Firebase kamu sendiri
+  const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://PROJECT_ID.firebaseio.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Points
   let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
   const pointsDisplay = document.getElementById('points');
   const spinBtn = document.getElementById('spinBtn');
+  const wheel = document.getElementById('wheel');
   const message = document.getElementById('message');
+  const withdrawAmount = document.getElementById('withdrawAmount');
+  const fullname = document.getElementById('fullname');
+  const rekening = document.getElementById('rekening');
+  const submitWithdraw = document.getElementById('submitWithdraw');
+  const exchangeMessage = document.getElementById('exchangeMessage');
 
+  // Wheel segments mapping to rewards
+  // 5 segments: Zonks, Small, Medium, Big, Double
+  // Angles: each 72 degrees
   const rewards = [
-    { type: 'zonk', chance: 30, message: 'Zonk! Tidak dapat poin.' },
-    { type: 'small', chance: 30, value: 10, message: '+10 Poin' },
-    { type: 'medium', chance: 20, value: 25, message: '+25 Poin' },
-    { type: 'big', chance: 15, value: 50, message: '+50 Poin' },
-    { type: 'double', chance: 5, message: 'Gandakan poin! Spin berikutnya dapat 2x lipat' }
+    {type:'zonk', label:'Zonk', points:0, color:'#ff4444', start:0},
+    {type:'small', label:'+10 Poin', points:10, color:'#4caf50', start:72},
+    {type:'medium', label:'+25 Poin', points:25, color:'#2196f3', start:144},
+    {type:'big', label:'+50 Poin', points:50, color:'#9c27b0', start:216},
+    {type:'double', label:'2x Poin', points:0, color:'#ffd700', start:288},
   ];
 
   let doubleNext = false;
-
-  function weightedRandom(rewards) {
-    let total = rewards.reduce((acc, r) => acc + r.chance, 0);
-    let rand = Math.random() * total;
-    let sum = 0;
-    for (let r of rewards) {
-      sum += r.chance;
-      if (rand <= sum) return r;
-    }
-  }
+  let spinning = false;
 
   function updatePointsDisplay() {
     pointsDisplay.textContent = `Poin: ${points}`;
   }
 
-  function createBubble(text, x, y, size, color) {
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.style.left = x + 'px';
-    bubble.style.top = y + 'px';
-    bubble.style.width = size + 'px';
-    bubble.style.height = size + 'px';
-    bubble.style.lineHeight = size + 'px';
-    bubble.style.fontWeight = '700';
-    bubble.style.fontSize = (size/3) + 'px';
-    bubble.style.color = color || '#fff';
-    bubble.style.textAlign = 'center';
-    bubble.style.userSelect = 'none';
-    bubble.textContent = text;
-    document.body.appendChild(bubble);
-
-    // Animate bubble floating upwards and fading
-    let posY = y;
-    let alpha = 1;
-    const speed = Math.random() * 1 + 0.5;
-    const floatInterval = setInterval(() => {
-      posY -= speed;
-      alpha -= 0.02;
-      bubble.style.top = posY + 'px';
-      bubble.style.opacity = alpha;
-      if (alpha <= 0) {
-        clearInterval(floatInterval);
-        bubble.remove();
-      }
-    }, 30);
-  }
-
-  spinBtn.onclick = () => {
-    spinBtn.disabled = true;
-    message.textContent = "Memutar...";
-    
-    // Spin sound
-    const spinSound = new Audio('https://cdn.pixabay.com/download/audio/2021/10/07/audio_8a868bf6ca.mp3?filename=slot-machine-spin-7077.mp3');
-    spinSound.volume = 0.4;
-    spinSound.play();
-
-    setTimeout(() => {
-      let reward = weightedRandom(rewards);
-      if (reward.type === 'zonk') {
-        message.textContent = reward.message;
-        createBubble('Zonk', window.innerWidth/2 - 40, window.innerHeight - 200, 80, '#ff4444');
-      } else if (reward.type === 'double') {
-        doubleNext = true;
-        message.textContent = reward.message;
-        createBubble('2x', window.innerWidth/2 - 30, window.innerHeight - 200, 80, '#ffd700');
-      } else {
-        let rewardPoints = reward.value;
-        if (doubleNext) {
-          rewardPoints *= 2;
-          doubleNext = false;
-          message.textContent = reward.message + ' (x2)';
-        } else {
-          message.textContent = reward.message;
-        }
-        points += rewardPoints;
-        localStorage.setItem('points', points);
-        updatePointsDisplay();
-        createBubble('+' + rewardPoints, window.innerWidth/2 - 40, window.innerHeight - 200, 80, '#4caf50');
-      }
-      spinBtn.disabled = false;
-    }, 2200);
-  };
-
-  updatePointsDisplay();
-
-  // Animate floating background bubbles
-  function createBackgroundBubble() {
-    const size = Math.random() * 60 + 20;
-    const x = Math.random() * window.innerWidth;
-    const y = window.innerHeight + size;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.style.width = size + 'px';
-    bubble.style.height = size + 'px';
-    bubble.style.left = x + 'px';
-    bubble.style.top = y + 'px';
-    bubble.style.background = 'rgba(255,255,255,0.15)';
-    bubble.style.boxShadow = '0 0 15px rgba(255,255,255,0.4)';
-    bubble.style.animation = `floatUp ${10 + Math.random()*10}s linear forwards`;
-    document.body.appendChild(bubble);
-
-    let posY = y;
-    const speed = Math.random() * 0.3 + 0.15;
-    const interval = setInterval(() => {
-      posY -= speed;
-      bubble.style.top = posY + 'px';
-      if (posY < -size) {
-        clearInterval(interval);
-        bubble.remove();
-      }
-    }, 30);
-  }
-
-  setInterval(createBackgroundBubble, 800);
-
-  // CSS animation keyframes added dynamically
-  const styleSheet = document.styleSheets[0];
-  styleSheet.insertRule(`@keyframes floatUp {
-    from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(-100vh); opacity: 0; }
-  }`, styleSheet.cssRules.length);
-
-</script>
-
-</body>
-</html>
+  function getRewardByAngle(angle) {
+    // angle normalized 0-360, returns reward of that segment
+    angle = angle % 360;
+    for (let i = 0; i < rewards.length; i++) {
+      let start = rewards[i].start;
+      let end = (start + 72) % 360;
+      if
