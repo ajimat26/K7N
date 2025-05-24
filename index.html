@@ -11,6 +11,7 @@
       background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
       color: #fff;
       user-select: none;
+      overflow-x: hidden;
     }
     #points, #message, #adminPanel, #notification {
       text-align: center;
@@ -40,13 +41,17 @@
     }
     .label {
       position: absolute;
-      width: 80px;
+      width: 100px;
       text-align: center;
       color: white;
       font-weight: bold;
       left: 50%;
       top: 50%;
-      transform-origin: 0 -120px;
+      /* Fix posisi label supaya tepat tengah tiap segmen */
+      transform-origin: 0 -130px;
+      font-size: 18px;
+      user-select: none;
+      pointer-events: none;
     }
     #pointer {
       position: absolute;
@@ -58,6 +63,7 @@
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
       border-bottom: 40px solid #fff;
+      user-select: none;
     }
     button {
       padding: 10px 20px;
@@ -65,13 +71,20 @@
       font-weight: bold;
       margin: 10px;
       cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: rgba(255,255,255,0.2);
     }
     #exchange-section {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
       padding: 20px;
       max-width: 350px;
-      margin: auto;
+      margin: 30px auto;
+      user-select: none;
     }
     input, select {
       width: 100%;
@@ -79,6 +92,7 @@
       padding: 8px;
       border-radius: 8px;
       border: none;
+      font-size: 16px;
     }
     #adminLogin, #adminPanel {
       max-width: 400px;
@@ -86,10 +100,12 @@
       background: rgba(0,0,0,0.2);
       padding: 15px;
       border-radius: 10px;
+      user-select: none;
     }
     #notification {
       color: yellow;
       font-size: 16px;
+      min-height: 20px;
     }
     #notifHistory {
       max-width: 400px;
@@ -98,6 +114,68 @@
       background: rgba(255,255,255,0.1);
       border-radius: 10px;
       font-size: 14px;
+      max-height: 120px;
+      overflow-y: auto;
+      user-select: none;
+    }
+    /* Tombol icon pesan */
+    #messageBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2196f3;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+    #messageBtn:hover {
+      background: #1769aa;
+    }
+    /* Icon pesan SVG */
+    #messageBtn svg {
+      fill: white;
+      width: 28px;
+      height: 28px;
+    }
+    /* Panel pesan */
+    #messagePanel {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 320px;
+      max-height: 400px;
+      background: rgba(0,0,0,0.8);
+      border-radius: 15px;
+      padding: 15px;
+      color: #fff;
+      font-size: 14px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      user-select: text;
+    }
+    #messagePanel h3 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #closeMsgPanel {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 20px;
+      user-select: none;
     }
   </style>
 </head>
@@ -131,16 +209,16 @@
     <option value="1000">100.000 IC - 1000 Poin</option>
     <option value="2500">250.000 IC - 2500 Poin</option>
   </select>
-  <input type="text" id="fullname" placeholder="Nama lengkap">
-  <input type="text" id="account" placeholder="Nomor rekening">
+  <input type="text" id="fullname" placeholder="Nama lengkap" />
+  <input type="text" id="account" placeholder="Nomor rekening" />
   <button onclick="submitWithdraw()">Ajukan Penarikan</button>
   <div id="exchangeMessage"></div>
 </div>
 
 <div id="adminLogin">
   <h3>Login Admin</h3>
-  <input type="text" id="adminUser" placeholder="Username">
-  <input type="password" id="adminPass" placeholder="Password">
+  <input type="text" id="adminUser" placeholder="Username" />
+  <input type="password" id="adminPass" placeholder="Password" />
   <button onclick="loginAdmin()">Login</button>
 </div>
 
@@ -149,6 +227,20 @@
   <div>Total Poin: <span id="totalPoints">0</span></div>
   <h3>Riwayat Penarikan:</h3>
   <ul id="withdrawList"></ul>
+</div>
+
+<!-- Tombol Icon Pesan -->
+<div id="messageBtn" title="Lihat Pesan / Riwayat Notifikasi" onclick="toggleMessagePanel()">
+  <svg viewBox="0 0 24 24">
+    <path d="M20 2H4C2.897 2 2 2.897 2 4v16l4-4h14c1.103 0 2-0.897 2-2V4c0-1.103-0.897-2-2-2zM6 12v-2h12v2H6z"/>
+  </svg>
+</div>
+
+<!-- Panel Pesan -->
+<div id="messagePanel">
+  <div id="closeMsgPanel" onclick="toggleMessagePanel()">×</div>
+  <h3>Riwayat Notifikasi</h3>
+  <div id="messageContent">Belum ada pesan.</div>
 </div>
 
 <script>
@@ -164,9 +256,18 @@
   function addNotification(msg) {
     document.getElementById("notification").textContent = msg;
     notifHistory.push(msg);
-    if (notifHistory.length > 5) notifHistory.shift();
+    if (notifHistory.length > 20) notifHistory.shift(); // simpan 20 pesan terakhir
     localStorage.setItem("notifHistory", JSON.stringify(notifHistory));
-    document.getElementById("notifHistory").innerHTML = notifHistory.map(n => `<div>- ${n}</div>`).join("");
+    renderNotifHistory();
+  }
+
+  function renderNotifHistory() {
+    if (notifHistory.length === 0) {
+      document.getElementById("messageContent").textContent = "Belum ada pesan.";
+    } else {
+      document.getElementById("messageContent").innerHTML = notifHistory
+        .map(n => `<div>- ${n}</div>`).join("");
+    }
   }
 
   function spinWheel() {
@@ -206,65 +307,4 @@
   }
 
   function submitWithdraw() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const name = document.getElementById("fullname").value;
-    const acc = document.getElementById("account").value;
-
-    if (!name || !acc) {
-      alert("Harap isi nama dan rekening.");
-      return;
-    }
-    if (points < amount) {
-      document.getElementById("exchangeMessage").textContent = "Poin tidak cukup!";
-      return;
-    }
-
-    points -= amount;
-    updatePointsDisplay();
-    document.getElementById("exchangeMessage").textContent = "Permintaan penarikan diajukan.";
-
-    let history = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    history.push({ name, acc, amount, status: "pending" });
-    localStorage.setItem("withdraws", JSON.stringify(history));
-    addNotification(`Penarikan ${amount} poin diajukan oleh ${name}`);
-  }
-
-  function loginAdmin() {
-    const user = document.getElementById("adminUser").value;
-    const pass = document.getElementById("adminPass").value;
-    if (user === "admin" && pass === "admin123") {
-      document.getElementById("adminPanel").style.display = "block";
-      document.getElementById("adminLogin").style.display = "none";
-      showAdminData();
-    } else {
-      alert("Login gagal!");
-    }
-  }
-
-  function confirmWithdraw(index) {
-    let history = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    history[index].status = "confirmed";
-    localStorage.setItem("withdraws", JSON.stringify(history));
-    showAdminData();
-    addNotification(`Penarikan ${history[index].amount} poin telah dikonfirmasi!`);
-  }
-
-  function showAdminData() {
-    document.getElementById("totalPoints").textContent = localStorage.getItem("points") || 0;
-    const list = document.getElementById("withdrawList");
-    list.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem("withdraws") || "[]");
-    data.forEach((d, i) => {
-      const li = document.createElement("li");
-      li.innerHTML = `${d.name} - ${d.acc} - ${d.amount} poin - ${d.status} 
-      ${d.status === "pending" ? `<button onclick="confirmWithdraw(${i})">Konfirmasi</button>` : ""}`;
-      list.appendChild(li);
-    });
-  }
-
-  updatePointsDisplay();
-  addNotification("Selamat datang!");
-</script>
-
-</body>
-  </html>
+    const amount =
