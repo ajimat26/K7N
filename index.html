@@ -1,31 +1,45 @@
 <!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Game Center</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Login Member</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
 </head>
-<body>
-  <div class="container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Discord_logo_new.svg" class="logo" alt="Logo">
-    <div class="login-box">
-      <h2>Masuk ke Game Center</h2><input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="loginEmail()">Masuk</button>
+<body style="background-color: #ffe152; font-family: Arial, sans-serif;">
+  <div style="width: 300px; margin: 80px auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center;">
+    <div style="margin-top: -60px;">
+      <div style="background: #2ecc71; width: 60px; height: 60px; border-radius: 50%; margin: 0 auto;">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="icon" style="width: 30px; margin-top: 15px;">
+      </div>
+    </div>
+    <h3 style="margin-top: 10px; color: #333;">Login Member</h3>
+    <input type="text" id="email" placeholder="Email atau Nomor HP" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc;">
+    <input type="password" id="password" placeholder="Password" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc;">
+    <button onclick="login()" style="width: 100%; padding: 10px; background: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer;">LOGIN</button>
+    <p style="margin-top: 10px; font-size: 14px;"><a href="#" onclick="forgotPassword()" style="color: #666; text-decoration: none;">Forgot Password ?</a></p>
+    <p id="message" style="color: red; margin-top: 10px;"></p>
+  </div>  <script>
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(user => {
+          window.location.href = "dashboard.html";
+        })
+        .catch(error => {
+          document.getElementById('message').innerText = error.message;
+        });
+    }
 
-  <hr>
-
-  <input type="text" id="phone" placeholder="Nomor HP (08xxxx)">
-  <button onclick="sendOTP()">Kirim OTP</button>
-  <input type="text" id="otp" placeholder="Masukkan OTP">
-  <button onclick="verifyOTP()">Verifikasi OTP</button>
-
-  <p id="message" class="message"></p>
-</div>
-
-  </div>  <script src="script.js"></script></body>
-    </html>
+    function forgotPassword() {
+      const email = document.getElementById('email').value;
+      if (!email) return alert("Masukkan email terlebih dahulu");
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => alert("Email reset telah dikirim"))
+        .catch(err => alert(err.message));
+    }
+  </script></body>
+      </html>
