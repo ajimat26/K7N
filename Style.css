@@ -1,61 +1,99 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1d2b64, #f8cdda);
-  color: #fff;
-}
-
-.login-container, .dashboard {
-  max-width: 400px;
-  margin: 80px auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
+  color: #f1f1f1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(6px);
-  text-align: center;
+  min-height: 100vh;
 }
 
-input {
-  width: 90%;
-  padding: 12px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+h1 {
+  font-size: 32px;
+  color: #ffcc00;
+  text-shadow: 2px 2px 5px #000;
+  margin-bottom: 30px;
 }
 
 button {
-  padding: 12px 24px;
+  background: linear-gradient(to right, #ffcc00, #ff6600);
+  color: #000;
   border: none;
-  border-radius: 8px;
-  background: #28a745;
-  color: white;
-  font-size: 1rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin: 8px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #ffcc00;
 }
 
 button:hover {
-  background: #218838;
+  transform: scale(1.05);
+  background: linear-gradient(to right, #ffaa00, #ff3300);
+  box-shadow: 0 0 15px #ffaa00;
 }
 
-.small-text {
-  font-size: 0.85rem;
-  margin-top: 10px;
+input, select, textarea {
+  background-color: #2e2e2e;
+  color: #f1f1f1;
+  border: none;
+  padding: 10px;
+  margin: 6px;
+  border-radius: 6px;
+  width: 90%;
+  max-width: 400px;
+  font-size: 15px;
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 20px;
-  background-color: rgba(0, 0, 0, 0.4);
+input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 5px #ffcc00;
 }
 
-#dashboardPage {
-  display: none;
+.panel {
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 600px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
-a {
-  color: #ffe066;
-  text-decoration: none;
+#notif {
+  font-weight: bold;
+  margin-top: 12px;
+  min-height: 30px;
+  color: #00ff99;
+  text-shadow: 1px 1px 2px #000;
 }
+
+#boxAnimation {
+  width: 120px;
+  height: 120px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin: 20px auto;
+  animation: floatBox 2s infinite ease-in-out;
+}
+
+@keyframes floatBox {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  button, input, select, textarea {
+    width: 100%;
+  }
+    }
