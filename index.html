@@ -1,54 +1,84 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
-  <head>
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/icons/128.png" />
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Kotak Hadiah</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+    button {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #218838; }
+    select, input, textarea {
+      width: 80%;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+    #notif {
+      margin-top: 10px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body><h1>Game Kotak Hadiah</h1>
+<h3>Poin: <span id="pointCount">0</span></h3>
+<h3>Kunci: <span id="keyCount">0</span></h3>
+<button onclick="bukaBox()">Buka Kotak</button>
+<button onclick="ambilSuplai()">Ambil Suplai</button>
+<div id="notif"></div><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script><script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+    authDomain: "uangduty.firebaseapp.com",
+    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "uangduty",
+    storageBucket: "uangduty.appspot.com",
+    messagingSenderId: "",
+    appId: ""
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f59e0b" />
-    <title>Radon Games</title>
-    <meta property="og:title" content="Radon Games" />
-    <meta property="og:image" content="/icons/128.png" />
-    <meta
-      name="description"
-      content="An open-source unblocked games website built with simplicity in mind."
-    />
-    <meta
-      property="og:description"
-      content="An open-source unblocked games website built with simplicity in mind."
-    />
-    <meta
-      name="keywords"
-      content="radon,games,radon games,unblocked,unblocked games,html games,html5 games,flash games,flashplayer games,proxy,io"
-    />
+  let uid = localStorage.getItem("uidKotak");
+  if (!uid) {
+    uid = "user_" + Date.now();
+    localStorage.setItem("uidKotak", uid);
+  }
+  const userRef = db.ref("users/" + uid);
 
-    <!-- Google Products -->
-    <script
-      defer
-      crossorigin="anonymous"
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8517735295733237"
-    ></script>
-    <script
-      defer
-      src="https://www.googletagmanager.com/gtag/js?id=G-0GR0HN1RFL"
-    ></script>
+  userRef.on("value", (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      document.getElementById("keyCount").innerText = data.kunci || 0;
+      document.getElementById("pointCount").innerText = data.poin || 0;
+    }
+  });
 
-    <script defer>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
+  function notif(teks) {
+    document.getElementById("notif").innerText = teks;
+    setTimeout(() => document.getElementById("notif").innerText = '', 5000);
+  }
 
-      gtag("config", "G-0GR0HN1RFL");
-    </script>
+  function bukaBox() {
+    userRef.get().then((snap) => {
+      const data = snap.val();
+      if (!data || data.kunci <= 0) return notif("Kunci tidak cukup!");
 
-    <script src="/uv/uv.bundle.js" defer></script>
-    <script src="/uv/uv.config.js" defer></script>
-  </head>
-  <body class="scroll-smooth bg-bg-primary font-medium text-text-primary">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+      let kunciBaru = data.kunci - 1;
+      let reward = Math.floor(Math.random() * 100) + 10
