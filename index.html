@@ -1,166 +1,54 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Giveaway Realtime</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    body { font-family: sans-serif; margin: 0; padding: 20px; background: #e6f0ff; }
-    .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; }
-    .top { margin-top: 20px; }
-    .admin { margin-top: 40px; background: #f8f8f8; padding: 10px; border-radius: 8px; }
-    button { padding: 10px; margin: 5px; border-radius: 5px; border: none; cursor: pointer; }
-    .popup { background: #d9f2d9; padding: 10px; margin-top: 10px; border-radius: 5px; }
-  </style>
-</head>
-<body>
-  <div id="app" class="box">
-    <h2>Reyzen Kaget - Total Hadiah: Rp {{ formatUang(sisaUang) }}</h2>
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icons/128.png" />
 
-    <div v-if="!sudahClaim">
-      <input v-model="nama" placeholder="Nama Kamu"><br>
-      <input v-model="norek" placeholder="No Rekening IC"><br>
-      <button @click="klaim" :disabled="paused || loading || sudahClaim">CLAIM HADIAH</button>
-    </div>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f59e0b" />
+    <title>Radon Games</title>
+    <meta property="og:title" content="Radon Games" />
+    <meta property="og:image" content="/icons/128.png" />
+    <meta
+      name="description"
+      content="An open-source unblocked games website built with simplicity in mind."
+    />
+    <meta
+      property="og:description"
+      content="An open-source unblocked games website built with simplicity in mind."
+    />
+    <meta
+      name="keywords"
+      content="radon,games,radon games,unblocked,unblocked games,html games,html5 games,flash games,flashplayer games,proxy,io"
+    />
 
-    <div v-else>
-      <div class="popup">
-        Hadiah kamu: <b>Rp {{ formatUang(uangClaim) }}</b><br>
-        Hadiahmu akan diproses dalam 24 jam.<br>
-        Jika tidak, berarti Reyzen sedang badmood.
-      </div>
-    </div>
+    <!-- Google Products -->
+    <script
+      defer
+      crossorigin="anonymous"
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8517735295733237"
+    ></script>
+    <script
+      defer
+      src="https://www.googletagmanager.com/gtag/js?id=G-0GR0HN1RFL"
+    ></script>
 
-    <div class="top">
-      <h3>Top Tier Penarik:</h3>
-      <ol>
-        <li v-for="(user, i) in topTier" :key="i">{{ user.nama }} - Rp {{ formatUang(user.uang) }}</li>
-      </ol>
-    </div>
-
-    <hr>
-
-    <div>
-      <button @click="toggleAdmin">REYZEN ONLY</button>
-    </div>
-
-    <div class="admin" v-if="admin">
-      <h3>Admin Panel</h3>
-      <p>Total Uang: Rp {{ formatUang(sisaUang) }}</p>
-      <button @click="resetData">RESET</button>
-      <button @click="togglePause">{{ paused ? 'UNPAUSE' : 'PAUSE' }}</button>
-      <input v-model.number="jumlahUangInput" placeholder="Set Jumlah Uang">
-      <button @click="setUang">SET UANG</button>
-
-      <h4>Pemenang:</h4>
-      <ul>
-        <li v-for="(user, key) in semuaClaim" :key="key">
-          {{ user.nama }} - {{ user.norek }} - Rp {{ formatUang(user.uang) }}
-          <button @click="tandaiLunas(key)">LUNAS</button>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <script src="firebase.js"></script>
-  <script>
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    new Vue({
-      el: '#app',
-      data: {
-        nama: '',
-        norek: '',
-        sisaUang: 0,
-        sudahClaim: false,
-        uangClaim: 0,
-        topTier: [],
-        admin: localStorage.getItem('isAdmin') === 'true',
-        semuaClaim: {},
-        paused: false,
-        loading: false,
-        jumlahUangInput: 0
-      },
-      mounted() {
-        db.ref('sisaUang').on('value', snap => this.sisaUang = snap.val() || 0);
-        db.ref('paused').on('value', snap => this.paused = snap.val() || false);
-        db.ref('claim').on('value', snap => {
-          const val = snap.val() || {};
-          this.semuaClaim = val;
-          this.updateTopTier(val);
-        });
-
-        const nama = localStorage.getItem('nama');
-        if (nama) {
-          this.nama = nama;
-          db.ref('claim').orderByChild('nama').equalTo(nama).once('value', snap => {
-            const data = snap.val();
-            if (data) {
-              const key = Object.keys(data)[0];
-              this.uangClaim = data[key].uang;
-              this.sudahClaim = true;
-            }
-          });
-        }
-      },
-      methods: {
-        klaim() {
-          if (!this.nama || !this.norek) return alert('Lengkapi data.');
-          this.loading = true;
-
-          const jumlah = Math.floor(Math.random() * 5000000) + 500000;
-          const newUang = this.sisaUang - jumlah;
-
-          if (newUang < 0) return alert('Uang sudah habis.');
-
-          db.ref('claim').push({
-            nama: this.nama,
-            norek: this.norek,
-            uang: jumlah,
-            waktu: Date.now(),
-            lunas: false
-          });
-
-          db.ref('sisaUang').set(newUang);
-          localStorage.setItem('nama', this.nama);
-          this.uangClaim = jumlah;
-          this.sudahClaim = true;
-          this.loading = false;
-        },
-        formatUang(num) {
-          return (num || 0).toLocaleString('id-ID');
-        },
-        toggleAdmin() {
-          const code = prompt('Kode rahasia:');
-          if (code === 'opicantik') {
-            this.admin = true;
-            localStorage.setItem('isAdmin', 'true');
-          } else {
-            alert('Kode salah!');
-          }
-        },
-        resetData() {
-          if (!confirm('Yakin reset?')) return;
-          db.ref().set({ sisaUang: 20000000, claim: {}, paused: false });
-        },
-        togglePause() {
-          db.ref('paused').set(!this.paused);
-        },
-        setUang() {
-          if (this.jumlahUangInput > 0) db.ref('sisaUang').set(this.jumlahUangInput);
-        },
-        updateTopTier(data) {
-          const arr = Object.values(data || {});
-          arr.sort((a, b) => b.uang - a.uang);
-          this.topTier = arr.slice(0, 3);
-        },
-        tandaiLunas(key) {
-          db.ref('claim/' + key + '/lunas').set(true);
-        }
+    <script defer>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
       }
-    });
-  </script>
-</body>
+      gtag("js", new Date());
+
+      gtag("config", "G-0GR0HN1RFL");
+    </script>
+
+    <script src="/uv/uv.bundle.js" defer></script>
+    <script src="/uv/uv.config.js" defer></script>
+  </head>
+  <body class="scroll-smooth bg-bg-primary font-medium text-text-primary">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
