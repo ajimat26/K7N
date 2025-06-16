@@ -1,67 +1,61 @@
 body {
-  background-color: #ffeb3b;
-  font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1d2b64, #f8cdda);
+  color: #fff;
 }
 
-.login-container {
-  background-color: #f7f7f7;
-  max-width: 350px;
-  margin: 100px auto;
-  padding: 20px;
+.login-container, .dashboard {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
   text-align: center;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.avatar {
-  width: 60px;
-  height: 60px;
-  background-color: #4caf50;
-  border-radius: 50%;
-  margin: 0 auto 10px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/847/847969.png');
-  background-size: 60%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-input[type="text"], input[type="password"] {
+input {
   width: 90%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 16px;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 button {
-  background-color: #28a745;
-  color: white;
-  padding: 10px;
-  margin-top: 10px;
-  width: 100%;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 8px;
+  background: #28a745;
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #218838;
+  background: #218838;
 }
 
-a {
-  color: #666;
-  font-size: 14px;
-  display: inline-block;
+.small-text {
+  font-size: 0.85rem;
   margin-top: 10px;
 }
 
 .navbar {
-  background: #222;
-  color: white;
-  padding: 15px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+#dashboardPage {
+  display: none;
+}
+
+a {
+  color: #ffe066;
+  text-decoration: none;
 }
