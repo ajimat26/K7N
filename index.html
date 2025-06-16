@@ -1,166 +1,71 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login / Daftar Member</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #ffeb3b;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: #fff;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      width: 300px;
-      position: relative;
-    }
-    .icon {
-      background: green;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      margin: 0 auto;
-      margin-top: -50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .icon img {
-      width: 30px;
-      height: 30px;
-    }
-    h2 {
-      text-align: center;
-      margin-top: 10px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      width: 100%;
-      background: #28a745;
-      color: #fff;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #218838;
-    }
-    #switchForm {
-      margin-top: 10px;
-      text-align: center;
-      color: #007bff;
-      cursor: pointer;
-    }
-    #forgot {
-      text-align: center;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-    #dashboard {
-      display: none;
-      padding: 20px;
-    }
-    #profile {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #eee;
-      padding: 5px 10px;
-      border-radius: 20px;
-    }
-  </style>
+  <title>MiniGame Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container" id="loginContainer">
-    <div class="icon">
-      <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="User Icon">
+
+  <!-- Login Page -->
+  <div id="loginPage" class="login-container">
+    <h1>Masuk ke MiniGame</h1>
+    <input type="text" id="email" placeholder="Email atau Nomor HP" />
+    <input type="password" id="password" placeholder="Kata Sandi" />
+    <button onclick="login()">Login</button>
+    <p class="small-text">Belum punya akun? <a href="#">Daftar</a></p>
+  </div>
+
+  <!-- Dashboard Page -->
+  <div id="dashboardPage">
+    <div class="navbar">
+      <span id="usernameDisplay"></span>
+      <button onclick="logout()">Keluar</button>
     </div>
-    <h2 id="formTitle">Login Member</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="submitBtn">LOGIN</button>
-    <div id="forgot"><a href="#" onclick="forgotPassword()">Forgot Password?</a></div>
-    <div id="switchForm" onclick="toggleForm()">Belum punya akun? Daftar di sini</div>
-  </div>  <div id="dashboard">
-    <div id="profile">Profil</div>
-    <h2>Selamat datang di Dashboard</h2>
-  </div>  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <div class="dashboard">
+      <h2>Selamat datang di Dashboard MiniGame</h2>
+      <p>Konten akan ditampilkan di sini nanti...</p>
+    </div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "959219620226",
-      appId: "1:959219620226:web:e5b5c5a617eb02a1a80482"
-    };
+  <script>
+    function login() {
+      const email = document.getElementById("email").value;
+      if (email.trim() === "") return alert("Isi email/nomor dulu!");
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+      localStorage.setItem("loggedInUser", email);
+      showDashboard();
+    }
 
-    let isLogin = true;
+    function logout() {
+      localStorage.removeItem("loggedInUser");
+      showLogin();
+    }
 
-    const toggleForm = () => {
-      const title = document.getElementById("formTitle");
-      const submit = document.getElementById("submitBtn");
-      const switcher = document.getElementById("switchForm");
-      isLogin = !isLogin;
-      if (isLogin) {
-        title.innerText = "Login Member";
-        submit.innerText = "LOGIN";
-        switcher.innerText = "Belum punya akun? Daftar di sini";
+    function showLogin() {
+      document.getElementById("loginPage").style.display = "block";
+      document.getElementById("dashboardPage").style.display = "none";
+    }
+
+    function showDashboard() {
+      const user = localStorage.getItem("loggedInUser");
+      if (!user) return showLogin();
+
+      document.getElementById("usernameDisplay").innerText = user;
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("dashboardPage").style.display = "block";
+    }
+
+    // Auto show on load
+    window.onload = function() {
+      if (localStorage.getItem("loggedInUser")) {
+        showDashboard();
       } else {
-        title.innerText = "Daftar Member";
-        submit.innerText = "DAFTAR";
-        switcher.innerText = "Sudah punya akun? Login di sini";
+        showLogin();
       }
     };
+  </script>
 
-    document.getElementById("submitBtn").addEventListener("click", () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      if (isLogin) {
-        signInWithEmailAndPassword(auth, email, password)
-          .then(() => {
-            document.getElementById("loginContainer").style.display = "none";
-            document.getElementById("dashboard").style.display = "block";
-            document.getElementById("profile").innerText = auth.currentUser.email;
-          })
-          .catch(e => alert("Login gagal: " + e.message));
-      } else {
-        createUserWithEmailAndPassword(auth, email, password)
-          .then(() => alert("Berhasil daftar, silakan login."))
-          .catch(e => alert("Daftar gagal: " + e.message));
-      }
-    });
-
-    window.toggleForm = toggleForm;
-
-    window.forgotPassword = () => {
-      const email = document.getElementById("email").value;
-      if (!email) return alert("Masukkan email terlebih dahulu");
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert("Email reset password telah dikirim!"))
-        .catch(e => alert("Gagal kirim email: " + e.message));
-    };
-  </script></body>
-  </html>
+</body>
+</html>
