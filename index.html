@@ -1,84 +1,180 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Game Kotak Hadiah</title>
+  <meta charset="UTF-8" />
+  <title>Dashboard Permainan</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+      background: #121212;
       color: #fff;
       text-align: center;
       padding: 20px;
     }
-    h1 { margin-bottom: 10px; }
-    button {
-      background: #28a745;
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      margin: 5px;
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      padding: 10px;
       font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
       cursor: pointer;
     }
-    button:hover { background: #218838; }
-    select, input, textarea {
-      width: 80%;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
+    button:hover {
+      background-color: #218838;
     }
-    #notif {
+    .chat-box {
+      background: #222;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      border-radius: 8px;
       margin-top: 10px;
-      font-weight: bold;
-      min-height: 24px;
+    }
+    .chat-message {
+      text-align: left;
+      margin: 5px 0;
     }
   </style>
 </head>
-<body><h1>Game Kotak Hadiah</h1>
-<h3>Poin: <span id="pointCount">0</span></h3>
-<h3>Kunci: <span id="keyCount">0</span></h3>
-<button onclick="bukaBox()">Buka Kotak</button>
-<button onclick="ambilSuplai()">Ambil Suplai</button>
-<div id="notif"></div><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script><script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-    authDomain: "uangduty.firebaseapp.com",
-    databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "uangduty",
-    storageBucket: "uangduty.appspot.com",
-    messagingSenderId: "",
-    appId: ""
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+<body>
 
-  let uid = localStorage.getItem("uidKotak");
-  if (!uid) {
-    uid = "user_" + Date.now();
-    localStorage.setItem("uidKotak", uid);
-  }
-  const userRef = db.ref("users/" + uid);
+  <div class="container">
+    <h1>🎮 Mini Game Center</h1>
+    <div id="userPanel" style="display:none;">
+      <p>Halo, <span id="userName"></span>!</p>
+      <button onclick="logout()">Logout</button>
 
-  userRef.on("value", (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      document.getElementById("keyCount").innerText = data.kunci || 0;
-      document.getElementById("pointCount").innerText = data.poin || 0;
+      <h3>Daftar Mini Game</h3>
+      <ul>
+        <li><a href="#">🧱 Game Kotak Hadiah</a></li>
+        <li><a href="#">🧠 Tebak Kata</a></li>
+        <li><a href="#">🐾 Pet Virtual</a></li>
+      </ul>
+
+      <h3>💬 Obrolan Publik</h3>
+      <div class="chat-box" id="chatBox"></div>
+      <input type="text" id="chatInput" placeholder="Ketik pesan..."/>
+      <button onclick="sendMessage()">Kirim</button>
+    </div>
+
+    <div id="loginPanel">
+      <h3>Masuk ke Akun</h3>
+      <button onclick="loginWithGoogle()">Login dengan Gmail</button>
+      <p>atau</p>
+      <input type="text" id="phoneNumber" placeholder="+62xxxxxx" />
+      <div id="recaptcha-container"></div>
+      <button onclick="sendOTP()">Kirim OTP</button>
+      <input type="text" id="otpCode" placeholder="Kode OTP" style="display:none;" />
+      <button onclick="verifyOTP()" style="display:none;" id="verifyBtn">Verifikasi</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
+      authDomain: "uangduty.firebaseapp.com",
+      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "uangduty",
+      storageBucket: "uangduty.appspot.com",
+      messagingSenderId: "172321758731",
+      appId: "1:172321758731:web:71423b287bf21512c58208"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const loginPanel = document.getElementById("loginPanel");
+    const userPanel = document.getElementById("userPanel");
+    const userName = document.getElementById("userName");
+    const chatBox = document.getElementById("chatBox");
+
+    // Google Login
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(result => {
+        showUser(result.user);
+      });
     }
-  });
 
-  function notif(teks) {
-    document.getElementById("notif").innerText = teks;
-    setTimeout(() => document.getElementById("notif").innerText = '', 5000);
-  }
+    // Phone Auth
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'normal',
+      callback: function(response) {
+        console.log("Recaptcha resolved");
+      }
+    });
 
-  function bukaBox() {
-    userRef.get().then((snap) => {
-      const data = snap.val();
-      if (!data || data.kunci <= 0) return notif("Kunci tidak cukup!");
+    function sendOTP() {
+      const phone = document.getElementById("phoneNumber").value;
+      auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          document.getElementById("otpCode").style.display = "inline";
+          document.getElementById("verifyBtn").style.display = "inline";
+        }).catch(e => alert(e.message));
+    }
 
-      let kunciBaru = data.kunci - 1;
-      let reward = Math.floor(Math.random() * 100) + 10
+    function verifyOTP() {
+      const code = document.getElementById("otpCode").value;
+      window.confirmationResult.confirm(code).then(result => {
+        showUser(result.user);
+      }).catch(e => alert("OTP salah!"));
+    }
+
+    // Auth State
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        showUser(user);
+      }
+    });
+
+    function showUser(user) {
+      loginPanel.style.display = "none";
+      userPanel.style.display = "block";
+      userName.innerText = user.displayName || user.phoneNumber || "User";
+
+      db.ref("chat").limitToLast(20).on("child_added", snapshot => {
+        const msg = snapshot.val();
+        const div = document.createElement("div");
+        div.className = "chat-message";
+        div.textContent = `${msg.name}: ${msg.text}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+
+    function sendMessage() {
+      const msg = document.getElementById("chatInput").value.trim();
+      if (msg === "") return;
+
+      const user = auth.currentUser;
+      const name = user.displayName || user.phoneNumber || "User";
+
+      db.ref("chat").push({ name, text: msg });
+      document.getElementById("chatInput").value = "";
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        loginPanel.style.display = "block";
+        userPanel.style.display = "none";
+        chatBox.innerHTML = "";
+      });
+    }
+  </script>
+</body>
+                         </html>
