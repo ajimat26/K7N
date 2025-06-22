@@ -1,145 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Giveaway Uang IC</title>
-  <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
-    input { padding: 10px; margin: 10px; width: 250px; }
-    button { padding: 10px 20px; }
-    .hidden { display: none; }
-    .highlight { background: #e0ffe0; padding: 10px; margin-top: 20px; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giveaway IC</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
+  <h1>🎁 Giveaway Uang IC</h1>
+  <div style="text-align:center; margin-bottom:20px;">
+    <button onclick="bukaTab('formDiv')">📋 Daftar</button>
+    <button onclick="bukaTab('terdaftarDiv')">👥 Peserta</button>
+  </div>
 
-  <h2>🎁 Pendaftaran Giveaway Uang IC</h2>
+  <div class="countdown-box">
+    <p id="waktuCountdown">Memuat waktu giveaway...</p>
+  </div>
 
   <div id="formDiv">
-    <input type="text" id="nama" placeholder="Nama Lengkap IC"><br>
-    <input type="text" id="rekening" placeholder="Nomor Rekening IC"><br>
-    <button onclick="daftar()">Daftar Giveaway</button>
-    <p id="info" style="color:red;"></p>
+    <form id="daftarForm">
+      <input type="text" id="namaLengkap" placeholder="Nama Lengkap IC" required />
+      <input type="text" id="rekening" placeholder="Nomor Rekening IC" required />
+      <button type="submit">Daftar Giveaway</button>
+    </form>
   </div>
 
-  
-<!-- Notifikasi Hasil Undian -->
-<div id="hasilUndian" class="hidden">
-  <h2>🎉 Hasil Undian Giveaway</h2>
-  <p><strong>Nama:</strong> <span id="pemenangNama"></span></p>
-  <p><strong>Rekening:</strong> <span id="pemenangRekening"></span></p>
-  <p><strong>Hadiah Uang:</strong> <span id="pemenangHadiah"></span></p>
-  <h3 style="color: green;">Selamat! Anda terpilih sebagai pemenang giveaway 🎉</h3>
-  <p><i>Hormat kami,</i><br><strong>Reyzen Kyzen</strong></p>
-</div>
-
-<div id="terdaftarDiv" class="hidden">
-    <h3 class="highlight">✅ Kamu sudah terdaftar!</h3>
-    <p><strong>Nama:</strong> <span id="myNama"></span></p>
-    <p><strong>No. Rekening:</strong> <span id="myRekening"></span></p>
+  <div id="terdaftarDiv" style="display:none;">
+    <h3>👥 Daftar Peserta</h3>
+    <ul id="daftarPeserta"></ul>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <div id="hasilUndian" class="hidden">
+    <h2>🎉 Hasil Undian Giveaway</h2>
+    <p><strong>Nama:</strong> <span id="pemenangNama"></span></p>
+    <p><strong>Rekening:</strong> <span id="pemenangRekening"></span></p>
+    <p><strong>Hadiah Uang:</strong> <span id="pemenangHadiah"></span></p>
+    <h3 class="success">Selamat! Anda terpilih sebagai pemenang giveaway 🎉</h3>
+    <p><i>Hormat kami,</i><br><strong>Reyzen Kyzen</strong></p>
+  </div>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
       databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "uangduty",
-      storageBucket: "uangduty.firebasestorage.app",
+      storageBucket: "uangduty.appspot.com",
       messagingSenderId: "598905752132",
       appId: "1:598905752132:web:7be400c23de21665044a11"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const userKey = localStorage.getItem("giveawayUserKey");
-
-    if (userKey) {
-      db.ref("giveaway/" + userKey).once('value').then(snap => {
-        const data = snap.val();
-        if (data) tampilkanData(data);
-      });
-    }
-
-    function daftar() {
-      const nama = document.getElementById("nama").value.trim();
-      const rekening = document.getElementById("rekening").value.trim();
-
-      if (!nama || !rekening) {
-        document.getElementById("info").innerText = "Harap isi semua data!";
-        return;
-      }
-
-      if (userKey) {
-        document.getElementById("info").innerText = "Kamu sudah terdaftar!";
-        return;
-      }
-
-      const ref = db.ref("giveaway").push();
-      const key = ref.key;
-      ref.set({
-        nama,
-        rekening,
-        waktu: Date.now()
-      }).then(() => {
-        localStorage.setItem("giveawayUserKey", key);
-        tampilkanData({ nama, rekening });
-      });
-    }
-
-    function tampilkanData(data) {
+    function bukaTab(id) {
       document.getElementById("formDiv").style.display = "none";
-      document.getElementById("terdaftarDiv").classList.remove("hidden");
-      document.getElementById("myNama").innerText = data.nama;
-      document.getElementById("myRekening").innerText = data.rekening;
+      document.getElementById("terdaftarDiv").style.display = "none";
+      document.getElementById("hasilUndian")?.classList.add("hidden");
+      document.getElementById(id).style.display = "block";
     }
+
+    const form = document.getElementById("daftarForm");
+    const daftarUl = document.getElementById("daftarPeserta");
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const nama = document.getElementById("namaLengkap").value;
+      const rekening = document.getElementById("rekening").value;
+      const id = nama + Date.now();
+      localStorage.setItem("giveawayUserKey", id);
+      db.ref("peserta/" + id).set({ nama, rekening });
+    };
+
+    db.ref("peserta").on("value", (snap) => {
+      daftarUl.innerHTML = "";
+      const data = snap.val();
+      if (data) {
+        Object.values(data).forEach(p => {
+          const li = document.createElement("li");
+          li.textContent = `${p.nama} (${p.rekening})`;
+          daftarUl.appendChild(li);
+        });
+      }
+    });
+
+    db.ref("waktu_akhir").on("value", (snap) => {
+      const akhir = snap.val();
+      if (!akhir) return;
+      const countdown = document.getElementById("waktuCountdown");
+      const interval = setInterval(() => {
+        const sisa = akhir - Date.now();
+        if (sisa <= 0) {
+          clearInterval(interval);
+          countdown.innerText = "⛔ Waktu pendaftaran habis!";
+          form.style.display = "none";
+        } else {
+          const jam = Math.floor(sisa / (1000 * 60 * 60));
+          const menit = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
+          const detik = Math.floor((sisa % (1000 * 60)) / 1000);
+          countdown.innerText = `🕒 Sisa Waktu: ${jam}j ${menit}m ${detik}d`;
+        }
+      }, 1000);
+    });
+
+    db.ref("pemenang").on("value", (snap) => {
+      const key = localStorage.getItem("giveawayUserKey");
+      const data = snap.val();
+      if (data && key in data) {
+        document.getElementById("formDiv").style.display = "none";
+        document.getElementById("terdaftarDiv").style.display = "none";
+        document.getElementById("hasilUndian").classList.remove("hidden");
+        document.getElementById("pemenangNama").innerText = data[key].nama;
+        document.getElementById("pemenangRekening").innerText = data[key].rekening;
+        document.getElementById("pemenangHadiah").innerText = "Rp " + data[key].hadiah.toLocaleString();
+      }
+    });
   </script>
-
-<!-- Tampilkan countdown untuk peserta -->
-<p id="waktuCountdown" style="font-size:18px; font-weight:bold;"></p>
-
-<script>
-db.ref("waktu_akhir").on("value", (snap) => {
-  const akhir = snap.val();
-  if (!akhir) return;
-  const countdown = document.getElementById("waktuCountdown");
-  setInterval(() => {
-    const sisa = akhir - Date.now();
-    if (sisa <= 0) {
-      countdown.innerText = "⛔ Pendaftaran sudah ditutup!";
-      document.getElementById("formDiv").style.display = "none";
-    } else {
-      const jam = Math.floor(sisa / (1000 * 60 * 60));
-      const menit = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
-      const detik = Math.floor((sisa % (1000 * 60)) / 1000);
-      countdown.innerText = `🕒 Sisa Waktu Pendaftaran: ${jam}j ${menit}m ${detik}d`;
-    }
-  }, 1000);
-});
-</script>
-
-<script>
-// Cek apakah peserta menang
-db.ref("pemenang").on("value", (snap) => {
-  const data = snap.val();
-  if (!data) return;
-
-  const key = localStorage.getItem("giveawayUserKey");
-  if (!key) return;
-
-  const hasil = data[key];
-  if (hasil) {
-    document.getElementById("formDiv").style.display = "none";
-    document.getElementById("terdaftarDiv").style.display = "none";
-    const hasilDiv = document.getElementById("hasilUndian");
-    hasilDiv.classList.remove("hidden");
-    document.getElementById("pemenangNama").innerText = hasil.nama;
-    document.getElementById("pemenangRekening").innerText = hasil.rekening;
-    document.getElementById("pemenangHadiah").innerText = "Rp " + hasil.hadiah.toLocaleString();
-  }
-});
-</script>
 </body>
-   </html>
+</html>
