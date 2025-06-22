@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -9,39 +8,28 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
-  <h1>🎁 Giveaway Uang IC</h1>
-  <div style="text-align:center; margin-bottom:20px;">
+  <h1>🎁 Giveaway Uang IC</h1>  <div class="info-banner">🎉 Giveaway sedang berlangsung! Silakan daftar sebelum waktu habis!</div>  <div style="text-align:center; margin-bottom:20px;">
     <button onclick="bukaTab('formDiv')">📋 Daftar</button>
     <button onclick="bukaTab('terdaftarDiv')">👥 Peserta</button>
-  </div>
-
-  <div class="countdown-box">
+  </div>  <div class="countdown-box animated">
     <p id="waktuCountdown">Memuat waktu giveaway...</p>
-  </div>
-
-  <div id="formDiv">
+  </div>  <div id="formDiv">
     <form id="daftarForm">
       <input type="text" id="namaLengkap" placeholder="Nama Lengkap IC" required />
       <input type="text" id="rekening" placeholder="Nomor Rekening IC" required />
       <button type="submit">Daftar Giveaway</button>
     </form>
-  </div>
-
-  <div id="terdaftarDiv" style="display:none;">
+  </div>  <div id="terdaftarDiv" style="display:none;">
     <h3>👥 Daftar Peserta</h3>
     <ul id="daftarPeserta"></ul>
-  </div>
-
-  <div id="hasilUndian" class="hidden">
+  </div>  <div id="hasilUndian" class="hidden">
     <h2>🎉 Hasil Undian Giveaway</h2>
     <p><strong>Nama:</strong> <span id="pemenangNama"></span></p>
     <p><strong>Rekening:</strong> <span id="pemenangRekening"></span></p>
     <p><strong>Hadiah Uang:</strong> <span id="pemenangHadiah"></span></p>
     <h3 class="success">Selamat! Anda terpilih sebagai pemenang giveaway 🎉</h3>
     <p><i>Hormat kami,</i><br><strong>Reyzen Kyzen</strong></p>
-  </div>
-
-  <script>
+  </div>  <div class="loading" id="loadingBox" style="display: none;">⏳ Sedang memproses...</div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
@@ -66,11 +54,15 @@
 
     form.onsubmit = (e) => {
       e.preventDefault();
+      document.getElementById("loadingBox").style.display = "block";
       const nama = document.getElementById("namaLengkap").value;
       const rekening = document.getElementById("rekening").value;
       const id = nama + Date.now();
       localStorage.setItem("giveawayUserKey", id);
-      db.ref("peserta/" + id).set({ nama, rekening });
+      db.ref("peserta/" + id).set({ nama, rekening }, () => {
+        document.getElementById("loadingBox").style.display = "none";
+        alert("Berhasil mendaftar!");
+      });
     };
 
     db.ref("peserta").on("value", (snap) => {
@@ -116,6 +108,5 @@
         document.getElementById("pemenangHadiah").innerText = "Rp " + data[key].hadiah.toLocaleString();
       }
     });
-  </script>
-</body>
-</html>
+  </script></body>
+      </html>
