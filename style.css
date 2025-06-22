@@ -1,99 +1,48 @@
 body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #f9f9f9, #e0f7fa);
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(to bottom right, #0f0f0f, #1a1a1a);
-  color: #f1f1f1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px;
-  min-height: 100vh;
+  padding: 20px;
+  color: #333;
 }
 
-h1 {
-  font-size: 32px;
-  color: #ffcc00;
-  text-shadow: 2px 2px 5px #000;
-  margin-bottom: 30px;
+h1, h2, h3 {
+  color: #006064;
+}
+
+form {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  max-width: 500px;
+  margin: auto;
+}
+
+input, button, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 button {
-  background: linear-gradient(to right, #ffcc00, #ff6600);
-  color: #000;
+  background-color: #00796b;
+  color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  margin: 8px;
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 10px #ffcc00;
 }
 
 button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(to right, #ffaa00, #ff3300);
-  box-shadow: 0 0 15px #ffaa00;
+  background-color: #004d40;
 }
 
-input, select, textarea {
-  background-color: #2e2e2e;
-  color: #f1f1f1;
-  border: none;
-  padding: 10px;
-  margin: 6px;
-  border-radius: 6px;
-  width: 90%;
-  max-width: 400px;
-  font-size: 15px;
+.hidden {
+  display: none;
 }
 
-input:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 5px #ffcc00;
+ul {
+  padding-left: 20px;
 }
-
-.panel {
-  background-color: rgba(255, 255, 255, 0.03);
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
-  width: 100%;
-  max-width: 600px;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-}
-
-#notif {
-  font-weight: bold;
-  margin-top: 12px;
-  min-height: 30px;
-  color: #00ff99;
-  text-shadow: 1px 1px 2px #000;
-}
-
-#boxAnimation {
-  width: 120px;
-  height: 120px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/189/189689.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  margin: 20px auto;
-  animation: floatBox 2s infinite ease-in-out;
-}
-
-@keyframes floatBox {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 10px;
-  }
-
-  button, input, select, textarea {
-    width: 100%;
-  }
-    }
