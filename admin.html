@@ -1,132 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+  <meta charset="UTF-8">
   <title>Admin Giveaway</title>
-  <style>
-    body { font-family: Arial; margin: 20px; }
-    input, button { padding: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 6px; }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
+  <h2>🎛️ Panel Admin</h2>
 
-  <h2>🎮 Admin Panel Giveaway</h2>
+  <input id="jumlahPemenang" type="number" placeholder="Jumlah Pemenang (contoh: 5)">
+  <input id="totalHadiah" type="number" placeholder="Total Hadiah (contoh: 10000000)">
+  <select id="durasiJam">
+    <option value="1">1 Jam</option>
+    <option value="2">2 Jam</option>
+    <option value="6">6 Jam</option>
+    <option value="12">12 Jam</option>
+    <option value="24">24 Jam</option>
+  </select>
+  <button onclick="mulaiGiveaway()">🎲 Mulai Giveaway</button>
 
-  <button onclick="undi(5)">🎉 Undi 5 Pemenang</button>
-  <button onclick="undi(10)">🎉 Undi 10 Pemenang</button>
+  <p id="waktuTampil"></p>
 
-  <h3>📃 Daftar Pendaftar (Realtime)</h3>
-  <table>
-    <thead><tr><th>No</th><th>Nama</th><th>Rekening</th><th>Waktu Daftar</th></tr></thead>
-    <tbody id="daftar"></tbody>
-  </table>
-
-  <h3>🏆 Pemenang</h3>
-  <ol id="pemenangList"></ol>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
       databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "uangduty",
-      storageBucket: "uangduty.firebasestorage.app",
+      storageBucket: "uangduty.appspot.com",
       messagingSenderId: "598905752132",
       appId: "1:598905752132:web:7be400c23de21665044a11"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const daftarBody = document.getElementById("daftar");
-    const pemenangList = document.getElementById("pemenangList");
+    function mulaiGiveaway() {
+      const jam = parseInt(document.getElementById("durasiJam").value);
+      const total = parseInt(document.getElementById("totalHadiah").value);
+      const jumlah = parseInt(document.getElementById("jumlahPemenang").value);
+      const akhir = Date.now() + (jam * 60 * 60 * 1000);
 
-    let semuaData = [];
+      db.ref("waktu_akhir").set(akhir);
+      db.ref("pengaturan").set({ total: total, jumlah: jumlah });
 
-    db.ref("giveaway").on("value", (snapshot) => {
-      const data = snapshot.val();
-      daftarBody.innerHTML = "";
-      semuaData = [];
-      let no = 1;
+      db.ref("peserta").once("value", (snap) => {
+        const data = snap.val();
+        if (!data) return;
+        const pesertaArray = Object.entries(data);
+        if (pesertaArray.length < jumlah) {
+          alert("Peserta tidak cukup untuk undian!");
+          return;
+        }
+        // Random undian
+        const shuffled = pesertaArray.sort(() => 0.5 - Math.random());
+        const pemenang = {};
+        const totalHadiah = total;
+        let sisa = totalHadiah;
 
-      for (let key in data) {
-        const d = data[key];
-        semuaData.push(d);
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${no++}</td><td>${d.nama}</td><td>${d.rekening}</td><td>${new Date(d.waktu).toLocaleString()}</td>`;
-        daftarBody.appendChild(tr);
+        for (let i = 0; i < jumlah; i++) {
+          const [key, val] = shuffled[i];
+          const hadiah = Math.floor(Math.random() * (sisa / (jumlah - i))) + 10000;
+          pemenang[key] = { ...val, hadiah };
+          sisa -= hadiah;
+        }
+
+        db.ref(\"pemenang\").set(pemenang);
+      });
+
+      alert(\"Giveaway dimulai dan pemenang akan diumumkan!\");
+    }
+
+    db.ref(\"pengaturan\").on(\"value\", snap => {
+      const data = snap.val();
+      if (data) {
+        document.getElementById(\"jumlahPemenang\").value = data.jumlah;
+        document.getElementById(\"totalHadiah\").value = data.total;
       }
     });
 
-    function undi(jumlah) {
-      if (semuaData.length < jumlah) {
-        alert("Peserta belum cukup!");
-        return;
-      }
-
-      const hasil = [];
-      const indexTerpilih = [];
-
-      while (hasil.length < jumlah) {
-        const idx = Math.floor(Math.random() * semuaData.length);
-        if (!indexTerpilih.includes(idx)) {
-          hasil.push(semuaData[idx]);
-          indexTerpilih.push(idx);
+    db.ref(\"waktu_akhir\").on(\"value\", (snap) => {
+      const akhir = snap.val();
+      if (!akhir) return;
+      const waktuTampil = document.getElementById(\"waktuTampil\");
+      setInterval(() => {
+        const sisa = akhir - Date.now();
+        if (sisa <= 0) {
+          waktuTampil.innerText = \"⛔ Giveaway selesai.\";
+        } else {
+          const jam = Math.floor(sisa / (1000 * 60 * 60));
+          const menit = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
+          const detik = Math.floor((sisa % (1000 * 60)) / 1000);
+          waktuTampil.innerText = `🕒 Sisa Waktu: ${jam}j ${menit}m ${detik}d`;
         }
-      }
-
-      pemenangList.innerHTML = "";
-      hasil.forEach((p) => {
-        const li = document.createElement("li");
-        li.textContent = `${p.nama} (${p.rekening})`;
-        pemenangList.appendChild(li);
-      });
-    }
+      }, 1000);
+    });
   </script>
-
-<!-- Tambahan untuk pengaturan waktu -->
-<h3>⏰ Atur Waktu Giveaway</h3>
-<label>Durasi (jam):</label>
-<select id="durasiJam">
-  <option value="1">1 Jam</option>
-  <option value="2">2 Jam</option>
-  <option value="4">4 Jam</option>
-  <option value="6">6 Jam</option>
-  <option value="12">12 Jam</option>
-  <option value="24">24 Jam</option>
-</select>
-<button onclick="aturWaktu()">Terapkan</button>
-<p id="waktuTampil"></p>
-
-<script>
-function aturWaktu() {
-  const jam = parseInt(document.getElementById("durasiJam").value);
-  const akhir = Date.now() + (jam * 60 * 60 * 1000);
-  db.ref("waktu_akhir").set(akhir);
-  alert("Waktu giveaway diset selama " + jam + " jam dari sekarang.");
-}
-
-// Pantau waktu akhir dan tampilkan
-db.ref("waktu_akhir").on("value", (snap) => {
-  const akhir = snap.val();
-  if (!akhir) return;
-  const waktuTampil = document.getElementById("waktuTampil");
-  setInterval(() => {
-    const sisa = akhir - Date.now();
-    if (sisa <= 0) {
-      waktuTampil.innerText = "⛔ Giveaway sudah ditutup!";
-    } else {
-      const jam = Math.floor(sisa / (1000 * 60 * 60));
-      const menit = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
-      const detik = Math.floor((sisa % (1000 * 60)) / 1000);
-      waktuTampil.innerText = `🕒 Sisa Waktu: ${jam}j ${menit}m ${detik}d`;
-    }
-  }, 1000);
-});
-</script>
-
 </body>
-    </html>
+</html>
