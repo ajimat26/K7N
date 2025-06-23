@@ -1,35 +1,44 @@
 <!DOCTYPE html><html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Giveaway IC</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <title>UANG DUTY SAFD</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #00ffcc;
+    }
+    .user-box {
+      background: #222;
+      margin: 10px auto;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 500px;
+      box-shadow: 0 0 10px rgba(0,255,204,0.5);
+    }
+    .user-box h3 {
+      margin: 0 0 10px;
+    }
+    .log-entry {
+      background: #333;
+      margin-top: 5px;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <h1>🎁 Giveaway Uang IC</h1>  <div class="info-banner">🎉 Giveaway sedang berlangsung! Silakan daftar sebelum waktu habis!</div>  <div style="text-align:center; margin-bottom:20px;">
-    <button onclick="bukaTab('formDiv')">📋 Daftar</button>
-    <button onclick="bukaTab('terdaftarDiv')">👥 Peserta</button>
-  </div>  <div class="countdown-box animated">
-    <p id="waktuCountdown">Memuat waktu giveaway...</p>
-  </div>  <div id="formDiv">
-    <form id="daftarForm">
-      <input type="text" id="namaLengkap" placeholder="Nama Lengkap IC" required />
-      <input type="text" id="rekening" placeholder="Nomor Rekening IC" required />
-      <button type="submit">Daftar Giveaway</button>
-    </form>
-  </div>  <div id="terdaftarDiv" style="display:none;">
-    <h3>👥 Daftar Peserta</h3>
-    <ul id="daftarPeserta"></ul>
-  </div>  <div id="hasilUndian" class="hidden">
-    <h2>🎉 Hasil Undian Giveaway</h2>
-    <p><strong>Nama:</strong> <span id="pemenangNama"></span></p>
-    <p><strong>Rekening:</strong> <span id="pemenangRekening"></span></p>
-    <p><strong>Hadiah Uang:</strong> <span id="pemenangHadiah"></span></p>
-    <h3 class="success">Selamat! Anda terpilih sebagai pemenang giveaway 🎉</h3>
-    <p><i>Hormat kami,</i><br><strong>Reyzen Kyzen</strong></p>
-  </div>  <div class="loading" id="loadingBox" style="display: none;">⏳ Sedang memproses...</div>  <script>
+  <h1>UANG DUTY SAFD</h1>
+  <h2>Log Pemantauan Real-time</h2>
+  <div id="userList"></div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
@@ -42,71 +51,29 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function bukaTab(id) {
-      document.getElementById("formDiv").style.display = "none";
-      document.getElementById("terdaftarDiv").style.display = "none";
-      document.getElementById("hasilUndian")?.classList.add("hidden");
-      document.getElementById(id).style.display = "block";
-    }
+    const userList = document.getElementById("userList");
 
-    const form = document.getElementById("daftarForm");
-    const daftarUl = document.getElementById("daftarPeserta");
-
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      document.getElementById("loadingBox").style.display = "block";
-      const nama = document.getElementById("namaLengkap").value;
-      const rekening = document.getElementById("rekening").value;
-      const id = nama + Date.now();
-      localStorage.setItem("giveawayUserKey", id);
-      db.ref("peserta/" + id).set({ nama, rekening }, () => {
-        document.getElementById("loadingBox").style.display = "none";
-        alert("Berhasil mendaftar!");
-      });
-    };
-
-    db.ref("peserta").on("value", (snap) => {
-      daftarUl.innerHTML = "";
-      const data = snap.val();
-      if (data) {
-        Object.values(data).forEach(p => {
-          const li = document.createElement("li");
-          li.textContent = `${p.nama} (${p.rekening})`;
-          daftarUl.appendChild(li);
-        });
-      }
-    });
-
-    db.ref("waktu_akhir").on("value", (snap) => {
-      const akhir = snap.val();
-      if (!akhir) return;
-      const countdown = document.getElementById("waktuCountdown");
-      const interval = setInterval(() => {
-        const sisa = akhir - Date.now();
-        if (sisa <= 0) {
-          clearInterval(interval);
-          countdown.innerText = "⛔ Waktu pendaftaran habis!";
-          form.style.display = "none";
-        } else {
-          const jam = Math.floor(sisa / (1000 * 60 * 60));
-          const menit = Math.floor((sisa % (1000 * 60 * 60)) / (1000 * 60));
-          const detik = Math.floor((sisa % (1000 * 60)) / 1000);
-          countdown.innerText = `🕒 Sisa Waktu: ${jam}j ${menit}m ${detik}d`;
+    db.ref("uangduty").on("value", snapshot => {
+      userList.innerHTML = "";
+      const data = snapshot.val();
+      if (!data) return;
+      const sortedNames = Object.keys(data).sort();
+      sortedNames.forEach(nama => {
+        const box = document.createElement("div");
+        box.className = "user-box";
+        const saldo = data[nama].uang || 0;
+        box.innerHTML = `<h3>${nama}</h3><strong>Saldo:</strong> Rp.${saldo.toLocaleString()}`;
+        if (data[nama].log) {
+          const logs = Object.values(data[nama].log);
+          logs.slice(-5).forEach(log => {
+            const logDiv = document.createElement("div");
+            logDiv.className = "log-entry";
+            logDiv.textContent = log;
+            box.appendChild(logDiv);
+          });
         }
-      }, 1000);
-    });
-
-    db.ref("pemenang").on("value", (snap) => {
-      const key = localStorage.getItem("giveawayUserKey");
-      const data = snap.val();
-      if (data && key in data) {
-        document.getElementById("formDiv").style.display = "none";
-        document.getElementById("terdaftarDiv").style.display = "none";
-        document.getElementById("hasilUndian").classList.remove("hidden");
-        document.getElementById("pemenangNama").innerText = data[key].nama;
-        document.getElementById("pemenangRekening").innerText = data[key].rekening;
-        document.getElementById("pemenangHadiah").innerText = "Rp " + data[key].hadiah.toLocaleString();
-      }
+        userList.appendChild(box);
+      });
     });
   </script></body>
-      </html>
+</html>
