@@ -1,44 +1,97 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>UANG DUTY SAFD</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <title>UangDuty SAFD</title>
   <style>
     body {
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+      margin: 0;
       padding: 20px;
     }
-    h1, h2 {
+
+    h1 {
       text-align: center;
-      color: #00ffcc;
+      margin-bottom: 30px;
+      color: #00ffc8;
+      text-shadow: 1px 1px 3px #000;
     }
+
+    #data {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
     .user-box {
-      background: #222;
-      margin: 10px auto;
-      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid #00ffc8;
       border-radius: 10px;
-      max-width: 500px;
-      box-shadow: 0 0 10px rgba(0,255,204,0.5);
+      padding: 20px;
+      width: 300px;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+      transition: 0.3s;
     }
+
+    .user-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+    }
+
     .user-box h3 {
-      margin: 0 0 10px;
+      color: #00ffc8;
+      margin-top: 0;
     }
+
     .log-entry {
-      background: #333;
-      margin-top: 5px;
-      padding: 5px;
-      border-radius: 5px;
       font-size: 14px;
+      margin-bottom: 5px;
+      color: #d0fefe;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 4px 6px;
+      border-radius: 5px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 16px;
+      color: #ccc;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
     }
   </style>
 </head>
 <body>
-  <h1>UANG DUTY SAFD</h1>
-  <h2>Log Pemantauan Real-time</h2>
-  <div id="userList"></div>  <script>
+
+  <h1>Real-Time Pemantauan UangDuty SAFD</h1>
+  <div class="loading" id="loading">Memuat data dari server...</div>
+  <div id="data" style="display:none;"></div>
+
+  <footer>
+    Sistem Pemantauan Dana SAFD - Otomatis Terhubung via MoonLoader<br>
+    Data real-time dari semua pengguna aktif.
+  </footer>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
       authDomain: "uangduty.firebaseapp.com",
@@ -48,32 +101,53 @@
       messagingSenderId: "598905752132",
       appId: "1:598905752132:web:7be400c23de21665044a11"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const userList = document.getElementById("userList");
+    const loading = document.getElementById("loading");
+    const container = document.getElementById("data");
 
     db.ref("uangduty").on("value", snapshot => {
-      userList.innerHTML = "";
       const data = snapshot.val();
-      if (!data) return;
-      const sortedNames = Object.keys(data).sort();
-      sortedNames.forEach(nama => {
-        const box = document.createElement("div");
-        box.className = "user-box";
-        const saldo = data[nama].uang || 0;
-        box.innerHTML = `<h3>${nama}</h3><strong>Saldo:</strong> Rp.${saldo.toLocaleString()}`;
-        if (data[nama].log) {
-          const logs = Object.values(data[nama].log);
-          logs.slice(-5).forEach(log => {
-            const logDiv = document.createElement("div");
-            logDiv.className = "log-entry";
-            logDiv.textContent = log;
-            box.appendChild(logDiv);
-          });
-        }
-        userList.appendChild(box);
+      container.innerHTML = "";
+
+      if (!data) {
+        loading.innerText = "Belum ada data yang dikirim dari client.";
+        return;
+      }
+
+      Object.keys(data).sort().forEach(nama => {
+        const user = data[nama];
+        const div = document.createElement("div");
+        div.className = "user-box";
+
+        div.innerHTML = `
+          <h3>${nama}</h3>
+          <p><strong>Saldo:</strong> ${formatRupiah(user.uang || 0)}</p>
+          <hr>
+          <div>${Object.values(user.log || {}).slice(-5).map(l => `<div class="log-entry">${l}</div>`).join("")}</div>
+        `;
+
+        container.appendChild(div);
       });
+
+      loading.style.display = "none";
+      container.style.display = "flex";
     });
-  </script></body>
+
+    function formatRupiah(angka) {
+      let str = angka.toString();
+      let sisa = str.length % 3;
+      let rupiah = str.substr(0, sisa);
+      let ribuan = str.substr(sisa).match(/\d{3}/g);
+      if (ribuan) {
+        let separator = sisa ? "." : "";
+        rupiah += separator + ribuan.join(".");
+      }
+      return "Rp " + rupiah;
+    }
+  </script>
+
+</body>
 </html>
