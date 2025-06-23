@@ -1,71 +1,76 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>UangDuty SAFD</title>
+  <meta charset="UTF-8" />
+  <title>Panel UangDuty SAFD</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #f5f5f5;
       padding: 20px;
     }
 
     h1 {
       text-align: center;
+      color: #00ffc8;
       margin-bottom: 30px;
-      color: #00ffc8;
-      text-shadow: 1px 1px 3px #000;
     }
 
-    #data {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
+      padding: 10px;
     }
 
-    .user-box {
-      background-color: rgba(255, 255, 255, 0.1);
+    .card {
+      background-color: rgba(255, 255, 255, 0.06);
       border: 1px solid #00ffc8;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 20px;
-      width: 300px;
-      box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-      transition: 0.3s;
+      box-shadow: 0 0 12px rgba(0, 255, 204, 0.3);
+      transition: 0.2s ease;
     }
 
-    .user-box:hover {
+    .card:hover {
       transform: scale(1.02);
-      box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+      box-shadow: 0 0 18px rgba(0, 255, 204, 0.6);
     }
 
-    .user-box h3 {
+    .card h2 {
+      margin: 0;
       color: #00ffc8;
-      margin-top: 0;
+      font-size: 20px;
+      margin-bottom: 8px;
     }
 
-    .log-entry {
+    .card p {
+      margin: 6px 0;
       font-size: 14px;
-      margin-bottom: 5px;
-      color: #d0fefe;
-      background-color: rgba(255, 255, 255, 0.05);
-      padding: 4px 6px;
-      border-radius: 5px;
+      color: #e3e3e3;
     }
 
-    footer {
-      margin-top: 40px;
-      text-align: center;
+    .logs {
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
       font-size: 13px;
-      color: #ccc;
+    }
+
+    .log-line {
+      margin-bottom: 4px;
+      border-bottom: 1px dashed #00ffc8;
+      padding-bottom: 2px;
     }
 
     .loading {
       text-align: center;
       font-size: 16px;
       color: #ccc;
+      margin-top: 40px;
       animation: pulse 1.2s infinite;
     }
 
@@ -78,16 +83,11 @@
 </head>
 <body>
 
-  <h1>Real-Time Pemantauan UangDuty SAFD</h1>
-  <div class="loading" id="loading">Memuat data dari server...</div>
-  <div id="data" style="display:none;"></div>
+  <h1>Real-Time UangDuty SAFD</h1>
+  <div id="loading" class="loading">Memuat data dari server...</div>
+  <div id="container" class="container" style="display:none;"></div>
 
-  <footer>
-    Sistem Pemantauan Dana SAFD - Otomatis Terhubung via MoonLoader<br>
-    Data real-time dari semua pengguna aktif.
-  </footer>
-
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -105,47 +105,51 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    const container = document.getElementById("container");
     const loading = document.getElementById("loading");
-    const container = document.getElementById("data");
 
-    db.ref("uangduty").on("value", snapshot => {
+    db.ref("uangduty").on("value", (snapshot) => {
       const data = snapshot.val();
       container.innerHTML = "";
 
       if (!data) {
-        loading.innerText = "Belum ada data yang dikirim dari client.";
+        loading.innerText = "Belum ada data dari MoonLoader.";
         return;
       }
 
-      Object.keys(data).sort().forEach(nama => {
+      Object.keys(data).sort().forEach((nama) => {
         const user = data[nama];
-        const div = document.createElement("div");
-        div.className = "user-box";
+        const logList = Object.values(user.log || {}).slice(-5);
 
-        div.innerHTML = `
-          <h3>${nama}</h3>
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <h2>${nama}</h2>
           <p><strong>Saldo:</strong> ${formatRupiah(user.uang || 0)}</p>
-          <hr>
-          <div>${Object.values(user.log || {}).slice(-5).map(l => `<div class="log-entry">${l}</div>`).join("")}</div>
+          <div class="logs">
+            <strong>Log Terakhir:</strong><br>
+            ${logList.map(log => `<div class="log-line">${log}</div>`).join("")}
+          </div>
         `;
 
-        container.appendChild(div);
+        container.appendChild(card);
       });
 
       loading.style.display = "none";
-      container.style.display = "flex";
+      container.style.display = "grid";
     });
 
-    function formatRupiah(angka) {
-      let str = angka.toString();
-      let sisa = str.length % 3;
-      let rupiah = str.substr(0, sisa);
-      let ribuan = str.substr(sisa).match(/\d{3}/g);
+    function formatRupiah(nomor) {
+      let angka = nomor.toString();
+      let sisa = angka.length % 3;
+      let rupiah = angka.substr(0, sisa);
+      let ribuan = angka.substr(sisa).match(/\d{3}/g);
       if (ribuan) {
-        let separator = sisa ? "." : "";
-        rupiah += separator + ribuan.join(".");
+        let separator = sisa ? '.' : '';
+        rupiah += separator + ribuan.join('.');
       }
-      return "Rp " + rupiah;
+      return 'Rp ' + rupiah;
     }
   </script>
 
