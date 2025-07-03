@@ -2,226 +2,198 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UangDuty Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
-      margin: 10px;
+      margin: 0;
+      padding: 10px;
     }
     h1 {
       color: #333;
-      font-size: 20px;
       text-align: center;
+    }
+    #marquee {
+      background: black;
+      color: white;
+      padding: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
     }
     .card {
       background: white;
-      padding: 10px;
-      margin-bottom: 15px;
+      padding: 15px;
+      margin-bottom: 10px;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       position: relative;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .nama {
-      font-weight: bold;
-    }
-    .total {
-      font-weight: bold;
-      color: green;
-      font-size: 15px;
-    }
-    .riwayat {
-      display: none;
-      margin-top: 10px;
-      font-size: 13px;
-      color: #555;
-    }
+    .total { font-weight: bold; color: green; }
+    .riwayat { display: none; margin-top: 10px; font-size: 14px; color: #555; }
     .btn {
-      margin-top: 5px;
-      background-color: #007BFF;
+      padding: 5px 10px;
+      background: #007bff;
       color: white;
-      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
       font-size: 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      margin-top: 5px;
+      margin-right: 5px;
     }
-    .btn:hover {
-      background-color: #0056b3;
-    }
-    .menu-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .dropdown {
+    .btn:hover { background: #0056b3; cursor: pointer; }
+    .menu {
       position: absolute;
+      top: 10px;
       right: 10px;
-      top: 35px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      display: none;
-      z-index: 1;
     }
-    .dropdown button {
+    .menu-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 6px;
+    }
+    .menu-content button {
       display: block;
       width: 100%;
-      padding: 6px 10px;
-      border: none;
+      padding: 8px;
       background: white;
+      border: none;
       text-align: left;
-      cursor: pointer;
     }
-    .dropdown button:hover {
-      background: #f0f0f0;
+    .menu-content button:hover {
+      background: #eee;
     }
-    .update-time {
+    .menu:hover .menu-content {
+      display: block;
+    }
+    .tag {
+      font-weight: bold;
+      margin-left: 5px;
+    }
+    .timestamp {
       font-size: 11px;
       color: #888;
       margin-top: 5px;
     }
-    #running-text {
-      background: black;
-      color: white;
-      padding: 5px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    #running-text span {
-      display: inline-block;
-      padding-left: 100%;
-      animation: scrollText 60s linear infinite;
-      color: white;
-    }
-    @keyframes scrollText {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
-    }
   </style>
 </head>
 <body>
-  <h1>📊 Uang Duty - SAFD</h1>
-  <div id="running-text"><span id="text-run"></span></div>
+
+  <h1>📊 UangDuty SAFD</h1>
+  <div id="marquee">Memuat riwayat...</div>
   <div id="data-container">Memuat data...</div>
 
   <script>
+    let riwayatAktif = false;
+    let opsiAktif = false;
+
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function renderData(data) {
-      const container = document.getElementById("data-container");
-      const runtext = document.getElementById("text-run");
-      container.innerHTML = "";
-      const entries = Object.entries(data || {}).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0));
+    function formatTime(date) {
+      return date.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' });
+    }
 
-      // Running Text
-      const allRiwayat = [];
-      entries.forEach(([nama, pemain]) => {
-        if (pemain.riwayat) {
-          pemain.riwayat.forEach(r => allRiwayat.push(`${pemain.nama}: ${r}`));
-        }
-      });
-      runtext.textContent = allRiwayat.join(" • ");
+    function loadData() {
+      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("data-container");
+          const marquee = document.getElementById("marquee");
+          container.innerHTML = "";
+          let riwayatList = [];
 
-      entries.forEach(([nama, pemain], index) => {
-        const div = document.createElement("div");
-        div.className = "card";
+          // Ubah objek jadi array & urutkan berdasarkan uang
+          const entries = Object.entries(data || {}).map(([nama, d]) => ({
+            nama,
+            uang: d.uang || 0,
+            riwayat: d.riwayat || [],
+            updated: d.riwayat && d.riwayat.length > 0 ? d.riwayat[d.riwayat.length - 1] : "Tidak diketahui"
+          })).sort((a, b) => b.uang - a.uang);
 
-        const tag = index === 0 ? " 🥇" : index === 1 ? " 🥈" : index === 2 ? " 🥉" : "";
-        const header = document.createElement("div");
-        header.className = "card-header";
-        header.innerHTML = `<span class="nama">📛 ${pemain.nama}${tag}</span>
-                            <button class="menu-btn">⋮</button>`;
+          entries.forEach((pemain, index) => {
+            const tag = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+            const div = document.createElement("div");
+            div.className = "card";
 
-        const dropdown = document.createElement("div");
-        dropdown.className = "dropdown";
-        dropdown.innerHTML = `
-          <button onclick="ubahNama('${nama}')">✏️ Ubah Nama</button>
-          <button onclick="hapusForum('${nama}')">🗑️ Hapus Forum</button>`;
+            // Running Text
+            pemain.riwayat.forEach(r => riwayatList.push(`${pemain.nama}: ${r}`));
 
-        const total = document.createElement("div");
-        total.className = "total";
-        total.textContent = "Total Uang: " + formatRupiah(pemain.uang || 0);
+            div.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>📛 ${pemain.nama}</strong> ${tag}<br>
+                  <span class="total">Total Uang: ${formatRupiah(pemain.uang)}</span><br>
+                  <div class="timestamp">🕒 Terakhir diperbarui: ${pemain.updated}</div>
+                </div>
+                <div class="menu">
+                  <span>⋮</span>
+                  <div class="menu-content">
+                    <button onclick="ubahNama('${pemain.nama}')">✏️ Ubah Nama</button>
+                    <button onclick="hapusForum('${pemain.nama}')">🗑️ Hapus Forum</button>
+                  </div>
+                </div>
+              </div>
+              <div class="riwayat">
+                <br><u>📜 Riwayat:</u><br>
+                ${pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}<br>
+                <button class="btn" onclick="toggleRiwayat(this)">❌ Tutup Riwayat</button>
+              </div>
+              <button class="btn" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
+            `;
+            container.appendChild(div);
+          });
 
-        const btnRiwayat = document.createElement("button");
-        btnRiwayat.className = "btn";
-        btnRiwayat.textContent = "📜 Lihat Riwayat";
-        const riwayatDiv = document.createElement("div");
-        riwayatDiv.className = "riwayat";
+          marquee.innerText = "📰 " + riwayatList.reverse().slice(0, 20).join(" ⚫ ");
+        })
+        .catch(err => {
+          document.getElementById("data-container").innerHTML = "Gagal memuat data.";
+        });
+    }
 
-        if (pemain.riwayat && pemain.riwayat.length > 0) {
-          riwayatDiv.innerHTML = pemain.riwayat.map(r => "• " + r).join("<br>");
-        } else {
-          riwayatDiv.textContent = "Tidak ada riwayat.";
-        }
-
-        const btnTutup = document.createElement("button");
-        btnTutup.className = "btn";
-        btnTutup.textContent = "❌ Tutup Riwayat";
-        btnTutup.onclick = () => riwayatDiv.style.display = "none";
-
-        btnRiwayat.onclick = () => {
-          riwayatDiv.style.display = "block";
-        };
-
-        const update = document.createElement("div");
-        update.className = "update-time";
-        const now = new Date();
-        update.textContent = "🕒 Diperbarui: " + now.toLocaleString("id-ID");
-
-        header.querySelector(".menu-btn").onclick = (e) => {
-          dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-          e.stopPropagation();
-        };
-
-        document.body.addEventListener("click", () => dropdown.style.display = "none");
-
-        div.appendChild(header);
-        div.appendChild(dropdown);
-        div.appendChild(total);
-        div.appendChild(btnRiwayat);
-        div.appendChild(btnTutup);
-        div.appendChild(riwayatDiv);
-        div.appendChild(update);
-        container.appendChild(div);
-      });
+    function toggleRiwayat(button) {
+      const riwayat = button.parentElement.querySelector(".riwayat");
+      if (riwayat.style.display === "block") {
+        riwayat.style.display = "none";
+        button.innerText = "📜 Lihat Riwayat";
+      } else {
+        riwayat.style.display = "block";
+        button.innerText = "❌ Tutup Riwayat";
+      }
     }
 
     function ubahNama(nama) {
-      const baru = prompt("Masukkan nama baru:", nama);
-      if (!baru) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-        method: "PATCH",
-        body: JSON.stringify({ nama: baru }),
-        headers: { "Content-Type": "application/json" }
-      }).then(() => location.reload());
+      const baru = prompt("Masukkan nama baru untuk forum:", nama);
+      if (baru && baru !== nama) {
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, { method: "DELETE" });
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
+          method: "PUT",
+          body: JSON.stringify({ nama: baru }),
+          headers: { "Content-Type": "application/json" }
+        }).then(() => loadData());
+      }
     }
 
     function hapusForum(nama) {
-      if (!confirm("Yakin ingin menghapus forum ini?")) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-        method: "DELETE"
-      }).then(() => location.reload());
+      if (confirm(`Yakin ingin menghapus forum "${nama}"?`)) {
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+          method: "DELETE"
+        }).then(() => loadData());
+      }
     }
 
-    // Fetch awal
-    fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-      .then(res => res.json())
-      .then(data => renderData(data))
-      .catch(err => {
-        document.getElementById("data-container").innerHTML = "Gagal memuat data.";
-        console.error(err);
-      });
+    loadData();
+    setInterval(() => {
+      if (![...document.querySelectorAll(".riwayat")].some(r => r.style.display === "block")) {
+        loadData();
+      }
+    }, 60000); // 1 menit
   </script>
 </body>
 </html>
