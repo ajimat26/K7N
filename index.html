@@ -3,177 +3,194 @@
 <head>
   <meta charset="UTF-8">
   <title>UangDuty Mobile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; margin: 10px; background: #f5f5f5; }
-    h1 { font-size: 20px; text-align: center; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 10px; margin: 0; }
+    h1 { font-size: 18px; color: #333; margin: 10px 0; }
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 5px; flex-wrap: wrap; }
+    .dropdown, .search { font-size: 12px; padding: 5px; border-radius: 5px; border: 1px solid #ccc; flex-grow: 1; }
+    .refresh-timer { font-size: 12px; color: gray; margin-bottom: 5px; }
+
     .card {
-      background: #fff; padding: 12px; margin-bottom: 12px;
-      border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); position: relative;
+      background: white; padding: 10px; margin-bottom: 10px;
+      border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
     }
-    .total { font-weight: bold; color: green; margin-bottom: 8px; }
-    .tag {
-      background: gold; color: black; font-size: 10px;
-      padding: 2px 6px; border-radius: 4px; margin-left: 5px;
+    .total { font-weight: bold; color: green; font-size: 14px; }
+    .riwayat { display: none; margin-top: 8px; font-size: 12px; color: #444; }
+    .updated { font-size: 11px; color: #888; margin-top: 5px; }
+    .tag { background: gold; color: black; font-size: 10px; padding: 2px 4px; border-radius: 4px; margin-left: 5px; }
+    .menu { position: absolute; right: 10px; top: 10px; cursor: pointer; font-size: 16px; }
+
+    .menu-options {
+      position: absolute; top: 30px; right: 10px;
+      background: #fff; border: 1px solid #ccc; border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: none; z-index: 999;
     }
-    .riwayat { display: none; font-size: 13px; margin-top: 5px; }
-    .btn {
-      background: #007bff; color: #fff; border: none; padding: 6px 10px;
-      font-size: 13px; border-radius: 5px; margin-top: 5px; cursor: pointer;
+    .menu-options div {
+      padding: 5px 10px; font-size: 12px; cursor: pointer;
     }
-    .opsi-btn {
-      position: absolute; right: 10px; top: 10px;
-      font-size: 18px; background: none; border: none; cursor: pointer;
-    }
-    .opsi-menu {
-      position: absolute; right: 10px; top: 30px;
-      background: #fff; border: 1px solid #ccc; border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: none; z-index: 2;
-    }
-    .opsi-menu button {
-      background: none; border: none; padding: 8px 10px;
-      width: 100%; text-align: left; font-size: 13px; cursor: pointer;
-    }
-    .opsi-menu button:hover { background: #f0f0f0; }
-    .updated { font-size: 11px; color: #888; margin-top: 6px; }
-    #marquee {
-      background: black; color: white; padding: 6px;
-      font-size: 13px; border-radius: 5px; margin-bottom: 10px;
-      overflow-x: auto; white-space: nowrap;
-    }
-    #refresh-controls {
-      font-size: 12px; text-align: center; margin-bottom: 8px; color: #333;
-    }
-    #refresh-controls select {
-      font-size: 12px; padding: 3px 6px; border-radius: 5px; border: 1px solid #ccc;
+    .menu-options div:hover { background: #eee; }
+
+    .running-text {
+      background: black; color: white;
+      white-space: nowrap; overflow-x: auto;
+      padding: 8px; font-size: 13px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>📊 UangDuty Viewer</h1>
+  <h1>📊 UangDuty SAFD</h1>
 
-  <div id="refresh-controls">
-    ⏱️ Refresh dalam <span id="countdown">60</span>s •
-    <select id="interval-select">
-      <option value="60000" selected>1 Menit</option>
-      <option value="120000">2 Menit</option>
-      <option value="180000">3 Menit</option>
-      <option value="300000">5 Menit</option>
-      <option value="0">Matikan</option>
+  <div class="controls">
+    <input type="text" class="search" placeholder="🔍 Cari nama..." oninput="searchForums(this.value)">
+    <select class="dropdown" id="refreshSelect" onchange="updateRefreshInterval()">
+      <option value="0">🔁 Auto Refresh: Mati</option>
+      <option value="60">🔁 Setiap 1 Menit</option>
+      <option value="120">🔁 Setiap 2 Menit</option>
+      <option value="180">🔁 Setiap 3 Menit</option>
+      <option value="300">🔁 Setiap 5 Menit</option>
     </select>
   </div>
 
-  <div id="marquee">
-    <marquee behavior="scroll" direction="left" scrollamount="2" id="runningText">Memuat riwayat...</marquee>
-  </div>
-
+  <div class="refresh-timer">⏱ Refresh dalam <span id="countdown">--</span> detik</div>
+  <div class="running-text" id="runningText">Memuat riwayat terbaru...</div>
   <div id="data-container">Memuat data...</div>
 
   <script>
-    let refreshInterval = 60000;
-    let countdown = refreshInterval / 1000;
-    let intervalID = null;
+    let interval = 0;
+    let timer = 0;
+    let countdown = 0;
+    let rawData = {};
+
+    function updateRefreshInterval() {
+      clearInterval(timer);
+      interval = parseInt(document.getElementById("refreshSelect").value);
+      if (interval > 0) {
+        countdown = interval;
+        timer = setInterval(() => {
+          countdown--;
+          document.getElementById("countdown").textContent = countdown;
+          if (countdown <= 0) {
+            loadData();
+            countdown = interval;
+          }
+        }, 1000);
+      } else {
+        document.getElementById("countdown").textContent = "--";
+      }
+    }
 
     function formatRupiah(angka) {
       return 'Rp. ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function toggleRiwayat(button) {
-      const riwayat = button.nextElementSibling;
-      riwayat.style.display = riwayat.style.display === 'none' ? 'block' : 'none';
+    function timeAgo(unixTime) {
+      const d = new Date(unixTime * 1000);
+      return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
     }
 
-    function toggleOpsiMenu(id) {
-      const menu = document.getElementById("opsi-" + id);
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    function searchForums(keyword) {
+      keyword = keyword.toLowerCase();
+      const cards = document.querySelectorAll(".card");
+      cards.forEach(card => {
+        const name = card.getAttribute("data-nama").toLowerCase();
+        card.style.display = name.includes(keyword) ? "block" : "none";
+      });
     }
 
-    function ubahNamaForum(nama) {
-      const baru = prompt("Masukkan nama baru:", nama);
-      if (baru && baru !== nama) {
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`)
-          .then(res => res.json())
-          .then(data => {
-            fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
-              method: "PUT", body: JSON.stringify(data)
-            });
-            fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-              method: "DELETE"
-            }).then(() => location.reload());
+    function renderRunningText(all) {
+      const semuaRiwayat = [];
+      for (let nama in all) {
+        if (all[nama].riwayat) {
+          all[nama].riwayat.forEach(r => {
+            semuaRiwayat.push(`📛 ${nama}: ${r}`);
           });
+        }
       }
+      document.getElementById("runningText").textContent = semuaRiwayat.reverse().slice(0, 20).join(" | ");
     }
 
-    function hapusForum(nama) {
-      if (confirm(`Yakin ingin menghapus forum ${nama}?`)) {
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-          method: "DELETE"
-        }).then(() => location.reload());
-      }
+    function renderData(data) {
+      const container = document.getElementById("data-container");
+      container.innerHTML = "";
+      const sorted = Object.entries(data).sort((a,b)=> (b[1].uang||0)-(a[1].uang||0));
+      sorted.forEach(([nama, info], index) => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.setAttribute("data-nama", nama);
+
+        const tag = index === 0 ? ' 🥇' : index === 1 ? ' 🥈' : index === 2 ? ' 🥉' : '';
+        const waktu = info.terakhir ? `<div class="updated">🕒 Update: ${timeAgo(info.terakhir)}</div>` : "";
+        const total = formatRupiah(info.uang || 0);
+        const riwayat = info.riwayat && info.riwayat.length > 0
+          ? info.riwayat.map(r => "• " + r).join("<br>")
+          : "Tidak ada riwayat";
+
+        div.innerHTML = `<strong>📛 ${info.nama || nama}${tag}</strong><br>
+                         <span class="total">Total Uang: ${total}</span>
+                         ${waktu}
+                         <div class="riwayat">
+                           <br><u>📜 Riwayat:</u><br>${riwayat}
+                         </div>
+                         <div class="menu">⋮</div>
+                         <div class="menu-options">
+                           <div onclick="editNama('${nama}')">✏️ Ubah Nama</div>
+                           <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
+                         </div>`;
+
+        div.querySelector(".menu").onclick = e => {
+          const opt = div.querySelector(".menu-options");
+          opt.style.display = opt.style.display === "block" ? "none" : "block";
+        };
+
+        div.addEventListener("click", e => {
+          if (!e.target.classList.contains("menu") && !e.target.closest(".menu-options")) {
+            const r = div.querySelector(".riwayat");
+            r.style.display = r.style.display === "block" ? "none" : "block";
+          }
+        });
+
+        container.appendChild(div);
+      });
     }
 
     function loadData() {
       fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
         .then(res => res.json())
         .then(data => {
-          const container = document.getElementById("data-container");
-          container.innerHTML = "";
-
-          const arr = Object.entries(data || {}).map(([nama, v]) => ({nama, ...v}));
-          arr.sort((a, b) => (b.uang || 0) - (a.uang || 0));
-
-          const running = [];
-
-          arr.forEach((item, idx) => {
-            const tag = idx == 0 ? '<span class="tag">🥇</span>' : idx == 1 ? '<span class="tag">🥈</span>' : idx == 2 ? '<span class="tag">🥉</span>' : '';
-            const card = document.createElement("div");
-            card.className = "card";
-
-            card.innerHTML = `
-              <button class="opsi-btn" onclick="toggleOpsiMenu('${item.nama}')">⋮</button>
-              <div class="opsi-menu" id="opsi-${item.nama}">
-                <button onclick="ubahNamaForum('${item.nama}')">✏️ Ubah Nama</button>
-                <button onclick="hapusForum('${item.nama}')">🗑️ Hapus</button>
-              </div>
-              <b>📛 ${item.nama}</b> ${tag}<br>
-              <div class="total">Total Uang: ${formatRupiah(item.uang)}</div>
-              <button class="btn" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
-              <div class="riwayat">
-                <br>${item.riwayat && item.riwayat.length > 0 ? item.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
-              </div>
-              <div class="updated">🕒 Update: ${new Date(item.terakhir || Date.now()).toLocaleString()}</div>
-            `;
-            container.appendChild(card);
-
-            if (item.riwayat) {
-              item.riwayat.slice(-3).forEach(r => running.push(`${item.nama}: ${r}`));
-            }
-          });
-
-          document.getElementById("runningText").textContent = "📰 " + running.reverse().join(" ⚫ ");
+          rawData = data;
+          renderData(data);
+          renderRunningText(data);
+        })
+        .catch(() => {
+          document.getElementById("data-container").innerHTML = "⚠️ Gagal memuat data.";
         });
     }
 
-    function updateCountdown() {
-      if (refreshInterval > 0) {
-        countdown--;
-        if (countdown <= 0) {
-          loadData();
-          countdown = refreshInterval / 1000;
-        }
-        document.getElementById("countdown").textContent = countdown;
-      } else {
-        document.getElementById("countdown").textContent = "—";
+    function editNama(nama) {
+      const baru = prompt("Ubah nama forum:", nama);
+      if (baru && baru !== nama) {
+        const updated = {...rawData[nama], nama: baru};
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, { method: "DELETE" });
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
+          method: "PUT",
+          body: JSON.stringify(updated)
+        }).then(() => loadData());
       }
     }
 
-    document.getElementById("interval-select").addEventListener("change", function () {
-      refreshInterval = parseInt(this.value);
-      countdown = refreshInterval / 1000;
-    });
+    function hapusForum(nama) {
+      if (confirm(`Hapus forum "${nama}"?`)) {
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+          method: "DELETE"
+        }).then(() => loadData());
+      }
+    }
 
-    setInterval(updateCountdown, 1000);
     loadData();
+    updateRefreshInterval(); // start countdown
   </script>
 </body>
 </html>
