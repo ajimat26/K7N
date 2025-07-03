@@ -15,8 +15,6 @@
     .menu button { display: block; background: none; border: none; padding: 10px; width: 100%; text-align: left; cursor: pointer; }
     .menu button:hover { background: #eee; }
     .riwayat { margin-top: 10px; font-size: 14px; display: none; }
-    .pesan-btn { background: #007BFF; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 10px; }
-    .pesan-btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
@@ -51,23 +49,6 @@
           status.textContent = `🔴 Sedang tidak aktif`;
         }
         forum.appendChild(status);
-
-        // Tombol Kirim Pesan
-        const btnPesan = document.createElement("button");
-        btnPesan.className = "pesan-btn";
-        btnPesan.textContent = "📩 Kirim Pesan";
-        btnPesan.onclick = async () => {
-          const teks = prompt("Masukkan pesan yang ingin dikirim:");
-          if (teks && teks.trim() !== "") {
-            const exp = Math.floor(Date.now() / 1000) + 2 * 60 * 60; // +2 jam
-            await fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-              method: "PATCH",
-              body: JSON.stringify({ pesan: teks, pesan_exp: exp })
-            });
-            alert("Pesan terkirim!");
-          }
-        };
-        forum.appendChild(btnPesan);
 
         // Titik Tiga Menu
         const dots = document.createElement("div");
