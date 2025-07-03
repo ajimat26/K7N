@@ -1,84 +1,81 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UangDuty - SAFD</title>
+  <title>UangDuty Viewer</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 20px; }
-    h1 { color: #333; text-align: center; }
-    .forum { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .forum h2 { margin: 0; color: #444; }
-    .forum p { margin: 5px 0; color: #666; }
-    .actions { float: right; }
-    .actions button { margin-left: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card:hover {
+      background: #f0f0f0;
+    }
+    .riwayat {
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    .total {
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
 <body>
-  <h1>Daftar Uang Duty</h1>
-  <div id="forums"></div>  <script>
-    const dbUrl = 'https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json';
+  <h1>📊 Daftar Uang Duty</h1>
+  <div id="data-container">Memuat data...</div>
 
-    async function fetchData() {
-      const res = await fetch(dbUrl);
-      const data = await res.json();
-      const container = document.getElementById('forums');
-      container.innerHTML = '';
-
-      for (const key in data) {
-        const forum = data[key];
-        const div = document.createElement('div');
-        div.className = 'forum';
-
-        const judul = document.createElement('h2');
-        judul.textContent = key;
-
-        const uangText = document.createElement('p');
-        uangText.innerHTML = 'Total uang = <b>Rp. ' + (forum.uang || 0).toLocaleString('id-ID') + '</b>';
-
-        const actions = document.createElement('div');
-        actions.className = 'actions';
-
-        const ubahBtn = document.createElement('button');
-        ubahBtn.textContent = 'Ubah Nama';
-        ubahBtn.onclick = () => {
-          const newName = prompt('Masukkan nama baru:', key);
-          if (newName && newName !== key) {
-            fetch(`${dbUrl.replace('/data.json', '/${newName}.json')}`, {
-              method: 'PUT',
-              body: JSON.stringify(forum)
-            }).then(() => fetch(`${dbUrl.replace('/data.json', '/' + key + '.json')}`, { method: 'DELETE' })).then(fetchData);
-          }
-        };
-
-        const hapusBtn = document.createElement('button');
-        hapusBtn.textContent = 'Hapus';
-        hapusBtn.onclick = () => {
-          if (confirm('Yakin ingin menghapus forum ini?')) {
-            fetch(`${dbUrl.replace('/data.json', '/' + key + '.json')}`, { method: 'DELETE' }).then(fetchData);
-          }
-        };
-
-        actions.appendChild(ubahBtn);
-        actions.appendChild(hapusBtn);
-        div.appendChild(actions);
-        div.appendChild(judul);
-        div.appendChild(uangText);
-
-        // Riwayat
-        if (forum.riwayat && Array.isArray(forum.riwayat)) {
-          const ul = document.createElement('ul');
-          forum.riwayat.forEach(r => {
-            const li = document.createElement('li');
-            li.textContent = r;
-            ul.appendChild(li);
-          });
-          div.appendChild(ul);
-        }
-
-        container.appendChild(div);
-      }
+  <script>
+    function formatRupiah(angka) {
+      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    fetchData();
-  </script></body>
+    fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("data-container");
+        container.innerHTML = "";
+
+        for (let nama in data) {
+          const pemain = data[nama];
+          const div = document.createElement("div");
+          div.className = "card";
+
+          const total = formatRupiah(pemain.uang || 0);
+          div.innerHTML = `<strong>📛 ${pemain.nama}</strong><br>
+                           <span class="total">Total Uang: ${total}</span>
+                           <div class="riwayat">
+                             <br><u>📜 Riwayat:</u><br>
+                             ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+                           </div>`;
+
+          div.addEventListener("click", () => {
+            const r = div.querySelector(".riwayat");
+            r.style.display = r.style.display === "none" ? "block" : "none";
+          });
+
+          container.appendChild(div);
+        }
+      })
+      .catch(err => {
+        document.getElementById("data-container").innerHTML = "Gagal memuat data.";
+        console.error(err);
+      });
+  </script>
+</body>
 </html>
