@@ -1,83 +1,81 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>UANG DUTY - SAFD</title>
+  <meta charset="UTF-8">
+  <title>UangDuty Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f0f4f7;
-      padding: 20px;
+      background: #f4f4f4;
+      margin: 20px;
+    }
+    h1 {
       color: #333;
     }
-    h1 { text-align: center; }
-    .user {
+    .card {
       background: white;
-      border-radius: 10px;
       padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .uang {
+    .card:hover {
+      background: #f0f0f0;
+    }
+    .riwayat {
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    .total {
       font-weight: bold;
       color: green;
     }
-    .log {
-      font-family: monospace;
-      background: #f7f7f7;
-      padding: 8px;
-      border-radius: 5px;
-      margin-top: 5px;
-      white-space: pre-line;
-    }
   </style>
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>💰 UANG DUTY REAL-TIME</h1>
-  <div id="dataContainer">Memuat data...</div>
+  <h1>📊 Daftar Uang Duty</h1>
+  <div id="data-container">Memuat data...</div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3-34rf9VZUIrAIR6z4BJtQm_MClqXm-Q",
-      authDomain: "uangduty.firebaseapp.com",
-      databaseURL: "https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "uangduty",
-      storageBucket: "uangduty.appspot.com",
-      messagingSenderId: "598905752132",
-      appId: "1:598905752132:web:7be400c23de21665044a11"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    function formatRupiah(angka) {
+      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
-    const container = document.getElementById("dataContainer");
+    fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("data-container");
+        container.innerHTML = "";
 
-    db.ref("uangduty").on("value", (snapshot) => {
-      const data = snapshot.val();
-      container.innerHTML = "";
+        for (let nama in data) {
+          const pemain = data[nama];
+          const div = document.createElement("div");
+          div.className = "card";
 
-      if (!data) {
-        container.innerHTML = "<p>Tidak ada data.</p>";
-        return;
-      }
+          const total = formatRupiah(pemain.uang || 0);
+          div.innerHTML = `<strong>📛 ${pemain.nama}</strong><br>
+                           <span class="total">Total Uang: ${total}</span>
+                           <div class="riwayat">
+                             <br><u>📜 Riwayat:</u><br>
+                             ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+                           </div>`;
 
-      const sortedNames = Object.keys(data).sort();
+          div.addEventListener("click", () => {
+            const r = div.querySelector(".riwayat");
+            r.style.display = r.style.display === "none" ? "block" : "none";
+          });
 
-      sortedNames.forEach((nama) => {
-        const user = data[nama];
-        const el = document.createElement("div");
-        el.className = "user";
-        el.innerHTML = `
-          <div><strong>👤 Nama:</strong> ${nama.replace(/_/g, " ")}</div>
-          <div><strong>💵 Saldo:</strong> <span class="uang">Rp ${Number(user.uang).toLocaleString('id-ID')}</span></div>
-          <div><strong>📜 Log:</strong></div>
-          <div class="log">${Object.values(user.log || {}).join("\n")}</div>
-        `;
-        container.appendChild(el);
+          container.appendChild(div);
+        }
+      })
+      .catch(err => {
+        document.getElementById("data-container").innerHTML = "Gagal memuat data.";
+        console.error(err);
       });
-    });
   </script>
 </body>
 </html>
