@@ -5,102 +5,63 @@
   <title>UangDuty Mobile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 10px;
-      background: #f5f5f5;
-    }
-    h1 {
-      font-size: 20px;
-      text-align: center;
-    }
+    body { font-family: sans-serif; margin: 10px; background: #f5f5f5; }
+    h1 { font-size: 20px; text-align: center; }
     .card {
-      background: #fff;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      position: relative;
+      background: #fff; padding: 12px; margin-bottom: 12px;
+      border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); position: relative;
     }
-    .total {
-      font-weight: bold;
-      color: green;
-      margin-bottom: 8px;
-    }
+    .total { font-weight: bold; color: green; margin-bottom: 8px; }
     .tag {
-      background: gold;
-      color: black;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 5px;
+      background: gold; color: black; font-size: 10px;
+      padding: 2px 6px; border-radius: 4px; margin-left: 5px;
     }
-    .riwayat {
-      display: none;
-      font-size: 13px;
-      margin-top: 5px;
-    }
+    .riwayat { display: none; font-size: 13px; margin-top: 5px; }
     .btn {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 6px 10px;
-      font-size: 13px;
-      border-radius: 5px;
-      margin-top: 5px;
-      cursor: pointer;
+      background: #007bff; color: #fff; border: none; padding: 6px 10px;
+      font-size: 13px; border-radius: 5px; margin-top: 5px; cursor: pointer;
     }
     .opsi-btn {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      font-size: 18px;
-      background: none;
-      border: none;
-      cursor: pointer;
+      position: absolute; right: 10px; top: 10px;
+      font-size: 18px; background: none; border: none; cursor: pointer;
     }
     .opsi-menu {
-      position: absolute;
-      right: 10px;
-      top: 30px;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: none;
-      z-index: 2;
+      position: absolute; right: 10px; top: 30px;
+      background: #fff; border: 1px solid #ccc; border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: none; z-index: 2;
     }
     .opsi-menu button {
-      background: none;
-      border: none;
-      padding: 8px 10px;
-      width: 100%;
-      text-align: left;
-      font-size: 13px;
-      cursor: pointer;
+      background: none; border: none; padding: 8px 10px;
+      width: 100%; text-align: left; font-size: 13px; cursor: pointer;
     }
-    .opsi-menu button:hover {
-      background: #f0f0f0;
-    }
-    .updated {
-      font-size: 11px;
-      color: #888;
-      margin-top: 6px;
-    }
+    .opsi-menu button:hover { background: #f0f0f0; }
+    .updated { font-size: 11px; color: #888; margin-top: 6px; }
     #marquee {
-      background: black;
-      color: white;
-      padding: 6px;
-      font-size: 13px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      overflow-x: auto;
-      white-space: nowrap;
+      background: black; color: white; padding: 6px;
+      font-size: 13px; border-radius: 5px; margin-bottom: 10px;
+      overflow-x: auto; white-space: nowrap;
+    }
+    #refresh-controls {
+      font-size: 12px; text-align: center; margin-bottom: 8px; color: #333;
+    }
+    #refresh-controls select {
+      font-size: 12px; padding: 3px 6px; border-radius: 5px; border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
   <h1>📊 UangDuty Viewer</h1>
+
+  <div id="refresh-controls">
+    ⏱️ Refresh dalam <span id="countdown">60</span>s •
+    <select id="interval-select">
+      <option value="60000" selected>1 Menit</option>
+      <option value="120000">2 Menit</option>
+      <option value="180000">3 Menit</option>
+      <option value="300000">5 Menit</option>
+      <option value="0">Matikan</option>
+    </select>
+  </div>
 
   <div id="marquee">
     <marquee behavior="scroll" direction="left" scrollamount="2" id="runningText">Memuat riwayat...</marquee>
@@ -109,6 +70,10 @@
   <div id="data-container">Memuat data...</div>
 
   <script>
+    let refreshInterval = 60000;
+    let countdown = refreshInterval / 1000;
+    let intervalID = null;
+
     function formatRupiah(angka) {
       return 'Rp. ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
@@ -130,8 +95,7 @@
           .then(res => res.json())
           .then(data => {
             fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
-              method: "PUT",
-              body: JSON.stringify(data)
+              method: "PUT", body: JSON.stringify(data)
             });
             fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
               method: "DELETE"
@@ -148,45 +112,68 @@
       }
     }
 
-    fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("data-container");
-        container.innerHTML = "";
+    function loadData() {
+      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("data-container");
+          container.innerHTML = "";
 
-        const arr = Object.entries(data || {}).map(([nama, v]) => ({nama, ...v}));
-        arr.sort((a, b) => (b.uang || 0) - (a.uang || 0));
+          const arr = Object.entries(data || {}).map(([nama, v]) => ({nama, ...v}));
+          arr.sort((a, b) => (b.uang || 0) - (a.uang || 0));
 
-        const running = [];
+          const running = [];
 
-        arr.forEach((item, idx) => {
-          const tag = idx == 0 ? '<span class="tag">🥇</span>' : idx == 1 ? '<span class="tag">🥈</span>' : idx == 2 ? '<span class="tag">🥉</span>' : '';
-          const card = document.createElement("div");
-          card.className = "card";
+          arr.forEach((item, idx) => {
+            const tag = idx == 0 ? '<span class="tag">🥇</span>' : idx == 1 ? '<span class="tag">🥈</span>' : idx == 2 ? '<span class="tag">🥉</span>' : '';
+            const card = document.createElement("div");
+            card.className = "card";
 
-          card.innerHTML = `
-            <button class="opsi-btn" onclick="toggleOpsiMenu('${item.nama}')">⋮</button>
-            <div class="opsi-menu" id="opsi-${item.nama}">
-              <button onclick="ubahNamaForum('${item.nama}')">✏️ Ubah Nama</button>
-              <button onclick="hapusForum('${item.nama}')">🗑️ Hapus</button>
-            </div>
-            <b>📛 ${item.nama}</b> ${tag}<br>
-            <div class="total">Total Uang: ${formatRupiah(item.uang)}</div>
-            <button class="btn" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
-            <div class="riwayat">
-              <br>${item.riwayat && item.riwayat.length > 0 ? item.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
-            </div>
-            <div class="updated">🕒 Update: ${new Date(item.terakhir || Date.now()).toLocaleString()}</div>
-          `;
-          container.appendChild(card);
+            card.innerHTML = `
+              <button class="opsi-btn" onclick="toggleOpsiMenu('${item.nama}')">⋮</button>
+              <div class="opsi-menu" id="opsi-${item.nama}">
+                <button onclick="ubahNamaForum('${item.nama}')">✏️ Ubah Nama</button>
+                <button onclick="hapusForum('${item.nama}')">🗑️ Hapus</button>
+              </div>
+              <b>📛 ${item.nama}</b> ${tag}<br>
+              <div class="total">Total Uang: ${formatRupiah(item.uang)}</div>
+              <button class="btn" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
+              <div class="riwayat">
+                <br>${item.riwayat && item.riwayat.length > 0 ? item.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+              </div>
+              <div class="updated">🕒 Update: ${new Date(item.terakhir || Date.now()).toLocaleString()}</div>
+            `;
+            container.appendChild(card);
 
-          if (item.riwayat) {
-            item.riwayat.slice(-3).forEach(r => running.push(`${item.nama}: ${r}`));
-          }
+            if (item.riwayat) {
+              item.riwayat.slice(-3).forEach(r => running.push(`${item.nama}: ${r}`));
+            }
+          });
+
+          document.getElementById("runningText").textContent = "📰 " + running.reverse().join(" ⚫ ");
         });
+    }
 
-        document.getElementById("runningText").textContent = "📰 " + running.reverse().join(" ⚫ ");
-      });
+    function updateCountdown() {
+      if (refreshInterval > 0) {
+        countdown--;
+        if (countdown <= 0) {
+          loadData();
+          countdown = refreshInterval / 1000;
+        }
+        document.getElementById("countdown").textContent = countdown;
+      } else {
+        document.getElementById("countdown").textContent = "—";
+      }
+    }
+
+    document.getElementById("interval-select").addEventListener("change", function () {
+      refreshInterval = parseInt(this.value);
+      countdown = refreshInterval / 1000;
+    });
+
+    setInterval(updateCountdown, 1000);
+    loadData();
   </script>
 </body>
 </html>
