@@ -1,81 +1,134 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>UangDuty Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UangDuty SAFD</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .card:hover {
-      background: #f0f0f0;
-    }
-    .riwayat {
-      display: none;
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
-    }
-    .total {
-      font-weight: bold;
-      color: green;
-    }
+    body { font-family: sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    .forum { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; }
+    .title { font-weight: bold; font-size: 18px; }
+    .uang { color: green; }
+    .status-online { color: green; font-size: 14px; }
+    .status-offline { color: red; font-size: 14px; }
+    .dots { position: absolute; right: 15px; top: 15px; cursor: pointer; }
+    .menu { display: none; position: absolute; right: 15px; top: 35px; background: white; border: 1px solid #ccc; border-radius: 5px; z-index: 1; }
+    .menu button { display: block; background: none; border: none; padding: 10px; width: 100%; text-align: left; cursor: pointer; }
+    .menu button:hover { background: #eee; }
+    .riwayat { margin-top: 10px; font-size: 14px; display: none; }
+    .pesan-btn { background: #007BFF; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 10px; }
+    .pesan-btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <h1>📊 Daftar Uang Duty</h1>
-  <div id="data-container">Memuat data...</div>
+  <h1>📋 Forum Uang Duty SAFD</h1>
+  <div id="forums"></div>  <script>
+    async function fetchData() {
+      const res = await fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json");
+      const data = await res.json();
+      const container = document.getElementById("forums");
+      container.innerHTML = "";
+      if (!data) return;
 
-  <script>
-    function formatRupiah(angka) {
-      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      Object.entries(data).forEach(([nama, info]) => {
+        const forum = document.createElement("div");
+        forum.className = "forum";
+
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = `👤 ${nama}`;
+        forum.appendChild(title);
+
+        const uang = document.createElement("div");
+        uang.innerHTML = `💰 Total Uang: <span class='uang'>${info.uang?.toLocaleString("id-ID", { style: 'currency', currency: 'IDR' }) || 'Rp. 0'}</span>`;
+        forum.appendChild(uang);
+
+        const status = document.createElement("div");
+        if (info.status === "online") {
+          status.className = "status-online";
+          status.textContent = `🟢 Sedang aktif di kota ${info.kota || 'Tidak diketahui'}`;
+        } else {
+          status.className = "status-offline";
+          status.textContent = `🔴 Sedang tidak aktif`;
+        }
+        forum.appendChild(status);
+
+        // Tombol Kirim Pesan
+        const btnPesan = document.createElement("button");
+        btnPesan.className = "pesan-btn";
+        btnPesan.textContent = "📩 Kirim Pesan";
+        btnPesan.onclick = async () => {
+          const teks = prompt("Masukkan pesan yang ingin dikirim:");
+          if (teks && teks.trim() !== "") {
+            const exp = Math.floor(Date.now() / 1000) + 2 * 60 * 60; // +2 jam
+            await fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+              method: "PATCH",
+              body: JSON.stringify({ pesan: teks, pesan_exp: exp })
+            });
+            alert("Pesan terkirim!");
+          }
+        };
+        forum.appendChild(btnPesan);
+
+        // Titik Tiga Menu
+        const dots = document.createElement("div");
+        dots.className = "dots";
+        dots.textContent = "︙";
+
+        const menu = document.createElement("div");
+        menu.className = "menu";
+
+        const btnRename = document.createElement("button");
+        btnRename.textContent = "✏️ Ubah Nama";
+        btnRename.onclick = async () => {
+          const newName = prompt("Masukkan nama baru:", nama);
+          if (newName && newName !== nama) {
+            await fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${newName}.json`, {
+              method: "PUT",
+              body: JSON.stringify(info)
+            });
+            await fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+              method: "DELETE"
+            });
+            fetchData();
+          }
+        };
+
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "🗑️ Hapus Forum";
+        btnDelete.onclick = async () => {
+          if (confirm(`Apakah yakin ingin menghapus forum ${nama}?`)) {
+            await fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+              method: "DELETE"
+            });
+            fetchData();
+          }
+        };
+
+        menu.appendChild(btnRename);
+        menu.appendChild(btnDelete);
+        forum.appendChild(dots);
+        forum.appendChild(menu);
+
+        dots.onclick = () => {
+          menu.style.display = menu.style.display === "block" ? "none" : "block";
+        };
+
+        // Riwayat
+        const riwayat = document.createElement("div");
+        riwayat.className = "riwayat";
+        if (info.riwayat) {
+          riwayat.innerHTML = "<strong>Riwayat:</strong><br>" + info.riwayat.map(r => `• ${r}`).join("<br>");
+        }
+        forum.onclick = () => {
+          riwayat.style.display = riwayat.style.display === "block" ? "none" : "block";
+        };
+        forum.appendChild(riwayat);
+
+        container.appendChild(forum);
+      });
     }
 
-    fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById("data-container");
-        container.innerHTML = "";
-
-        for (let nama in data) {
-          const pemain = data[nama];
-          const div = document.createElement("div");
-          div.className = "card";
-
-          const total = formatRupiah(pemain.uang || 0);
-          div.innerHTML = `<strong>📛 ${pemain.nama}</strong><br>
-                           <span class="total">Total Uang: ${total}</span>
-                           <div class="riwayat">
-                             <br><u>📜 Riwayat:</u><br>
-                             ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
-                           </div>`;
-
-          div.addEventListener("click", () => {
-            const r = div.querySelector(".riwayat");
-            r.style.display = r.style.display === "none" ? "block" : "none";
-          });
-
-          container.appendChild(div);
-        }
-      })
-      .catch(err => {
-        document.getElementById("data-container").innerHTML = "Gagal memuat data.";
-        console.error(err);
-      });
-  </script>
-</body>
+    fetchData();
+    setInterval(fetchData, 5000);
+  </script></body>
 </html>
