@@ -1,173 +1,197 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UangDuty Mobile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UangDuty Viewer</title>
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; margin: 10px; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 10px; margin: 0; }
+    h1 { font-size: 20px; color: #333; }
     .card {
-      background: white; border-radius: 10px; padding: 10px;
-      margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: white;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       position: relative;
     }
-    .card .riwayat { display: none; margin-top: 10px; font-size: 14px; color: #444; }
-    .card .tag { font-size: 12px; background: #222; color: gold; padding: 2px 6px; border-radius: 5px; float: right; }
-    .total { font-weight: bold; color: green; }
-    .timestamp { font-size: 12px; color: #777; margin-top: 4px; }
-    .menu {
-      position: absolute; top: 8px; right: 10px; font-size: 20px; cursor: pointer;
+    .card-header { display: flex; justify-content: space-between; align-items: center; }
+    .card strong { font-size: 16px; }
+    .total { color: green; font-weight: bold; font-size: 14px; }
+    .updated { font-size: 12px; color: #888; }
+    .riwayat { display: none; margin-top: 10px; font-size: 13px; color: #444; }
+    .btn { background: #eee; border: none; padding: 6px 10px; margin-top: 6px; border-radius: 6px; font-size: 13px; }
+    .btn:hover { background: #ddd; cursor: pointer; }
+
+    .options-menu {
+      position: absolute;
+      top: 36px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
+      display: none;
     }
-    .menu-options {
-      display: none; position: absolute; right: 10px; top: 30px; background: #fff;
-      border: 1px solid #ccc; border-radius: 5px; font-size: 14px; z-index: 10;
+    .options-menu div {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
     }
-    .menu-options div {
-      padding: 5px 10px; cursor: pointer;
+    .options-menu div:hover {
+      background: #f0f0f0;
     }
-    .menu-options div:hover {
-      background: #eee;
+
+    .running {
+      background: black;
+      color: white;
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
+      padding: 8px;
+      margin: 10px 0;
     }
-    .marquee-container {
-      background: black; color: lime; overflow: hidden; white-space: nowrap;
-      padding: 5px; font-size: 14px; border-radius: 5px; margin-bottom: 15px;
-    }
+
     .marquee {
-      display: inline-block; animation: scroll 135s linear infinite;
+      display: inline-block;
+      animation: marquee 100s linear infinite;
     }
-    @keyframes scroll {
+
+    @keyframes marquee {
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
-    button {
-      margin-top: 8px;
-      background: #007BFF; color: white; border: none; padding: 5px 10px;
-      border-radius: 5px; cursor: pointer;
-    }
-    button:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <h2>💼 UangDuty - SAFD</h2>
-  <div class="marquee-container"><div class="marquee" id="running-text">Memuat riwayat...</div></div>
+  <h1>💼 Uang Duty - SAFD</h1>
+  <div class="running"><div id="marquee" class="marquee">Memuat riwayat...</div></div>
   <div id="data-container">Memuat data...</div>
 
   <script>
+    let isInteracting = false;
     let lastInteraction = Date.now();
-    let isViewingRiwayat = {};
-    let isMenuOpen = {};
 
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function updateRunningText(text) {
-      document.getElementById("running-text").textContent = text;
-    }
-
-    function fetchData() {
-      const now = Date.now();
-      if (now - lastInteraction < 20000) return; // skip refresh jika interaksi < 20 detik
-
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById("data-container");
-          container.innerHTML = "";
-
-          if (!data) return container.innerHTML = "Data kosong.";
-
-          // Urutkan berdasarkan uang terbanyak
-          const sorted = Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0));
-
-          const latestRiwayat = [];
-
-          sorted.forEach(([nama, info], i) => {
-            const total = formatRupiah(info.uang || 0);
-            const div = document.createElement("div");
-            div.className = "card";
-
-            const tag = i === 0 ? "🥇 Juara 1" : i === 1 ? "🥈 Juara 2" : i === 2 ? "🥉 Juara 3" : "";
-            const tagHTML = tag ? `<span class="tag">${tag}</span>` : "";
-
-            latestRiwayat.push(`${info.nama}: ${info.riwayat?.slice(-1)[0] || "-"}`);
-
-            div.innerHTML = `
-              ${tagHTML}
-              <div class="menu" onclick="toggleMenu('${nama}')">⋮</div>
-              <div class="menu-options" id="menu-${nama}">
-                <div onclick="ubahNama('${nama}')">Ubah Nama</div>
-                <div onclick="hapusForum('${nama}')">Hapus Forum</div>
-              </div>
-              <strong>📛 ${info.nama}</strong><br>
-              <span class="total">Total Uang: ${total}</span>
-              <div class="timestamp">Terakhir diperbarui: ${new Date().toLocaleString()}</div>
-              <div class="riwayat" id="riwayat-${nama}">
-                <br><u>📜 Riwayat:</u><br>
-                ${info.riwayat && info.riwayat.length > 0 ? info.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
-              </div>
-              <button onclick="lihatRiwayat('${nama}')">Lihat Riwayat</button>
-              <button onclick="tutupRiwayat('${nama}')">Tutup Riwayat</button>
-            `;
-
-            container.appendChild(div);
-          });
-
-          updateRunningText(latestRiwayat.join("  ❖  "));
-        });
-    }
-
-    function lihatRiwayat(nama) {
-      document.getElementById("riwayat-" + nama).style.display = "block";
+    function setInteracting() {
+      isInteracting = true;
       lastInteraction = Date.now();
-      isViewingRiwayat[nama] = true;
     }
 
-    function tutupRiwayat(nama) {
-      document.getElementById("riwayat-" + nama).style.display = "none";
-      lastInteraction = Date.now();
-      isViewingRiwayat[nama] = false;
+    function buatForum(data) {
+      const container = document.getElementById("data-container");
+      container.innerHTML = "";
+
+      // Urutkan berdasarkan uang (besar ke kecil)
+      const arr = Object.entries(data || {}).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0));
+
+      const top3 = arr.slice(0, 3).map(entry => entry[0]);
+
+      arr.forEach(([nama, pemain], index) => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        const total = formatRupiah(pemain.uang || 0);
+        const updated = pemain.updated_at || "Tidak diketahui";
+        const isTop3 = top3.includes(nama);
+
+        const tag = isTop3 ? `<span style="color:gold; font-size:12px;">🏆 Juara ${top3.indexOf(nama)+1}</span>` : "";
+
+        div.innerHTML = `
+          <div class="card-header">
+            <div>
+              <strong>${pemain.nama}</strong> ${tag}<br>
+              <span class="total">Total Uang: ${total}</span><br>
+              <span class="updated">📅 Update: ${updated}</span>
+            </div>
+            <div>
+              <button class="btn" onclick="toggleRiwayat(this)">Lihat Riwayat</button>
+              <button class="btn" onclick="toggleOptions(this)">⋮</button>
+              <div class="options-menu">
+                <div onclick="ubahNama('${nama}')">✏️ Ubah Nama</div>
+                <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
+              </div>
+            </div>
+          </div>
+          <div class="riwayat">
+            <br><u>📜 Riwayat:</u><br>
+            ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+            <br><button class="btn" onclick="tutupRiwayat(this)">Tutup Riwayat</button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+
+      // Running text update
+      const allRiwayat = arr.flatMap(([nama, p]) => (p.riwayat || []).map(r => `${p.nama}: ${r}`));
+      document.getElementById("marquee").textContent = allRiwayat.join(" | ");
     }
 
-    function toggleMenu(nama) {
-      const menu = document.getElementById("menu-" + nama);
+    function toggleRiwayat(btn) {
+      setInteracting();
+      const card = btn.closest(".card");
+      const riwayat = card.querySelector(".riwayat");
+      riwayat.style.display = "block";
+    }
+
+    function tutupRiwayat(btn) {
+      const card = btn.closest(".card");
+      const riwayat = card.querySelector(".riwayat");
+      riwayat.style.display = "none";
+      setInteracting();
+    }
+
+    function toggleOptions(btn) {
+      setInteracting();
+      const menu = btn.nextElementSibling;
       menu.style.display = menu.style.display === "block" ? "none" : "block";
-      lastInteraction = Date.now();
-      isMenuOpen[nama] = menu.style.display === "block";
     }
 
-    function ubahNama(namaLama) {
-      const baru = prompt("Masukkan nama baru:", namaLama);
-      if (!baru || baru === namaLama) return;
-
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${namaLama}.json`)
-        .then(res => res.json())
-        .then(data => {
-          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
-            method: "PUT",
-            body: JSON.stringify(data),
-          }).then(() => {
-            fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${namaLama}.json`, { method: "DELETE" })
-              .then(fetchData);
-          });
-        });
+    function ubahNama(nama) {
+      setInteracting();
+      const baru = prompt("Masukkan nama baru:");
+      if (baru) {
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+          method: "PATCH",
+          body: JSON.stringify({ nama: baru }),
+          headers: { "Content-Type": "application/json" }
+        }).then(() => loadData());
+      }
     }
 
     function hapusForum(nama) {
-      if (!confirm(`Yakin ingin menghapus forum ${nama}?`)) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-        method: "DELETE"
-      }).then(fetchData);
+      setInteracting();
+      if (confirm("Yakin ingin menghapus forum ini?")) {
+        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+          method: "DELETE"
+        }).then(() => loadData());
+      }
     }
 
-    // Perbarui setiap 1 detik hanya jika tidak ada interaksi
-    setInterval(fetchData, 1000);
+    function loadData() {
+      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+        .then(res => res.json())
+        .then(data => buatForum(data))
+        .catch(err => {
+          document.getElementById("data-container").innerHTML = "Gagal memuat data.";
+        });
+    }
 
-    document.body.addEventListener("click", () => {
-      lastInteraction = Date.now();
-    });
+    // Timer: refresh tiap 20 detik jika tidak sedang berinteraksi
+    setInterval(() => {
+      const now = Date.now();
+      if (!isInteracting || now - lastInteraction > 20000) {
+        isInteracting = false;
+        loadData();
+      }
+    }, 2000);
 
-    fetchData(); // initial
+    loadData();
   </script>
 </body>
 </html>
