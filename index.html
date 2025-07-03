@@ -1,222 +1,216 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>UangDuty Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
-      margin: 0;
-      padding: 10px;
+      margin: 15px;
+      overflow-x: hidden;
     }
     h1 {
       color: #333;
-      text-align: center;
-    }
-    #marquee {
-      background: black;
-      color: white;
-      padding: 10px;
-      font-size: 14px;
-      overflow: hidden;
-      white-space: nowrap;
-      box-sizing: border-box;
+      font-size: 20px;
     }
     .card {
       background: white;
       padding: 15px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: relative;
+      transition: all 0.2s;
     }
-    .total { font-weight: bold; color: green; }
     .riwayat {
       display: none;
       margin-top: 10px;
       font-size: 14px;
       color: #555;
     }
-    .btn {
-      padding: 6px 12px;
-      background: #007bff;
+    .total {
+      font-weight: bold;
+      color: green;
+    }
+    .toolbar {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    #marquee-container {
+      overflow-x: auto;
+      white-space: nowrap;
+      background: black;
+      color: white;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+    .tombol {
+      background: #007BFF;
       color: white;
       border: none;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
       font-size: 13px;
       margin-top: 6px;
-      margin-right: 6px;
     }
-    .btn:hover { background: #0056b3; cursor: pointer; }
-    .menu {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+    .opsi {
+      float: right;
+      margin-top: -25px;
     }
-    .menu-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      z-index: 1;
-      border-radius: 6px;
-    }
-    .menu-content button {
-      display: block;
-      width: 100%;
-      padding: 8px;
-      background: white;
+    .opsi button {
+      background: none;
       border: none;
-      text-align: left;
+      font-size: 20px;
+      cursor: pointer;
     }
-    .menu-content button:hover { background: #eee; }
-    .menu:hover .menu-content { display: block; }
-    .tag { font-weight: bold; margin-left: 5px; }
-    .timestamp {
+    .tag {
+      background: gold;
+      color: black;
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-left: 5px;
+    }
+    .updated {
       font-size: 11px;
-      color: #888;
-      margin-top: 5px;
-    }
-    .refresh-control {
-      text-align: center;
-      margin: 10px 0;
-    }
-    select {
-      padding: 6px;
-      font-size: 14px;
-      border-radius: 6px;
+      color: #999;
+      margin-top: 4px;
     }
   </style>
 </head>
 <body>
-
-  <h1>📊 UangDuty SAFD</h1>
-  <div id="marquee">Memuat riwayat...</div>
-
-  <div class="refresh-control">
-    <label for="refreshRate">Auto Refresh: </label>
-    <select id="refreshRate">
-      <option value="0">Nonaktif</option>
-      <option value="60000">1 Menit</option>
-      <option value="120000">2 Menit</option>
-      <option value="180000">3 Menit</option>
-      <option value="240000">4 Menit</option>
-      <option value="300000">5 Menit</option>
+  <h1>📊 Daftar Uang Duty</h1>
+  <div class="toolbar">
+    ⏳ Refresh dalam <span id="cooldown">60</span> detik
+    | Auto Refresh: 
+    <select id="refresh-setting">
+      <option value="0">Mati</option>
+      <option value="60">1m</option>
+      <option value="120">2m</option>
+      <option value="180">3m</option>
+      <option value="240">4m</option>
+      <option value="300">5m</option>
     </select>
   </div>
 
+  <div id="marquee-container">Memuat riwayat...</div>
   <div id="data-container">Memuat data...</div>
 
   <script>
-    let refreshInterval = null;
+    let interval = 60, countdown = interval, pause = false;
+    let autoRefresh, timeout;
+    const refreshSelect = document.getElementById("refresh-setting");
+    const cooldownText = document.getElementById("cooldown");
 
     function formatRupiah(angka) {
-      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return 'Rp. ' + (angka || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function loadData() {
+    function updateCountdown() {
+      if (!pause && interval > 0) {
+        countdown--;
+        cooldownText.textContent = countdown;
+        if (countdown <= 0) {
+          fetchData();
+          countdown = interval;
+        }
+      }
+    }
+
+    refreshSelect.addEventListener("change", () => {
+      interval = parseInt(refreshSelect.value);
+      countdown = interval;
+    });
+
+    function createCard(nama, data, tag) {
+      const div = document.createElement("div");
+      div.className = "card";
+
+      const total = formatRupiah(data.uang);
+      let html = `<strong>📛 ${data.nama}</strong> ${tag}
+                  <div class="opsi">
+                    <button onclick="showOptions('${nama}')">⋮</button>
+                  </div><br>
+                  <span class="total">Total Uang: ${total}</span>
+                  <br><button class="tombol" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
+                  <div class="riwayat">
+                    <br><u>📜 Riwayat:</u><br>
+                    ${data.riwayat && data.riwayat.length > 0 ? data.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+                  </div>
+                  <div class="updated">🕒 Terakhir update: ${new Date(data.terakhir || Date.now()).toLocaleString()}</div>`;
+      div.innerHTML = html;
+      return div;
+    }
+
+    function toggleRiwayat(btn) {
+      const r = btn.parentNode.querySelector(".riwayat");
+      pause = true;
+      r.style.display = r.style.display === "none" ? "block" : "none";
+      btn.textContent = r.style.display === "none" ? "📜 Lihat Riwayat" : "📜 Lihat Riwayat";
+      pause = r.style.display === "block";
+    }
+
+    function showOptions(nama) {
+      pause = true;
+      const opt = confirm(`🔧 Ubah nama atau hapus forum ${nama}?\n\n✅ OK = Ubah Nama\n❌ Cancel = Hapus`);
+      if (opt) {
+        const baru = prompt("Masukkan nama baru:", nama);
+        if (baru && baru !== nama) {
+          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`)
+            .then(res => res.json())
+            .then(data => {
+              fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
+                method: "PUT",
+                body: JSON.stringify(data)
+              });
+              fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+                method: "DELETE"
+              }).then(() => fetchData());
+            });
+        }
+      } else {
+        const ya = confirm(`Yakin ingin menghapus forum ${nama}?`);
+        if (ya) {
+          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+            method: "DELETE"
+          }).then(() => fetchData());
+        }
+      }
+      pause = false;
+    }
+
+    function fetchData() {
       fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
         .then(res => res.json())
         .then(data => {
           const container = document.getElementById("data-container");
-          const marquee = document.getElementById("marquee");
           container.innerHTML = "";
-          let riwayatList = [];
 
-          const entries = Object.entries(data || {}).map(([nama, d]) => ({
-            nama,
-            uang: d.uang || 0,
-            riwayat: d.riwayat || [],
-            updated: d.riwayat && d.riwayat.length > 0 ? d.riwayat[d.riwayat.length - 1] : "Tidak diketahui"
-          })).sort((a, b) => b.uang - a.uang);
-
-          entries.forEach((pemain, index) => {
-            const tag = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
-            const div = document.createElement("div");
-            div.className = "card";
-
-            pemain.riwayat.forEach(r => riwayatList.push(`${pemain.nama}: ${r}`));
-
-            div.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div>
-                  <strong>📛 ${pemain.nama}</strong> ${tag}<br>
-                  <span class="total">Total Uang: ${formatRupiah(pemain.uang)}</span><br>
-                  <div class="timestamp">🕒 Terakhir diperbarui: ${pemain.updated}</div>
-                </div>
-                <div class="menu">
-                  <span>⋮</span>
-                  <div class="menu-content">
-                    <button onclick="ubahNama('${pemain.nama}')">✏️ Ubah Nama</button>
-                    <button onclick="hapusForum('${pemain.nama}')">🗑️ Hapus Forum</button>
-                  </div>
-                </div>
-              </div>
-              <div class="riwayat">
-                <br><u>📜 Riwayat:</u><br>
-                ${pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}<br>
-                <button class="btn" onclick="toggleRiwayat(this)">❌ Tutup Riwayat</button>
-              </div>
-              <button class="btn" onclick="toggleRiwayat(this)">📜 Lihat Riwayat</button>
-            `;
-            container.appendChild(div);
+          let dataArray = Object.entries(data || {}).map(([k, v]) => {
+            return {nama: k, data: v};
           });
 
-          marquee.innerText = "📰 " + riwayatList.reverse().slice(0, 20).join(" ⚫ ");
-        })
-        .catch(err => {
-          document.getElementById("data-container").innerHTML = "Gagal memuat data.";
+          dataArray.sort((a, b) => (b.data.uang || 0) - (a.data.uang || 0));
+
+          let riwayatGabung = [];
+
+          dataArray.forEach((item, idx) => {
+            const tag = idx === 0 ? `<span class="tag">🥇</span>` : idx === 1 ? `<span class="tag">🥈</span>` : idx === 2 ? `<span class="tag">🥉</span>` : "";
+            container.appendChild(createCard(item.nama, item.data, tag));
+            if (item.data.riwayat) {
+              item.data.riwayat.forEach(r => riwayatGabung.push(`${item.data.nama}: ${r}`));
+            }
+          });
+
+          document.getElementById("marquee-container").textContent = "📰 " + riwayatGabung.reverse().slice(0, 20).join(" ⚫ ");
         });
     }
 
-    function toggleRiwayat(button) {
-      const riwayat = button.parentElement.querySelector(".riwayat");
-      if (riwayat.style.display === "block") {
-        riwayat.style.display = "none";
-        button.innerText = "📜 Lihat Riwayat";
-      } else {
-        riwayat.style.display = "block";
-        button.innerText = "❌ Tutup Riwayat";
-      }
-    }
-
-    function ubahNama(nama) {
-      const baru = prompt("Masukkan nama baru untuk forum:", nama);
-      if (baru && baru !== nama) {
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, { method: "DELETE" });
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
-          method: "PUT",
-          body: JSON.stringify({ nama: baru }),
-          headers: { "Content-Type": "application/json" }
-        }).then(() => loadData());
-      }
-    }
-
-    function hapusForum(nama) {
-      if (confirm(`Yakin ingin menghapus forum "${nama}"?`)) {
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
-          method: "DELETE"
-        }).then(() => loadData());
-      }
-    }
-
-    // ⏱️ Auto Refresh selector
-    document.getElementById("refreshRate").addEventListener("change", function () {
-      const ms = parseInt(this.value);
-      if (refreshInterval) clearInterval(refreshInterval);
-      if (ms > 0) {
-        refreshInterval = setInterval(() => {
-          if (![...document.querySelectorAll(".riwayat")].some(r => r.style.display === "block")) {
-            loadData();
-          }
-        }, ms);
-      }
-    });
-
-    loadData();
+    setInterval(updateCountdown, 1000);
+    fetchData();
   </script>
 </body>
-</html>
+  </html>
