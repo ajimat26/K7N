@@ -13,6 +13,7 @@
       color: #333;
     }
     .card {
+      position: relative;
       background: white;
       padding: 15px;
       margin-bottom: 10px;
@@ -34,6 +35,35 @@
       font-weight: bold;
       color: green;
     }
+    .dot-menu {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .menu-options {
+      display: none;
+      position: absolute;
+      right: 15px;
+      top: 30px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      z-index: 10;
+    }
+    .menu-options div {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .menu-options div:hover {
+      background: #eee;
+    }
+    .updated {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -43,6 +73,67 @@
   <script>
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatTanggal(timestamp) {
+      const d = new Date(timestamp * 1000);
+      return d.toLocaleString("id-ID");
+    }
+
+    function buatTitikTigaMenu(nama, div) {
+      const titik3 = document.createElement("div");
+      titik3.className = "dot-menu";
+      titik3.innerHTML = "⋮";
+
+      const menu = document.createElement("div");
+      menu.className = "menu-options";
+
+      const ubah = document.createElement("div");
+      ubah.innerText = "Ubah Nama";
+      ubah.onclick = () => {
+        const baru = prompt("Masukkan nama baru:");
+        if (baru) {
+          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+            method: "GET"
+          })
+          .then(res => res.json())
+          .then(data => {
+            fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${baru}.json`, {
+              method: "PUT",
+              body: JSON.stringify({...data, nama: baru, updated: Math.floor(Date.now()/1000)})
+            }).then(() => {
+              fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+                method: "DELETE"
+              }).then(() => location.reload());
+            });
+          });
+        }
+      };
+
+      const hapus = document.createElement("div");
+      hapus.innerText = "Hapus";
+      hapus.onclick = () => {
+        if (confirm("Yakin ingin menghapus data ini?")) {
+          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+            method: "DELETE"
+          }).then(() => location.reload());
+        }
+      };
+
+      menu.appendChild(ubah);
+      menu.appendChild(hapus);
+
+      titik3.onclick = (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+      };
+
+      document.body.addEventListener("click", () => {
+        menu.style.display = "none";
+      });
+
+      div.appendChild(titik3);
+      div.appendChild(menu);
     }
 
     fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
@@ -57,8 +148,11 @@
           div.className = "card";
 
           const total = formatRupiah(pemain.uang || 0);
+          const waktuUpdate = pemain.updated ? formatTanggal(pemain.updated) : "Tidak diketahui";
+
           div.innerHTML = `<strong>📛 ${pemain.nama}</strong><br>
-                           <span class="total">Total Uang: ${total}</span>
+                           <span class="total">Total Uang: ${total}</span><br>
+                           <span class="updated">⏰ Terakhir diperbarui: ${waktuUpdate}</span>
                            <div class="riwayat">
                              <br><u>📜 Riwayat:</u><br>
                              ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
@@ -69,6 +163,7 @@
             r.style.display = r.style.display === "none" ? "block" : "none";
           });
 
+          buatTitikTigaMenu(nama, div);
           container.appendChild(div);
         }
       })
