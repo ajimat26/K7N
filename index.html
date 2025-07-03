@@ -3,200 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <title>UangDuty Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 10px;
-    }
-    h1 {
-      color: #333;
-      font-size: 20px;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 10px; }
+    h1 { color: #333; font-size: 22px; }
     .card {
-      background: white;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: all 0.2s;
+      background: white; padding: 12px; margin-bottom: 10px; border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;
     }
-    .card:hover {
-      background: #f0f0f0;
+    .riwayat { display: none; margin-top: 10px; font-size: 14px; color: #555; }
+    .total { font-weight: bold; color: green; }
+    .opsi {
+      position: absolute; top: 10px; right: 15px; cursor: pointer;
+      font-size: 18px; color: #888;
     }
-    .riwayat {
-      display: none;
-      margin-top: 8px;
-      font-size: 14px;
-      color: #555;
+    .popup {
+      display: none; position: absolute; right: 15px; top: 30px;
+      background: #fff; border: 1px solid #ccc; border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10;
     }
-    .total {
-      font-weight: bold;
-      color: green;
+    .popup button {
+      display: block; padding: 8px 12px; width: 100%; border: none;
+      background: none; text-align: left; font-size: 14px; cursor: pointer;
     }
-    .info-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      margin-bottom: 10px;
+    .popup button:hover { background-color: #f0f0f0; }
+    .running-text {
+      background: black; color: white; padding: 8px;
+      margin-bottom: 10px; border-radius: 6px;
+      font-size: 14px; font-family: monospace;
     }
-    .dropdown {
-      font-size: 14px;
-      padding: 3px 6px;
+    .waktu {
+      font-size: 13px; color: #999; margin-top: 6px;
     }
-    .badge {
-      background-color: gold;
-      color: black;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-left: 8px;
+    .tag {
+      background: gold; color: black; padding: 2px 6px;
+      font-size: 12px; border-radius: 4px; margin-left: 5px;
+    }
+    .refresh-info {
+      font-size: 12px; margin: 5px 0 10px; color: #666;
+    }
+    .btn-riwayat {
+      background: #007bff; color: white; padding: 4px 8px;
+      border: none; border-radius: 4px; font-size: 13px;
+      margin-top: 5px; cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>📊 Uang Duty SAFD</h1>
 
-  <div class="info-bar">
-    <span id="timer">Refresh dalam: 60 detik</span>
-    <select id="refreshControl" class="dropdown">
-      <option value="60000">Setiap 1 menit</option>
-      <option value="120000">Setiap 2 menit</option>
-      <option value="0">Mati</option>
-    </select>
+  <div class="running-text">
+    <marquee scrollamount="1" behavior="scroll" direction="left" id="runningRiwayat">
+      Memuat riwayat terbaru...
+    </marquee>
   </div>
+
+  <div class="refresh-info" id="refresh-info">⏳ Memuat ulang dalam 60 detik</div>
 
   <div id="data-container">Memuat data...</div>
 
   <script>
-    let countdown = 60;
-    let refreshInterval = 60000; // default 1 menit
-    let intervalId = null;
-
-    const container = document.getElementById("data-container");
-    const timerDisplay = document.getElementById("timer");
-    const refreshSelect = document.getElementById("refreshControl");
+    let lastInteraction = Date.now();
+    let pauseRefresh = false;
+    let refreshInterval = 60000;
 
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    function updateTimerDisplay() {
-      timerDisplay.textContent = `Refresh dalam: ${countdown} detik`;
+    function updateCountdown() {
+      const remaining = Math.max(0, refreshInterval - (Date.now() - lastInteraction));
+      const seconds = Math.ceil(remaining / 1000);
+      document.getElementById("refresh-info").innerText = "⏳ Memuat ulang dalam " + seconds + " detik";
     }
-
-    function startCountdown() {
-      clearInterval(intervalId);
-      if (refreshInterval === 0) {
-        timerDisplay.textContent = "Auto refresh dimatikan";
-        return;
-      }
-      countdown = refreshInterval / 1000;
-      updateTimerDisplay();
-      intervalId = setInterval(() => {
-        countdown--;
-        if (countdown <= 0) {
-          loadData();
-          countdown = refreshInterval / 1000;
-        }
-        updateTimerDisplay();
-      }, 1000);
-    }
-
-    refreshSelect.addEventListener("change", () => {
-      refreshInterval = parseInt(refreshSelect.value);
-      startCountdown();
-    });
 
     function loadData() {
       fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
         .then(res => res.json())
         .then(data => {
+          const container = document.getElementById("data-container");
+          const runningText = document.getElementById("runningRiwayat");
           container.innerHTML = "";
-          if (!data) return;
+          runningText.innerText = "";
 
-          // Urutkan berdasarkan jumlah uang tertinggi
-          const sorted = Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0));
+          if (!data) return container.innerHTML = "Tidak ada data.";
 
-          let rank = 1;
-          for (const [nama, pemain] of sorted) {
+          let entries = Object.entries(data);
+          entries.sort((a,b) => (b[1].uang||0)-(a[1].uang||0));
+
+          const top3 = entries.slice(0,3).map(x=>x[0]);
+
+          let semuaRiwayat = [];
+
+          entries.forEach(([nama, pemain], index) => {
             const div = document.createElement("div");
             div.className = "card";
 
             const total = formatRupiah(pemain.uang || 0);
-            const tag = rank === 1 ? `<span class="badge">🥇 Juara 1</span>` :
-                        rank === 2 ? `<span class="badge">🥈 Juara 2</span>` :
-                        rank === 3 ? `<span class="badge">🥉 Juara 3</span>` : "";
-
-            const waktuUpdate = pemain.updated_at ? new Date(pemain.updated_at).toLocaleString("id-ID") : "Tidak diketahui";
-            const riwayatHTML = pemain.riwayat && pemain.riwayat.length > 0 ?
-              pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat";
+            const tag = top3.includes(nama) ? `<span class="tag">Juara ${top3.indexOf(nama)+1}</span>` : "";
 
             div.innerHTML = `
-              <strong>📛 ${pemain.nama}</strong> ${tag}<br>
-              <span class="total">Total Uang: ${total}</span><br>
-              <small>⏰ Pembaruan: ${waktuUpdate}</small>
+              <div><strong>📛 ${pemain.nama || nama}</strong>${tag}</div>
+              <div class="total">Total Uang: ${total}</div>
+              <div class="waktu">Terakhir diupdate: ${new Date(pemain.updated || Date.now()).toLocaleString()}</div>
               <div class="riwayat">
-                <br><u>📜 Riwayat:</u><br>${riwayatHTML}
-                <br><br><button onclick="this.parentElement.style.display='none'; event.stopPropagation()">Tutup Riwayat</button>
+                <br><u>📜 Riwayat:</u><br>
+                ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
               </div>
-              <div style="text-align:right;margin-top:5px;">
-                <button onclick="showMenu('${nama}', this); event.stopPropagation()">⋮</button>
-              </div>`;
+              <button class="btn-riwayat">👁️ Lihat Riwayat</button>
+              <div class="opsi">⋮</div>
+              <div class="popup">
+                <button onclick="ubahNama('${nama}')">✏️ Ubah Nama</button>
+                <button onclick="hapusForum('${nama}')">🗑️ Hapus Forum</button>
+              </div>
+            `;
 
-            div.addEventListener("click", () => {
-              const r = div.querySelector(".riwayat");
-              r.style.display = r.style.display === "none" ? "block" : "none";
+            // kumpulkan semua riwayat
+            if (pemain.riwayat) {
+              pemain.riwayat.forEach(r => semuaRiwayat.push(`${pemain.nama || nama}: ${r}`));
+            }
+
+            const riwayatDiv = div.querySelector(".riwayat");
+            const riwayatBtn = div.querySelector(".btn-riwayat");
+            const opsiBtn = div.querySelector(".opsi");
+            const popup = div.querySelector(".popup");
+
+            opsiBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              pauseRefresh = true;
+              popup.style.display = popup.style.display === "block" ? "none" : "block";
+            });
+
+            riwayatBtn.addEventListener("click", () => {
+              pauseRefresh = true;
+              const visible = riwayatDiv.style.display === "block";
+              riwayatDiv.style.display = visible ? "none" : "block";
+              riwayatBtn.textContent = visible ? "👁️ Lihat Riwayat" : "❌ Tutup Riwayat";
+              popup.style.display = "none";
             });
 
             container.appendChild(div);
-            rank++;
-          }
+          });
+
+          runningText.innerText = semuaRiwayat.length > 0 ? semuaRiwayat.join(" ❖ ") : "Tidak ada riwayat.";
         })
         .catch(err => {
-          container.innerHTML = "Gagal memuat data.";
+          document.getElementById("data-container").innerHTML = "Gagal memuat data.";
           console.error(err);
         });
     }
 
-    function showMenu(nama, button) {
-      const menu = document.createElement("div");
-      menu.style.position = "absolute";
-      menu.style.background = "white";
-      menu.style.border = "1px solid #ccc";
-      menu.style.padding = "5px";
-      menu.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-      menu.innerHTML = `
-        <button onclick="ubahNama('${nama}')">Ubah Nama</button><br>
-        <button onclick="hapusForum('${nama}')">Hapus Forum</button>
-      `;
-      document.body.appendChild(menu);
-      const rect = button.getBoundingClientRect();
-      menu.style.left = `${rect.left}px`;
-      menu.style.top = `${rect.bottom}px`;
-      const removeMenu = () => {
-        document.body.removeChild(menu);
-        document.removeEventListener("click", removeMenu);
-      };
-      setTimeout(() => document.addEventListener("click", removeMenu), 0);
-    }
-
-    function ubahNama(namaLama) {
-      const namaBaru = prompt("Masukkan nama baru:", namaLama);
-      if (!namaBaru) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${namaLama}.json`)
-        .then(res => res.json())
-        .then(data => {
-          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${namaLama}.json`, { method: "DELETE" });
-          fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${namaBaru}.json`, {
-            method: "PUT",
-            body: JSON.stringify({...data, nama: namaBaru})
-          }).then(() => loadData());
-        });
+    function ubahNama(nama) {
+      const baru = prompt("Masukkan nama baru:");
+      if (!baru) return;
+      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`, {
+        method: "PATCH",
+        body: JSON.stringify({ nama: baru })
+      }).then(() => loadData());
     }
 
     function hapusForum(nama) {
@@ -206,8 +169,21 @@
       }).then(() => loadData());
     }
 
+    setInterval(() => {
+      updateCountdown();
+      if (pauseRefresh) return;
+      if (Date.now() - lastInteraction > refreshInterval) {
+        loadData();
+        lastInteraction = Date.now();
+      }
+    }, 1000);
+
+    window.addEventListener("click", () => {
+      lastInteraction = Date.now();
+      pauseRefresh = false;
+    });
+
     loadData();
-    startCountdown();
   </script>
 </body>
 </html>
