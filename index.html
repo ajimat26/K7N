@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UangDuty Viewer</title>
   <style>
     body {
@@ -17,7 +18,8 @@
     #marquee {
       background: black;
       color: white;
-      padding: 8px;
+      padding: 10px;
+      font-size: 14px;
       overflow: hidden;
       white-space: nowrap;
       box-sizing: border-box;
@@ -31,16 +33,21 @@
       position: relative;
     }
     .total { font-weight: bold; color: green; }
-    .riwayat { display: none; margin-top: 10px; font-size: 14px; color: #555; }
+    .riwayat {
+      display: none;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
     .btn {
-      padding: 5px 10px;
+      padding: 6px 12px;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 12px;
-      margin-top: 5px;
-      margin-right: 5px;
+      font-size: 13px;
+      margin-top: 6px;
+      margin-right: 6px;
     }
     .btn:hover { background: #0056b3; cursor: pointer; }
     .menu {
@@ -65,20 +72,22 @@
       border: none;
       text-align: left;
     }
-    .menu-content button:hover {
-      background: #eee;
-    }
-    .menu:hover .menu-content {
-      display: block;
-    }
-    .tag {
-      font-weight: bold;
-      margin-left: 5px;
-    }
+    .menu-content button:hover { background: #eee; }
+    .menu:hover .menu-content { display: block; }
+    .tag { font-weight: bold; margin-left: 5px; }
     .timestamp {
       font-size: 11px;
       color: #888;
       margin-top: 5px;
+    }
+    .refresh-control {
+      text-align: center;
+      margin: 10px 0;
+    }
+    select {
+      padding: 6px;
+      font-size: 14px;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -86,18 +95,26 @@
 
   <h1>📊 UangDuty SAFD</h1>
   <div id="marquee">Memuat riwayat...</div>
+
+  <div class="refresh-control">
+    <label for="refreshRate">Auto Refresh: </label>
+    <select id="refreshRate">
+      <option value="0">Nonaktif</option>
+      <option value="60000">1 Menit</option>
+      <option value="120000">2 Menit</option>
+      <option value="180000">3 Menit</option>
+      <option value="240000">4 Menit</option>
+      <option value="300000">5 Menit</option>
+    </select>
+  </div>
+
   <div id="data-container">Memuat data...</div>
 
   <script>
-    let riwayatAktif = false;
-    let opsiAktif = false;
+    let refreshInterval = null;
 
     function formatRupiah(angka) {
       return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function formatTime(date) {
-      return date.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' });
     }
 
     function loadData() {
@@ -109,7 +126,6 @@
           container.innerHTML = "";
           let riwayatList = [];
 
-          // Ubah objek jadi array & urutkan berdasarkan uang
           const entries = Object.entries(data || {}).map(([nama, d]) => ({
             nama,
             uang: d.uang || 0,
@@ -122,11 +138,10 @@
             const div = document.createElement("div");
             div.className = "card";
 
-            // Running Text
             pemain.riwayat.forEach(r => riwayatList.push(`${pemain.nama}: ${r}`));
 
             div.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                   <strong>📛 ${pemain.nama}</strong> ${tag}<br>
                   <span class="total">Total Uang: ${formatRupiah(pemain.uang)}</span><br>
@@ -188,12 +203,20 @@
       }
     }
 
-    loadData();
-    setInterval(() => {
-      if (![...document.querySelectorAll(".riwayat")].some(r => r.style.display === "block")) {
-        loadData();
+    // ⏱️ Auto Refresh selector
+    document.getElementById("refreshRate").addEventListener("change", function () {
+      const ms = parseInt(this.value);
+      if (refreshInterval) clearInterval(refreshInterval);
+      if (ms > 0) {
+        refreshInterval = setInterval(() => {
+          if (![...document.querySelectorAll(".riwayat")].some(r => r.style.display === "block")) {
+            loadData();
+          }
+        }, ms);
       }
-    }, 60000); // 1 menit
+    });
+
+    loadData();
   </script>
 </body>
 </html>
