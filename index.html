@@ -67,22 +67,14 @@
       border: 1px solid #ccc;
       font-size: 13px;
     }
-    #pesanAdmin {
-      display: none;
-      background: #ffeeba;
-      border-left: 5px solid #ffc107;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      font-size: 14px;
-    }
   </style>
 </head>
 <body>
   <h1>📊 Daftar Uang Duty</h1>
 
-  <div id="pesanAdmin">
-    🔔 <strong>Pesan Admin:</strong> <span id="isiPesanAdmin"></span>
+  <div style="margin: 10px 0;">
+    <input id="pesanInput" type="text" placeholder="Ketik pesan admin..." style="width:70%;padding:5px;border-radius:5px;border:1px solid #ccc;font-size:13px;">
+    <button onclick="kirimPesanAdmin()" style="padding:5px 10px;background:#28a745;color:white;border:none;border-radius:5px;font-size:13px;">Kirim Pesan</button>
   </div>
 
   <div id="refreshOptions">
@@ -180,20 +172,6 @@
           }
           runningText.textContent = allRiwayat.reverse().join(" ⚡ ");
         });
-
-      // Ambil pesan admin
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/pesan.json")
-        .then(res => res.json())
-        .then(pesan => {
-          const pesanBox = document.getElementById("pesanAdmin");
-          const isiPesan = document.getElementById("isiPesanAdmin");
-          if (pesan && pesan.trim() !== "") {
-            pesanBox.style.display = "block";
-            isiPesan.textContent = pesan;
-          } else {
-            pesanBox.style.display = "none";
-          }
-        });
     }
 
     function displayData(dataArray) {
@@ -225,15 +203,14 @@
 
         const options = card.querySelector(".options");
         const dropdown = card.querySelector(".dropdown");
+
         options.addEventListener("click", e => {
           e.stopPropagation();
           dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
         });
 
-        card.addEventListener("click", () => {
-          if (dropdown.style.display === "block") {
-            dropdown.style.display = "none";
-          }
+        document.addEventListener("click", () => {
+          document.querySelectorAll(".dropdown").forEach(d => d.style.display = "none");
         });
 
         container.appendChild(card);
@@ -251,7 +228,28 @@
       }
     }
 
-    // Pause marquee saat disentuh
+    function kirimPesanAdmin() {
+      const pesan = document.getElementById("pesanInput").value.trim();
+      if (pesan === "") {
+        alert("Pesan tidak boleh kosong!");
+        return;
+      }
+
+      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/pesan.json", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pesan)
+      })
+      .then(() => {
+        alert("Pesan admin berhasil dikirim!");
+        document.getElementById("pesanInput").value = "";
+        fetchData();
+      })
+      .catch(() => {
+        alert("Gagal mengirim pesan.");
+      });
+    }
+
     let timeout;
     runningText.parentElement.addEventListener("pointerdown", () => {
       runningText.style.animationPlayState = "paused";
