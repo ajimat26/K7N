@@ -7,12 +7,44 @@
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
-      margin: 0;
-      padding: 10px;
+      margin: 10px;
     }
     h1 {
       color: #333;
-      font-size: 18px;
+      font-size: 20px;
+      text-align: center;
+    }
+    #running-text {
+      background: black;
+      color: white;
+      padding: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    #running-text span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll 25s linear infinite;
+    }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    .refresh-info {
+      text-align: center;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .refresh-control {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .refresh-control select {
+      padding: 4px;
+      font-size: 12px;
     }
     .card {
       background: white;
@@ -20,93 +52,191 @@
       margin-bottom: 10px;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: 0.2s;
-    }
-    .total { font-weight: bold; color: green; }
-    .riwayat { display: none; margin-top: 10px; font-size: 14px; color: #555; }
-    .marquee-container {
-      background: black;
-      color: white;
-      overflow: hidden;
-      white-space: nowrap;
-      border-radius: 6px;
-      padding: 6px;
-      margin: 10px 0;
       position: relative;
     }
-    .marquee {
-      display: inline-block;
-      animation: scroll 20s linear infinite;
-      padding-left: 100%;
-    }
-    @keyframes scroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-100%); }
-    }
-    .broadcast-box {
-      background: #ffeeba;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      padding: 8px;
-      margin-bottom: 10px;
+    .card .riwayat { display: none; font-size: 12px; margin-top: 5px; color: #555; }
+    .card .total { font-weight: bold; color: green; }
+    .btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      margin: 3px;
+      border: none;
       border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-blue { background: #007bff; color: white; }
+    .btn-red { background: #dc3545; color: white; }
+    .menu-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .menu-options {
+      display: none;
+      position: absolute;
+      top: 25px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      z-index: 1;
+    }
+    .menu-options button {
+      display: block;
+      background: none;
+      border: none;
+      padding: 5px 10px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
+    .top1 {
+      font-size: 12px;
+      color: #555;
+      text-align: right;
+      margin-bottom: 5px;
+    }
+    .search-bar {
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .search-bar input {
+      padding: 6px;
+      font-size: 12px;
+      width: 70%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .message-global {
+      background: #ffeeba;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      margin: 10px 0;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <h1>📊 Daftar Uang Duty</h1>
-  <div class="marquee-container">
-    <div class="marquee" id="running-text">Memuat riwayat terbaru...</div>
+  <div id="running-text"><span id="scroll-content">Memuat riwayat...</span></div>
+  <div class="top1" id="top1-info">Top 1: Memuat...</div>
+  <div class="refresh-info">⏳ Refresh otomatis dalam <span id="countdown">60</span> detik</div>
+  <div class="refresh-control">
+    <label for="refreshSelect">Auto Refresh:</label>
+    <select id="refreshSelect">
+      <option value="60000">1 menit</option>
+      <option value="120000">2 menit</option>
+      <option value="180000">3 menit</option>
+      <option value="300000">5 menit</option>
+      <option value="0">Mati</option>
+    </select>
   </div>
-  <div class="broadcast-box" id="broadcast"></div>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Cari nama forum...">
+  </div>
+  <div id="global-message"></div>
   <div id="data-container">Memuat data...</div>  <script>
-    async function fetchData() {
-      const res = await fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json");
-      const data = await res.json();
-      const sorted = Object.entries(data || {}).sort((a,b) => (b[1].uang||0)-(a[1].uang||0));
-      const container = document.getElementById("data-container");
-      container.innerHTML = "";
+    let interval = 60000;
+    let countdown = 60;
+    let disableRefresh = false;
 
-      let allRiwayat = [];
+    document.getElementById("refreshSelect").addEventListener("change", function() {
+      interval = parseInt(this.value);
+      countdown = interval / 1000;
+      document.getElementById("countdown").innerText = countdown;
+    });
 
-      sorted.forEach(([nama, pemain], index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        const uang = pemain.uang || 0;
-        const waktu = pemain.riwayat && pemain.riwayat.length ? pemain.riwayat[pemain.riwayat.length-1].split("|")[0] : "-";
-        card.innerHTML = `<strong>${nama}</strong> ${index==0 ? '🏆' : ''}<br>
-          <span class="total">Total Uang: Rp. ${uang.toLocaleString()}</span><br>
-          <small>⏱️ ${waktu}</small>
-          <div class="riwayat"><br><u>📜 Riwayat:</u><br>
-          ${(pemain.riwayat || []).map(r => `• ${r}`).join("<br>") || 'Tidak ada riwayat'}</div>`;
-
-        allRiwayat.push(...(pemain.riwayat || []).map(r => `${nama}: ${r}`));
-
-        card.addEventListener("click", () => {
-          const r = card.querySelector(".riwayat");
-          r.style.display = r.style.display === "none" ? "block" : "none";
-        });
-
-        container.appendChild(card);
-      });
-
-      document.getElementById("running-text").innerText = allRiwayat.slice(-10).join(" ⚡ ");
-    }
-
-    async function fetchBroadcast() {
-      const res = await fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/broadcast.json");
-      const data = await res.json();
-      const now = Math.floor(Date.now()/1000);
-      if (data && data.pesan && now < data.pesan_exp) {
-        document.getElementById("broadcast").innerText = data.pesan;
-      } else {
-        document.getElementById("broadcast").style.display = "none";
+    setInterval(() => {
+      if (interval === 0 || disableRefresh) return;
+      countdown--;
+      document.getElementById("countdown").innerText = countdown;
+      if (countdown <= 0) {
+        loadData();
+        countdown = interval / 1000;
       }
+    }, 1000);
+
+    function formatRupiah(angka) {
+      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    fetchData();
-    fetchBroadcast();
-    setInterval(fetchData, 60000);
-    setInterval(fetchBroadcast, 60000);
+    function loadData() {
+      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("data-container");
+          const scrollText = document.getElementById("scroll-content");
+          const top1Info = document.getElementById("top1-info");
+          const globalMessage = document.getElementById("global-message");
+          container.innerHTML = "";
+          let entries = Object.entries(data || {});
+          entries.sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0));
+
+          let top1 = entries[0]?.[1]?.nama || "-";
+          top1Info.innerText = "Top 1: " + top1;
+
+          let scrollRiwayat = [];
+
+          const searchQuery = document.getElementById("search").value.toLowerCase();
+
+          for (let [nama, pemain] of entries) {
+            if (!nama.toLowerCase().includes(searchQuery)) continue;
+
+            const div = document.createElement("div");
+            div.className = "card";
+
+            const total = formatRupiah(pemain.uang || 0);
+            const tag = entries.indexOf([nama, pemain]) === 0 ? " 🏅" : "";
+
+            div.innerHTML = `<strong>📛 ${pemain.nama}${tag}</strong><br>
+              <span class="total">Total Uang: ${total}</span><br>
+              <small>Diperbarui: ${pemain.riwayat?.slice(-1)[0]?.split(']')[0].replace('[', '') || '-'}</small><br>
+              <button class='btn btn-blue' onclick='toggleRiwayat(this)'>📜 Lihat Riwayat</button>
+              <button class='menu-button' onclick='toggleMenu(this)'>⋮</button>
+              <div class='menu-options'>
+                <button onclick='alert("Fitur ubah nama belum tersedia")'>✏️ Ubah Nama</button>
+                <button onclick='alert("Konfirmasi penghapusan")'>🗑️ Hapus Forum</button>
+              </div>
+              <div class="riwayat">${pemain.riwayat?.map(r => "• "+r).join("<br>") || "Tidak ada riwayat"}</div>`;
+
+            container.appendChild(div);
+            scrollRiwayat = scrollRiwayat.concat(pemain.riwayat?.slice(-2).map(r => `${pemain.nama}: ${r}`) || []);
+          }
+
+          scrollText.innerText = scrollRiwayat.join(" | ");
+
+          fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/pesan.json")
+            .then(r => r.json())
+            .then(msg => {
+              if (msg && msg.teks) {
+                globalMessage.innerHTML = `<div class='message-global'>📢 ${msg.teks}</div>`;
+              }
+            });
+        });
+    }
+
+    function toggleRiwayat(btn) {
+      const div = btn.parentElement.querySelector(".riwayat");
+      const isShown = div.style.display === "block";
+      div.style.display = isShown ? "none" : "block";
+      btn.innerText = isShown ? "📜 Lihat Riwayat" : "🔽 Tutup Riwayat";
+      disableRefresh = !isShown;
+    }
+
+    function toggleMenu(btn) {
+      const menu = btn.parentElement.querySelector(".menu-options");
+      const isShown = menu.style.display === "block";
+      document.querySelectorAll(".menu-options").forEach(m => m.style.display = "none");
+      menu.style.display = isShown ? "none" : "block";
+      disableRefresh = true;
+      setTimeout(() => disableRefresh = false, 5000);
+    }
+
+    loadData();
   </script></body>
 </html>
