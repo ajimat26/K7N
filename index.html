@@ -72,16 +72,11 @@
 <body>
   <h1>📊 Daftar Uang Duty</h1>
 
-  <div style="margin: 10px 0;">
-    <input id="pesanInput" type="text" placeholder="Ketik pesan admin..." style="width:70%;padding:5px;border-radius:5px;border:1px solid #ccc;font-size:13px;">
-    <button onclick="kirimPesanAdmin()" style="padding:5px 10px;background:#28a745;color:white;border:none;border-radius:5px;font-size:13px;">Kirim Pesan</button>
-  </div>
-
   <div id="refreshOptions">
     Auto Refresh:
     <select id="refreshSelect">
       <option value="0">Mati</option>
-      <option value="1">1 menit</option>
+      <option value="1" selected>1 menit</option>
       <option value="2">2 menit</option>
       <option value="3">3 menit</option>
       <option value="5">5 menit</option>
@@ -94,7 +89,7 @@
   <div id="data-container">Memuat data...</div>
 
   <script>
-    let refreshInterval = 0;
+    let refreshInterval = 1;
     let countdownTimer, refreshTimer;
     let remaining = 0;
     let dataRiwayat = [];
@@ -188,8 +183,8 @@
           <div style="font-weight:bold">📛 ${pemain.nama || nama}${tag}
             <span class="options">⋮</span>
             <div class="dropdown">
-              <div>✏️ Ubah Nama</div>
-              <div>🗑️ Hapus Forum</div>
+              <div onclick="ubahNama('${nama}')">✏️ Ubah Nama</div>
+              <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
             </div>
           </div>
           <div class="total">Total Uang: ${total}</div>
@@ -228,26 +223,20 @@
       }
     }
 
-    function kirimPesanAdmin() {
-      const pesan = document.getElementById("pesanInput").value.trim();
-      if (pesan === "") {
-        alert("Pesan tidak boleh kosong!");
-        return;
-      }
-
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/pesan.json", {
+    function ubahNama(id) {
+      const baru = prompt("Masukkan nama baru:");
+      if (!baru) return;
+      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}/nama.json`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pesan)
-      })
-      .then(() => {
-        alert("Pesan admin berhasil dikirim!");
-        document.getElementById("pesanInput").value = "";
-        fetchData();
-      })
-      .catch(() => {
-        alert("Gagal mengirim pesan.");
-      });
+        body: JSON.stringify(baru)
+      }).then(fetchData);
+    }
+
+    function hapusForum(id) {
+      if (!confirm("Yakin ingin menghapus forum ini?")) return;
+      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}.json`, {
+        method: "DELETE"
+      }).then(fetchData);
     }
 
     let timeout;
@@ -262,6 +251,7 @@
     });
 
     fetchData();
+    startAutoRefresh();
   </script>
 </body>
 </html>
