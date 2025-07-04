@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>UangDuty Viewer</title>
@@ -67,12 +66,18 @@
       border: 1px solid #ccc;
       font-size: 13px;
     }
+    .top3 {
+      font-size: 12px;
+      color: #555;
+      text-align: right;
+      margin-top: -5px;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>📊 Daftar Uang Duty</h1>
-
-  <div id="refreshOptions">
+  <div class="top3" id="top3Display">🏆 Top 3: -</div>  <div id="refreshOptions">
     Auto Refresh:
     <select id="refreshSelect">
       <option value="0">Mati</option>
@@ -81,14 +86,10 @@
       <option value="3">3 menit</option>
       <option value="5">5 menit</option>
     </select>
-  </div>
-
-  <div id="countdownDisplay">⏳ --</div>
+  </div>  <div id="countdownDisplay">⏳ --</div>
   <div id="runningText"><div id="runningTextContent">Memuat riwayat terbaru...</div></div>
   <input type="text" id="searchInput" placeholder="🔍 Cari nama forum..." />
-  <div id="data-container">Memuat data...</div>
-
-  <script>
+  <div id="data-container">Memuat data...</div>  <script>
     let refreshInterval = 1;
     let countdownTimer, refreshTimer;
     let remaining = 0;
@@ -155,6 +156,9 @@
             Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0))
           );
 
+          const topNames = Object.values(dataRiwayat).slice(0, 3).map(d => d.nama || "-");
+          document.getElementById("top3Display").textContent = "🏆 Top 3: " + topNames.join(", ");
+
           displayData(filteredData());
 
           const allRiwayat = [];
@@ -177,6 +181,7 @@
 
         const total = formatRupiah(pemain.uang || 0);
         const lastUpdate = pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat[pemain.riwayat.length - 1] : "Tidak ada";
+        const setoran = pemain.setoran || 0;
 
         const tag = index === 0 ? `<span class="tag-top">Top 1</span>` : "";
         card.innerHTML = `
@@ -188,6 +193,7 @@
             </div>
           </div>
           <div class="total">Total Uang: ${total}</div>
+          <div>📥 Setoran: ${setoran}x</div>
           <div style="font-size: 12px; color: gray; margin-top: 4px;">⏱️ Update: ${lastUpdate}</div>
           <button onclick="toggleRiwayat(this)" style="margin-top:6px;padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">Lihat Riwayat</button>
           <div class="riwayat">
@@ -252,6 +258,5 @@
 
     fetchData();
     startAutoRefresh();
-  </script>
-</body>
-</html>
+  </script></body>
+  </html>
