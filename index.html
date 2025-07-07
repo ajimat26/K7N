@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>UangDuty Viewer</title>
@@ -9,27 +8,42 @@
     h1 { font-size: 18px; margin-bottom: 10px; }
     #refreshOptions, #countdownDisplay { font-size: 14px; margin: 5px 0; }
     .card {
-      background: white; padding: 10px; margin-bottom: 8px;
-      border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: white;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
     }
     .total { font-weight: bold; color: green; }
-    .riwayat, .arsip { display: none; font-size: 13px; margin-top: 8px; }
+    .riwayat, .arsip, .peringatan { display: none; font-size: 13px; margin-top: 8px; }
     .options { position: absolute; top: 8px; right: 10px; cursor: pointer; }
     .dropdown {
-      display: none; position: absolute; top: 25px; right: 0;
-      background: white; border: 1px solid #ccc;
-      border-radius: 5px; font-size: 13px; z-index: 10;
+      display: none;
+      position: absolute;
+      top: 25px;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 13px;
+      z-index: 10;
     }
     .dropdown div {
-      padding: 5px 10px; cursor: pointer;
+      padding: 5px 10px;
+      cursor: pointer;
     }
     .dropdown div:hover { background: #eee; }
     .tag-top { background: gold; padding: 2px 5px; font-size: 10px; border-radius: 4px; margin-left: 5px; }
     #runningText {
-      background: black; color: white; padding: 5px;
-      overflow: hidden; white-space: nowrap;
-      margin-bottom: 10px; border-radius: 8px;
+      background: black;
+      color: white;
+      padding: 5px;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 10px;
+      position: relative;
+      border-radius: 8px;
     }
     #runningTextContent {
       display: inline-block;
@@ -40,23 +54,30 @@
       to { transform: translateX(-100%); }
     }
     #searchInput {
-      width: 100%; padding: 6px; margin: 10px 0;
-      border-radius: 6px; border: 1px solid #ccc;
+      width: 100%;
+      padding: 6px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
     select {
-      padding: 5px; border-radius: 5px;
-      border: 1px solid #ccc; font-size: 13px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 13px;
     }
-    .top3box {
-      font-size: 12px; text-align: right;
-      margin-bottom: 5px; color: #444;
+    .arsip-btn {
+      margin-left: 10px;
+      font-size: 12px;
+      color: #007bff;
+      cursor: pointer;
     }
+    .arsip-content { margin-top: 5px; font-size: 12px; color: #555; }
+    .peringatan-box { margin-top: 5px; font-size: 12px; color: red; }
   </style>
 </head>
 <body>
-  <h1>📊 Daftar Uang Duty</h1>
-
-  <div id="refreshOptions">
+  <h1>📊 Daftar Uang Duty</h1>  <div id="refreshOptions">
     Auto Refresh:
     <select id="refreshSelect">
       <option value="0">Mati</option>
@@ -65,15 +86,10 @@
       <option value="3">3 menit</option>
       <option value="5">5 menit</option>
     </select>
-  </div>
-
-  <div id="countdownDisplay">⏳ --</div>
-  <div class="top3box" id="top3box">🏆 Top 3: ...</div>
+  </div>  <div id="countdownDisplay">⏳ --</div>
   <div id="runningText"><div id="runningTextContent">Memuat riwayat terbaru...</div></div>
   <input type="text" id="searchInput" placeholder="🔍 Cari nama forum..." />
-  <div id="data-container">Memuat data...</div>
-
-  <script>
+  <div id="data-container">Memuat data...</div>  <script>
     let refreshInterval = 1;
     let countdownTimer, refreshTimer;
     let remaining = 0;
@@ -83,7 +99,7 @@
     const countdownDisplay = document.getElementById("countdownDisplay");
     const runningText = document.getElementById("runningTextContent");
 
-    document.getElementById("refreshSelect").addEventListener("change", function () {
+    document.getElementById("refreshSelect").addEventListener("change", function() {
       refreshInterval = parseInt(this.value);
       startAutoRefresh();
     });
@@ -130,19 +146,6 @@
       }
     }
 
-    function fetchTop3Mingguan() {
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/mingguan.json")
-        .then(res => res.json())
-        .then(data => {
-          if (!data) return;
-          const sorted = Object.entries(data)
-            .sort((a, b) => (b[1].uang_mingguan || 0) - (a[1].uang_mingguan || 0))
-            .slice(0, 3)
-            .map(([nama, val], i) => `${i + 1}. ${val.nama || nama} (${formatRupiah(val.uang_mingguan)})`);
-          document.getElementById("top3box").innerHTML = "🏆 Top 3: " + sorted.join(" | ");
-        });
-    }
-
     function fetchData() {
       fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
         .then(res => res.json())
@@ -175,6 +178,11 @@
 
         const total = formatRupiah(pemain.uang || 0);
         const lastUpdate = pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat[pemain.riwayat.length - 1] : "Tidak ada";
+        const arsipSetoran = pemain.riwayat ? pemain.riwayat.filter(r => r.includes("Setor")).join("<br>") : "-";
+
+        const peringatan = [];
+        if ((!pemain.riwayat || pemain.riwayat.length === 0) && (pemain.uang || 0) > 500000) peringatan.push("⚠️ Uang tinggi tapi riwayat kosong");
+        if (pemain.uang && pemain.uang % 1000 !== 0) peringatan.push("⚠️ Uang bukan kelipatan seragam");
 
         const tag = index === 0 ? `<span class="tag-top">Top 1</span>` : "";
         card.innerHTML = `
@@ -187,12 +195,9 @@
           </div>
           <div class="total">Total Uang: ${total}</div>
           <div style="font-size: 12px; color: gray; margin-top: 4px;">⏱️ Update: ${lastUpdate}</div>
-          <div style="margin-top:6px;">
-            <button onclick="toggleRiwayat(this)" style="padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">Lihat Riwayat</button>
-            <button onclick="toggleArsip(this, '${nama}')" style="padding:4px 10px;background:#28a745;color:white;border:none;border-radius:5px;">📦 Arsip Setoran</button>
-          </div>
-          <div class="riwayat"></div>
-          <div class="arsip">⏳ Memuat arsip...</div>
+          <div class="arsip-btn" onclick="toggleArsip(this)">📦 Arsip Setoran</div>
+          <div class="arsip"><br>${arsipSetoran || "-"}</div>
+          <div class="peringatan-box">${peringatan.join("<br>")}</div>
         `;
 
         const options = card.querySelector(".options");
@@ -211,32 +216,9 @@
       });
     }
 
-    function toggleRiwayat(btn) {
-      const r = btn.parentElement.nextElementSibling;
-      r.style.display = r.style.display === "block" ? "none" : "block";
-      btn.textContent = r.style.display === "block" ? "Tutup Riwayat" : "Lihat Riwayat";
-
-      if (r.innerHTML.trim() === "") {
-        const nama = btn.closest(".card").querySelector("div").textContent.trim().split("📛 ")[1].split("⋮")[0];
-        fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${nama}.json`)
-          .then(res => res.json())
-          .then(data => {
-            r.innerHTML = `<br><u>📜 Riwayat:</u><br>` + (data.riwayat ? data.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat");
-          });
-      }
-    }
-
-    function toggleArsip(btn, nama) {
-      const a = btn.parentElement.nextElementSibling.nextElementSibling;
-      a.style.display = a.style.display === "block" ? "none" : "block";
-      btn.textContent = a.style.display === "block" ? "Tutup Arsip" : "📦 Arsip Setoran";
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/arsip/${nama}.json`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data) return a.innerHTML = "Tidak ada arsip setoran.";
-          const daftar = Object.entries(data).map(([tanggal, jumlah]) => `📅 ${tanggal}: <b>${formatRupiah(jumlah)}</b>`).join("<br>");
-          a.innerHTML = daftar;
-        });
+    function toggleArsip(el) {
+      const arsip = el.nextElementSibling;
+      arsip.style.display = arsip.style.display === "block" ? "none" : "block";
     }
 
     function ubahNama(id) {
@@ -267,8 +249,6 @@
     });
 
     fetchData();
-    fetchTop3Mingguan();
     startAutoRefresh();
-  </script>
-</body>
-  </html>
+  </script></body>
+</html>
