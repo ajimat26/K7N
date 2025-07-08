@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>UangDuty Viewer</title>
@@ -17,7 +16,7 @@
       position: relative;
     }
     .total { font-weight: bold; color: green; }
-    .riwayat, .arsip { display: none; font-size: 13px; margin-top: 8px; }
+    .riwayat { display: none; font-size: 13px; margin-top: 8px; }
     .options { position: absolute; top: 8px; right: 10px; cursor: pointer; }
     .dropdown {
       display: none;
@@ -74,13 +73,14 @@
       margin-top: -5px;
       margin-bottom: 5px;
     }
-    .warning {
-      background: #ffebcc;
-      padding: 5px;
-      font-size: 12px;
-      margin-top: 5px;
-      border-left: 4px solid orange;
-      border-radius: 5px;
+    .notif-warning {
+      background: red;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 50%;
+      margin-left: 5px;
+      vertical-align: top;
     }
   </style>
 </head>
@@ -101,195 +101,190 @@
   <div id="runningText"><div id="runningTextContent">Memuat riwayat terbaru...</div></div>
   <input type="text" id="searchInput" placeholder="🔍 Cari nama forum..." />
   <div id="data-container">Memuat data...</div>
-
   <script>
     let refreshInterval = 1;
     let countdownTimer, refreshTimer;
     let remaining = 0;
-    let dataRiwayat = [];
+    let dataRiwayat = [];const container = document.getElementById("data-container");
+const countdownDisplay = document.getElementById("countdownDisplay");
+const runningText = document.getElementById("runningTextContent");
 
-    const container = document.getElementById("data-container");
-    const countdownDisplay = document.getElementById("countdownDisplay");
-    const runningText = document.getElementById("runningTextContent");
+document.getElementById("refreshSelect").addEventListener("change", function() {
+  refreshInterval = parseInt(this.value);
+  startAutoRefresh();
+});
 
-    document.getElementById("refreshSelect").addEventListener("change", function() {
-      refreshInterval = parseInt(this.value);
-      startAutoRefresh();
-    });
+document.getElementById("searchInput").addEventListener("input", () => {
+  displayData(filteredData());
+});
 
-    document.getElementById("searchInput").addEventListener("input", () => {
-      displayData(filteredData());
-    });
+function formatRupiah(angka) {
+  return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-    function formatRupiah(angka) {
-      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+function filteredData() {
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+  return Object.entries(dataRiwayat).filter(([nama]) =>
+    nama.toLowerCase().includes(keyword)
+  );
+}
 
-    function filteredData() {
-      const keyword = document.getElementById("searchInput").value.toLowerCase();
-      return Object.entries(dataRiwayat).filter(([nama]) =>
-        nama.toLowerCase().includes(keyword)
-      );
-    }
+function startAutoRefresh() {
+  clearInterval(refreshTimer);
+  clearInterval(countdownTimer);
 
-    function startAutoRefresh() {
-      clearInterval(refreshTimer);
-      clearInterval(countdownTimer);
+  if (refreshInterval > 0) {
+    remaining = refreshInterval * 60;
+    countdownDisplay.textContent = `⏳ ${remaining}s`;
 
-      if (refreshInterval > 0) {
-        remaining = refreshInterval * 60;
+    countdownTimer = setInterval(() => {
+      if (remaining > 0) {
+        remaining--;
         countdownDisplay.textContent = `⏳ ${remaining}s`;
-
-        countdownTimer = setInterval(() => {
-          if (remaining > 0) {
-            remaining--;
-            countdownDisplay.textContent = `⏳ ${remaining}s`;
-          } else {
-            countdownDisplay.textContent = `⏳ 0s`;
-            clearInterval(countdownTimer);
-          }
-        }, 1000);
-
-        refreshTimer = setInterval(() => {
-          fetchData();
-          remaining = refreshInterval * 60;
-        }, refreshInterval * 60 * 1000);
       } else {
-        countdownDisplay.textContent = "⏳ --";
+        countdownDisplay.textContent = `⏳ 0s`;
+        clearInterval(countdownTimer);
+      }
+    }, 1000);
+
+    refreshTimer = setInterval(() => {
+      fetchData();
+      remaining = refreshInterval * 60;
+    }, refreshInterval * 60 * 1000);
+  } else {
+    countdownDisplay.textContent = "⏳ --";
+  }
+}
+
+function fetchData() {
+  fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
+    .then(res => res.json())
+    .then(data => {
+      if (!data) return;
+
+      dataRiwayat = Object.fromEntries(
+        Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0))
+      );
+
+      const topNames = Object.values(dataRiwayat).slice(0, 3).map(d => d.nama || "-");
+      document.getElementById("top3Display").textContent = "🏆 Top 3: " + topNames.join(", ");
+
+      displayData(filteredData());
+
+      const allRiwayat = [];
+      for (let nama in data) {
+        if (data[nama].riwayat) {
+          data[nama].riwayat.slice(-2).forEach(r => {
+            allRiwayat.push(`${nama}: ${r}`);
+          });
+        }
+      }
+      runningText.textContent = allRiwayat.reverse().join(" ⚡ ");
+    });
+}
+
+function displayData(dataArray) {
+  container.innerHTML = "";
+  dataArray.forEach(([nama, pemain], index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const total = formatRupiah(pemain.uang || 0);
+    const lastUpdate = pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat[pemain.riwayat.length - 1] : "Tidak ada";
+    const setoran = pemain.setoran || 0;
+
+    let adaKejanggalan = false;
+    if (pemain.riwayat) {
+      for (let r of pemain.riwayat) {
+        if (r.toLowerCase().includes("tidak wajar") || r.toLowerCase().includes("mendadak")) {
+          adaKejanggalan = true;
+          break;
+        }
       }
     }
 
-    function fetchData() {
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-        .then(res => res.json())
-        .then(data => {
-          if (!data) return;
+    const tag = index === 0 ? `<span class="tag-top">Top 1</span>` : "";
+    card.innerHTML = `
+      <div style="font-weight:bold">📛 ${pemain.nama || nama}${tag}
+        <span class="options">⋮</span>
+        <div class="dropdown">
+          <div onclick="ubahNama('${nama}')">✏️ Ubah Nama</div>
+          <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
+        </div>
+      </div>
+      <div class="total">Total Uang: ${total}</div>
+      <div>📥 Setoran: ${setoran}x</div>
+      <div style="font-size: 12px; color: gray; margin-top: 4px;">⏱️ Update: ${lastUpdate}</div>
+      <button onclick="toggleRiwayat(this)" style="margin-top:6px;padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">
+        Lihat Riwayat
+      </button>
+      <button onclick="alert('Arsip: \n' + ${JSON.stringify(pemain.riwayat || [])}.join('\n'))" style="margin-left: 5px;padding:4px 10px;background:#28a745;color:white;border:none;border-radius:5px;">
+        Arsip
+        ${adaKejanggalan ? '<span class="notif-warning">!</span>' : ''}
+      </button>
+      <div class="riwayat">
+        <br><u>📜 Riwayat:</u><br>
+        ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
+      </div>
+    `;
 
-          dataRiwayat = Object.fromEntries(
-            Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0))
-          );
+    const options = card.querySelector(".options");
+    const dropdown = card.querySelector(".dropdown");
 
-          const topNames = Object.values(dataRiwayat)
-            .sort((a, b) => (b.uang || 0) - (a.uang || 0))
-            .slice(0, 3)
-            .map(d => d.nama || "-");
-          document.getElementById("top3Display").textContent = "🏆 Top 3: " + topNames.join(", ");
-
-          displayData(filteredData());
-
-          const allRiwayat = [];
-          for (let nama in data) {
-            if (data[nama].riwayat) {
-              data[nama].riwayat.slice(-2).forEach(r => {
-                allRiwayat.push(`${nama}: ${r}`);
-              });
-            }
-          }
-          runningText.textContent = allRiwayat.reverse().join(" ⚡ ");
-        });
-    }
-
-    function displayData(dataArray) {
-      container.innerHTML = "";
-      dataArray.forEach(([nama, pemain], index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const total = formatRupiah(pemain.uang || 0);
-        const lastUpdate = pemain.riwayat?.slice(-1)[0] || "Tidak ada";
-        const setoran = pemain.setoran || 0;
-        const arsip = pemain.arsip || [];
-
-        let warning = '';
-        if (setoran > 5 && (pemain.uang || 0) < 50000) {
-          warning = '⚠️ Banyak setoran tapi uang kecil';
-        }
-        if ((pemain.uang || 0) > 1000000 && setoran === 0) {
-          warning = '⚠️ Uang besar tapi belum pernah setor';
-        }
-
-        const tag = index === 0 ? `<span class="tag-top">Top 1</span>` : "";
-        card.innerHTML = `
-          <div style="font-weight:bold">📛 ${pemain.nama || nama}${tag}
-            <span class="options">⋮</span>
-            <div class="dropdown">
-              <div onclick="ubahNama('${nama}')">✏️ Ubah Nama</div>
-              <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
-            </div>
-          </div>
-          <div class="total">Total Uang: ${total}</div>
-          <div>📥 Setoran: ${setoran}x</div>
-          <div style="font-size: 12px; color: gray;">⏱️ Update: ${lastUpdate}</div>
-          ${warning ? `<div class="warning">${warning}</div>` : ''}
-          <button onclick="toggleRiwayat(this)" style="margin-top:6px;padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">Lihat Riwayat</button>
-          <button onclick="lihatArsip('${nama}', ${JSON.stringify(arsip)})" style="margin-left:6px;padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">Lihat Arsip</button>
-          <div class="riwayat">
-            <br><u>📜 Riwayat:</u><br>
-            ${pemain.riwayat?.map(r => "• " + r).join("<br>") || "Tidak ada riwayat"}
-          </div>
-        `;
-
-        const options = card.querySelector(".options");
-        const dropdown = card.querySelector(".dropdown");
-
-        options.addEventListener("click", e => {
-          e.stopPropagation();
-          dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-        });
-
-        document.addEventListener("click", () => {
-          document.querySelectorAll(".dropdown").forEach(d => d.style.display = "none");
-        });
-
-        container.appendChild(card);
-      });
-    }
-
-    function toggleRiwayat(btn) {
-      const r = btn.nextElementSibling;
-      if (r.style.display === "block") {
-        r.style.display = "none";
-        btn.textContent = "Lihat Riwayat";
-      } else {
-        r.style.display = "block";
-        btn.textContent = "Tutup Riwayat";
-      }
-    }
-
-    function lihatArsip(nama, arsip) {
-      const isi = arsip.length > 0 ? arsip.map(a => "• " + a).join("\n") : "Tidak ada arsip setoran.";
-      alert("📁 Arsip Setoran " + nama + ":\n\n" + isi);
-    }
-
-    function ubahNama(id) {
-      const baru = prompt("Masukkan nama baru:");
-      if (!baru) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}/nama.json`, {
-        method: "PUT",
-        body: JSON.stringify(baru)
-      }).then(fetchData);
-    }
-
-    function hapusForum(id) {
-      if (!confirm("Yakin ingin menghapus forum ini?")) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}.json`, {
-        method: "DELETE"
-      }).then(fetchData);
-    }
-
-    let timeout;
-    runningText.parentElement.addEventListener("pointerdown", () => {
-      runningText.style.animationPlayState = "paused";
-      clearTimeout(timeout);
-    });
-    runningText.parentElement.addEventListener("pointerup", () => {
-      timeout = setTimeout(() => {
-        runningText.style.animationPlayState = "running";
-      }, 4000);
+    options.addEventListener("click", e => {
+      e.stopPropagation();
+      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
     });
 
-    fetchData();
-    startAutoRefresh();
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".dropdown").forEach(d => d.style.display = "none");
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function toggleRiwayat(btn) {
+  const r = btn.nextElementSibling;
+  if (r.style.display === "block") {
+    r.style.display = "none";
+    btn.textContent = "Lihat Riwayat";
+  } else {
+    r.style.display = "block";
+    btn.textContent = "Tutup Riwayat";
+  }
+}
+
+function ubahNama(id) {
+  const baru = prompt("Masukkan nama baru:");
+  if (!baru) return;
+  fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}/nama.json`, {
+    method: "PUT",
+    body: JSON.stringify(baru)
+  }).then(fetchData);
+}
+
+function hapusForum(id) {
+  if (!confirm("Yakin ingin menghapus forum ini?")) return;
+  fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}.json`, {
+    method: "DELETE"
+  }).then(fetchData);
+}
+
+let timeout;
+runningText.parentElement.addEventListener("pointerdown", () => {
+  runningText.style.animationPlayState = "paused";
+  clearTimeout(timeout);
+});
+runningText.parentElement.addEventListener("pointerup", () => {
+  timeout = setTimeout(() => {
+    runningText.style.animationPlayState = "running";
+  }, 4000);
+});
+
+fetchData();
+startAutoRefresh();
+
   </script>
 </body>
-    </html>
+</html>
