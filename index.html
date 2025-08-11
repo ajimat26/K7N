@@ -1,279 +1,306 @@
-<!DOCTYPE html><html lang="id">
+<!doctype html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>UangDuty Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: sans-serif; background: #f4f4f4; margin: 10px; }
-    h1 { font-size: 18px; margin-bottom: 10px; }
-    #refreshOptions, #countdownDisplay { font-size: 14px; margin: 5px 0; }
-    .card {
-      background: white;
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: relative;
-    }
-    .total { font-weight: bold; color: green; }
-    .riwayat { display: none; font-size: 13px; margin-top: 8px; }
-    .options { position: absolute; top: 8px; right: 10px; cursor: pointer; }
-    .dropdown {
-      display: none;
-      position: absolute;
-      top: 25px;
-      right: 0;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 13px;
-      z-index: 10;
-    }
-    .dropdown div {
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .dropdown div:hover { background: #eee; }
-    .tag-top { background: gold; padding: 2px 5px; font-size: 10px; border-radius: 4px; margin-left: 5px; }
-    #runningText {
-      background: black;
-      color: white;
-      padding: 5px;
-      overflow: hidden;
-      white-space: nowrap;
-      margin-bottom: 10px;
-      position: relative;
-      border-radius: 8px;
-    }
-    #runningTextContent {
-      display: inline-block;
-      animation: scrollText 30s linear infinite;
-    }
-    @keyframes scrollText {
-      from { transform: translateX(100%); }
-      to { transform: translateX(-100%); }
-    }
-    #searchInput {
-      width: 100%;
-      padding: 6px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    select {
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 13px;
-    }
-    .top3 {
-      font-size: 12px;
-      color: #555;
-      text-align: right;
-      margin-top: -5px;
-      margin-bottom: 5px;
-    }
-    .notif-red {
-      height: 8px;
-      width: 8px;
-      background: red;
-      border-radius: 50%;
-      display: inline-block;
-      margin-left: 5px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lowongan Kerja — Jaga Toko (Prank)</title>
+<style>
+  /* full background menggunakan background.jpg (letakkan file di folder sama) */
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  body{
+    background: url('./background.jpg') center/cover no-repeat fixed;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* overlay gelap untuk kontras */
+  .overlay {
+    position: absolute;
+    inset:0;
+    background: rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    z-index:2;
+    width: 360px;
+    max-width: calc(100% - 40px);
+    background: rgba(255,255,255,0.95);
+    border-radius:12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    padding:18px;
+    pointer-events: auto;
+  }
+
+  h1{
+    margin:0 0 8px 0;
+    font-size:18px;
+    color:#112;
+    text-align:center;
+  }
+  p.lead{
+    margin:0 0 14px 0;
+    font-size:13px;
+    color:#334;
+    text-align:center;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    color:#223;
+    margin-bottom:6px;
+  }
+  input[type="text"], input[type="number"], input[type="tel"], select, textarea{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #cfcfcf;
+    box-sizing:border-box;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+  input[type="file"]{
+    margin-bottom:10px;
+  }
+
+  .small{
+    font-size:12px;
+    color:#666;
+    margin-bottom:10px;
+  }
+
+  .row{
+    display:flex;
+    gap:8px;
+  }
+  .row > *{ flex:1; }
+
+  button{
+    width:100%;
+    padding:10px;
+    background:#0b7;
+    color:#032;
+    font-weight:600;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  button:active{ transform:translateY(1px); }
+
+  .preview{
+    width:100%;
+    height:120px;
+    border-radius:8px;
+    border:1px dashed #bbb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:#fafafa;
+    margin-bottom:10px;
+  }
+  .preview img{ width:100%; object-fit:cover; }
+
+  .note{
+    font-size:12px;
+    color:#b22;
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* modal */
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background: rgba(0,0,0,0.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+  }
+  .modal {
+    background:white;
+    padding:18px;
+    border-radius:12px;
+    width:320px;
+    max-width:90%;
+    text-align:center;
+  }
+  .modal h2{ margin:0 0 8px 0; font-size:18px; }
+  .muted{ font-size:13px; color:#444; margin-bottom:10px; }
+  .disclaimer { font-size:12px; color:#666; margin-top:8px; }
+</style>
 </head>
 <body>
-  <h1>📊 Daftar Uang Duty</h1>
-  <div class="top3" id="top3Display">🏆 Top 3: -</div>
-  <div id="refreshOptions">
-    Auto Refresh:
-    <select id="refreshSelect">
-      <option value="0">Mati</option>
-      <option value="1" selected>1 menit</option>
-      <option value="2">2 menit</option>
-      <option value="3">3 menit</option>
-      <option value="5">5 menit</option>
-    </select>
+  <div class="overlay" aria-hidden="true"></div>
+
+  <div class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Lowongan Kerja — Jaga Toko</h1>
+    <p class="lead">Butuh pekerja untuk jaga toko. Isi data di bawah untuk melamar. <strong>(Prank demo)</strong></p>
+
+    <form id="jobForm" novalidate>
+      <label for="name">Nama lengkap</label>
+      <input id="name" name="name" type="text" placeholder="Contoh: Budi Santoso" required />
+
+      <div class="row">
+        <div>
+          <label for="age">Umur</label>
+          <input id="age" name="age" type="number" placeholder="Umur (tahun)" min="12" required />
+        </div>
+        <div>
+          <label for="origin">Asal</label>
+          <input id="origin" name="origin" type="text" placeholder="Contoh: Jakarta" required />
+        </div>
+      </div>
+
+      <label for="phone">Nomor HP</label>
+      <input id="phone" name="phone" type="tel" placeholder="08xxxxxxxxxx" required />
+
+      <label for="ijazah">Upload Foto Ijazah (minimal SMP)</label>
+      <input id="ijazah" name="ijazah" type="file" accept="image/*" required />
+      <div class="small">Format: JPG/PNG. File hanya disimpan di browser (localStorage) — tidak dikirim ke server.</div>
+
+      <div class="preview" id="preview">Preview ijasah akan muncul di sini</div>
+
+      <label>
+        <input type="checkbox" id="confirmIjazah" required /> Saya memastikan ijazah minimal tingkat SMP (wajib)
+      </label>
+
+      <button type="submit">Kirim Lamaran</button>
+
+      <div class="note" id="errorMsg" role="alert" aria-live="polite"></div>
+    </form>
+
+    <div class="disclaimer" style="margin-top:10px; font-size:12px; color:#444">
+      Template prank/demo — Jangan gunakan untuk menipu orang. Simpan file gambar sebagai <strong>background.jpg</strong>.
+    </div>
   </div>
-  <div id="countdownDisplay">⏳ --</div>
-  <div id="runningText"><div id="runningTextContent">Memuat riwayat terbaru...</div></div>
-  <input type="text" id="searchInput" placeholder="🔍 Cari nama forum..." />
-  <div id="data-container">Memuat data...</div>  <script>
-    let refreshInterval = 1;
-    let countdownTimer, refreshTimer;
-    let remaining = 0;
-    let dataRiwayat = [];
 
-    const container = document.getElementById("data-container");
-    const countdownDisplay = document.getElementById("countdownDisplay");
-    const runningText = document.getElementById("runningTextContent");
+  <!-- modal hasil -->
+  <div class="modal-backdrop" id="backdrop" role="dialog" aria-modal="true">
+    <div class="modal" id="modal">
+      <h2 id="modalTitle">Terima kasih!</h2>
+      <p class="muted" id="modalText">Data lamaranmu tersimpan (hanya di browser). Ini adalah halaman prank/demo.</p>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button id="closeBtn" style="background:#08a; color:white;">Tutup</button>
+        <button id="seeDataBtn" style="background:#0a7; color:#023;">Lihat Data</button>
+      </div>
+      <div class="disclaimer" id="rawData" style="display:none; text-align:left; margin-top:10px; font-size:12px;"></div>
+    </div>
+  </div>
 
-    document.getElementById("refreshSelect").addEventListener("change", function() {
-      refreshInterval = parseInt(this.value);
-      startAutoRefresh();
-    });
+<script>
+  const form = document.getElementById('jobForm');
+  const ijazahInput = document.getElementById('ijazah');
+  const preview = document.getElementById('preview');
+  const errorMsg = document.getElementById('errorMsg');
+  const backdrop = document.getElementById('backdrop');
+  const modalText = document.getElementById('modalText');
+  const modalTitle = document.getElementById('modalTitle');
+  const seeDataBtn = document.getElementById('seeDataBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const rawData = document.getElementById('rawData');
 
-    document.getElementById("searchInput").addEventListener("input", () => {
-      displayData(filteredData());
-    });
+  // preview image
+  ijazahInput.addEventListener('change', e=>{
+    const f = ijazahInput.files[0];
+    preview.innerHTML = '';
+    if(!f){ preview.textContent = 'Preview ijasah akan muncul di sini'; return; }
+    if(!f.type.startsWith('image/')){ preview.textContent = 'File bukan gambar.'; return; }
+    const img = document.createElement('img');
+    img.alt = 'Preview ijasah';
+    const reader = new FileReader();
+    reader.onload = ()=> img.src = reader.result;
+    reader.readAsDataURL(f);
+    preview.appendChild(img);
+  });
 
-    function formatRupiah(angka) {
-      return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+  function validatePhone(n){
+    // sederhana: mulai dengan 08 dan 10-15 digit
+    const s = n.replace(/\s+/g,'');
+    return /^08\d{8,13}$/.test(s);
+  }
 
-    function filteredData() {
-      const keyword = document.getElementById("searchInput").value.toLowerCase();
-      return Object.entries(dataRiwayat).filter(([nama]) =>
-        nama.toLowerCase().includes(keyword)
-      );
-    }
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    errorMsg.textContent = '';
 
-    function startAutoRefresh() {
-      clearInterval(refreshTimer);
-      clearInterval(countdownTimer);
+    const name = form.name.value.trim();
+    const age = Number(form.age.value);
+    const origin = form.origin.value.trim();
+    const phone = form.phone.value.trim();
+    const file = ijazahInput.files[0];
+    const confirmIj = document.getElementById('confirmIjazah').checked;
 
-      if (refreshInterval > 0) {
-        remaining = refreshInterval * 60;
-        countdownDisplay.textContent = `⏳ ${remaining}s`;
+    if(!name){ errorMsg.textContent = 'Nama harus diisi.'; return; }
+    if(!age || age < 12){ errorMsg.textContent = 'Umur minimal 12 tahun.'; return; }
+    if(!origin){ errorMsg.textContent = 'Asal harus diisi.'; return; }
+    if(!validatePhone(phone)){ errorMsg.textContent = 'Format nomor HP tidak valid. Contoh: 081234567890'; return; }
+    if(!file){ errorMsg.textContent = 'Silakan upload foto ijasah.'; return; }
+    if(!confirmIj){ errorMsg.textContent = 'Centang konfirmasi ijazah minimal SMP.'; return; }
 
-        countdownTimer = setInterval(() => {
-          if (remaining > 0) {
-            remaining--;
-            countdownDisplay.textContent = `⏳ ${remaining}s`;
-          } else {
-            countdownDisplay.textContent = `⏳ 0s`;
-            clearInterval(countdownTimer);
-          }
-        }, 1000);
+    // baca file ijasah sebagai dataURL (disimpan local saja)
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const dataURL = reader.result;
 
-        refreshTimer = setInterval(() => {
-          fetchData();
-          remaining = refreshInterval * 60;
-        }, refreshInterval * 60 * 1000);
-      } else {
-        countdownDisplay.textContent = "⏳ --";
+      // simpan di localStorage (demo). Key unik bisa pakai timestamp
+      const key = 'prank_lowongan_' + Date.now();
+      const payload = {
+        name, age, origin, phone, ijazah:dataURL, created: new Date().toISOString()
+      };
+      try {
+        localStorage.setItem(key, JSON.stringify(payload));
+      } catch(err){
+        console.warn('localStorage error', err);
       }
-    }
 
-    function fetchData() {
-      fetch("https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data.json")
-        .then(res => res.json())
-        .then(data => {
-          if (!data) return;
+      // tampilkan modal hasil (ini bagian prank)
+      modalTitle.textContent = 'Lamaran Diterima (Demo)';
+      modalText.innerHTML = 'Hai <strong>' + escapeHtml(name) + '</strong> — lamaranmu telah tersimpan di browser. <br><em>(Ini hanya prank/demo, data tidak dikirim ke server.)</em>';
+      rawData.style.display = 'none';
+      backdrop.style.display = 'flex';
+      // simpan last key supaya bisa dilihat
+      backdrop.dataset.lastKey = key;
+    };
+    reader.readAsDataURL(file);
+  });
 
-          dataRiwayat = Object.fromEntries(
-            Object.entries(data).sort((a, b) => (b[1].uang || 0) - (a[1].uang || 0))
-          );
+  closeBtn.addEventListener('click', ()=> backdrop.style.display = 'none');
+  seeDataBtn.addEventListener('click', ()=>{
+    const key = backdrop.dataset.lastKey;
+    if(!key) return;
+    const raw = localStorage.getItem(key);
+    if(!raw){ rawData.textContent = 'Tidak ada data.'; rawData.style.display='block'; return; }
+    const obj = JSON.parse(raw);
+    // tampilkan ringkasan termasuk thumbnail (dataURI)
+    rawData.style.display='block';
+    rawData.innerHTML = '<strong>Ringkasan data:</strong><br>'
+      + 'Nama: ' + escapeHtml(obj.name) + '<br>'
+      + 'Umur: ' + escapeHtml(obj.age) + '<br>'
+      + 'Asal: ' + escapeHtml(obj.origin) + '<br>'
+      + 'No HP: ' + escapeHtml(obj.phone) + '<br>'
+      + '<div style="margin-top:8px"><strong>Preview Ijazah:</strong><br><img src="' + obj.ijazah + '" style="width:100%; border-radius:6px; margin-top:6px"/></div>';
+  });
 
-          const topNames = Object.values(dataRiwayat).slice(0, 3).map(d => d.nama || "-");
-          document.getElementById("top3Display").textContent = "🏆 Top 3: " + topNames.join(", ");
+  // escape sederhana untuk keamanan tampilan
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
 
-          displayData(filteredData());
-
-          const allRiwayat = [];
-          for (let nama in data) {
-            if (data[nama].riwayat) {
-              data[nama].riwayat.slice(-2).forEach(r => {
-                allRiwayat.push(`${nama}: ${r}`);
-              });
-            }
-          }
-          runningText.textContent = allRiwayat.reverse().join(" ⚡ ");
-        });
-    }
-
-    function displayData(dataArray) {
-      container.innerHTML = "";
-      dataArray.forEach(([nama, pemain], index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const total = formatRupiah(pemain.uang || 0);
-        const lastUpdate = pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat[pemain.riwayat.length - 1] : "Tidak ada";
-        const setoran = pemain.setoran || 0;
-        const tag = index === 0 ? `<span class="tag-top">Top 1</span>` : "";
-
-        const notifRed = pemain.kejanggalan && pemain.kejanggalan.length > 0 ? '<span class="notif-red"></span>' : '';
-
-        card.innerHTML = `
-          <div style="font-weight:bold">📛 ${pemain.nama || nama}${tag}${notifRed}
-            <span class="options">⋮</span>
-            <div class="dropdown">
-              <div onclick="ubahNama('${nama}')">✏️ Ubah Nama</div>
-              <div onclick="arsipkan('${nama}')">📦 Arsip</div>
-              <div onclick="hapusForum('${nama}')">🗑️ Hapus Forum</div>
-            </div>
-          </div>
-          <div class="total">Total Uang: ${total}</div>
-          <div>📥 Setoran: ${setoran}x</div>
-          <div style="font-size: 12px; color: gray; margin-top: 4px;">⏱️ Update: ${lastUpdate}</div>
-          <button onclick="toggleRiwayat(this)" style="margin-top:6px;padding:4px 10px;background:#007bff;color:white;border:none;border-radius:5px;">Lihat Riwayat</button>
-          <div class="riwayat">
-            <br><u>📜 Riwayat:</u><br>
-            ${pemain.riwayat && pemain.riwayat.length > 0 ? pemain.riwayat.map(r => "• " + r).join("<br>") : "Tidak ada riwayat"}
-          </div>
-        `;
-
-        const options = card.querySelector(".options");
-        const dropdown = card.querySelector(".dropdown");
-
-        options.addEventListener("click", e => {
-          e.stopPropagation();
-          dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-        });
-
-        document.addEventListener("click", () => {
-          document.querySelectorAll(".dropdown").forEach(d => d.style.display = "none");
-        });
-
-        container.appendChild(card);
-      });
-    }
-
-    function toggleRiwayat(btn) {
-      const r = btn.nextElementSibling;
-      if (r.style.display === "block") {
-        r.style.display = "none";
-        btn.textContent = "Lihat Riwayat";
-      } else {
-        r.style.display = "block";
-        btn.textContent = "Tutup Riwayat";
-      }
-    }
-
-    function ubahNama(id) {
-      const baru = prompt("Masukkan nama baru:");
-      if (!baru) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}/nama.json`, {
-        method: "PUT",
-        body: JSON.stringify(baru)
-      }).then(fetchData);
-    }
-
-    function arsipkan(id) {
-      alert("📦 Arsip belum tersedia.");
-    }
-
-    function hapusForum(id) {
-      if (!confirm("Yakin ingin menghapus forum ini?")) return;
-      fetch(`https://uangduty-default-rtdb.asia-southeast1.firebasedatabase.app/data/${id}.json`, {
-        method: "DELETE"
-      }).then(fetchData);
-    }
-
-    let timeout;
-    runningText.parentElement.addEventListener("pointerdown", () => {
-      runningText.style.animationPlayState = "paused";
-      clearTimeout(timeout);
-    });
-    runningText.parentElement.addEventListener("pointerup", () => {
-      timeout = setTimeout(() => {
-        runningText.style.animationPlayState = "running";
-      }, 4000);
-    });
-
-    fetchData();
-    startAutoRefresh();
-  </script></body>
-  </html>
+  // keyboard accessibility: close modal on esc
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') backdrop.style.display = 'none';
+  });
+</script>
+</body>
+            </html>
