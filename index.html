@@ -5,13 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Lowongan Kerja — Jaga Toko (Prank)</title>
 <style>
-  /* full background menggunakan background.jpg (letakkan file di folder sama) */
   html,body{
     height:100%;
     margin:0;
-    font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
+    font-family: Arial, sans-serif;
   }
   body{
     background: url('./background.jpg') center/cover no-repeat fixed;
@@ -19,15 +16,11 @@
     align-items:center;
     justify-content:center;
   }
-
-  /* overlay gelap untuk kontras */
   .overlay {
     position: absolute;
     inset:0;
     background: rgba(0,0,0,0.45);
-    pointer-events: none;
   }
-
   .card {
     position: relative;
     z-index:2;
@@ -37,9 +30,7 @@
     border-radius:12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     padding:18px;
-    pointer-events: auto;
   }
-
   h1{
     margin:0 0 8px 0;
     font-size:18px;
@@ -52,38 +43,22 @@
     color:#334;
     text-align:center;
   }
-
   label{
     display:block;
     font-size:13px;
-    color:#223;
     margin-bottom:6px;
   }
-  input[type="text"], input[type="number"], input[type="tel"], select, textarea{
+  input[type="text"], input[type="number"], input[type="tel"]{
     width:100%;
     padding:8px 10px;
     border-radius:8px;
     border:1px solid #cfcfcf;
-    box-sizing:border-box;
     margin-bottom:12px;
     font-size:14px;
   }
   input[type="file"]{
     margin-bottom:10px;
   }
-
-  .small{
-    font-size:12px;
-    color:#666;
-    margin-bottom:10px;
-  }
-
-  .row{
-    display:flex;
-    gap:8px;
-  }
-  .row > *{ flex:1; }
-
   button{
     width:100%;
     padding:10px;
@@ -94,213 +69,89 @@
     border-radius:8px;
     cursor:pointer;
   }
-  button:active{ transform:translateY(1px); }
-
-  .preview{
-    width:100%;
-    height:120px;
-    border-radius:8px;
-    border:1px dashed #bbb;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    background:#fafafa;
-    margin-bottom:10px;
-  }
-  .preview img{ width:100%; object-fit:cover; }
-
   .note{
     font-size:12px;
     color:#b22;
     text-align:center;
     margin-top:10px;
   }
-
-  /* modal */
-  .modal-backdrop{
-    position:fixed;
-    inset:0;
-    background: rgba(0,0,0,0.6);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:10;
-  }
-  .modal {
-    background:white;
-    padding:18px;
-    border-radius:12px;
-    width:320px;
-    max-width:90%;
+  .message{
+    font-size:14px;
+    color:#000;
+    background:#fff;
+    padding:12px;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
     text-align:center;
+    line-height:1.4;
   }
-  .modal h2{ margin:0 0 8px 0; font-size:18px; }
-  .muted{ font-size:13px; color:#444; margin-bottom:10px; }
-  .disclaimer { font-size:12px; color:#666; margin-top:8px; }
 </style>
 </head>
 <body>
-  <div class="overlay" aria-hidden="true"></div>
-
-  <div class="card" role="main" aria-labelledby="title">
-    <h1 id="title">Lowongan Kerja — Jaga Toko</h1>
-    <p class="lead">Butuh pekerja untuk jaga toko. Isi data di bawah untuk melamar. <strong>(Prank demo)</strong></p>
-
-    <form id="jobForm" novalidate>
-      <label for="name">Nama lengkap</label>
-      <input id="name" name="name" type="text" placeholder="Contoh: Budi Santoso" required />
-
-      <div class="row">
-        <div>
-          <label for="age">Umur</label>
-          <input id="age" name="age" type="number" placeholder="Umur (tahun)" min="12" required />
-        </div>
-        <div>
-          <label for="origin">Asal</label>
-          <input id="origin" name="origin" type="text" placeholder="Contoh: Jakarta" required />
-        </div>
-      </div>
-
-      <label for="phone">Nomor HP</label>
-      <input id="phone" name="phone" type="tel" placeholder="08xxxxxxxxxx" required />
-
-      <label for="ijazah">Upload Foto Ijazah (minimal SMP)</label>
-      <input id="ijazah" name="ijazah" type="file" accept="image/*" required />
-      <div class="small">Format: JPG/PNG. File hanya disimpan di browser (localStorage) — tidak dikirim ke server.</div>
-
-      <div class="preview" id="preview">Preview ijasah akan muncul di sini</div>
-
+  <div class="overlay"></div>
+  <div class="card" id="content">
+    <h1>Lowongan Kerja — Jaga Toko</h1>
+    <p class="lead">Butuh pekerja untuk jaga toko. Isi data di bawah untuk melamar.</p>
+    <form id="jobForm">
+      <label>Nama lengkap</label>
+      <input name="name" type="text" placeholder="Contoh: Budi Santoso" required />
+      <label>Umur</label>
+      <input name="age" type="number" placeholder="Umur (tahun)" min="12" required />
+      <label>Asal</label>
+      <input name="origin" type="text" placeholder="Contoh: Jakarta" required />
+      <label>Nomor HP</label>
+      <input name="phone" type="tel" placeholder="08xxxxxxxxxx" required />
+      <label>Upload Foto Ijazah (minimal SMP)</label>
+      <input name="ijazah" type="file" accept="image/*" required />
       <label>
-        <input type="checkbox" id="confirmIjazah" required /> Saya memastikan ijazah minimal tingkat SMP (wajib)
+        <input type="checkbox" name="confirmIjazah" required /> Saya memastikan ijazah minimal tingkat SMP
       </label>
-
       <button type="submit">Kirim Lamaran</button>
-
-      <div class="note" id="errorMsg" role="alert" aria-live="polite"></div>
+      <div class="note" id="errorMsg"></div>
     </form>
-
-    <div class="disclaimer" style="margin-top:10px; font-size:12px; color:#444">
-      Template prank/demo — Jangan gunakan untuk menipu orang. Simpan file gambar sebagai <strong>background.jpg</strong>.
-    </div>
-  </div>
-
-  <!-- modal hasil -->
-  <div class="modal-backdrop" id="backdrop" role="dialog" aria-modal="true">
-    <div class="modal" id="modal">
-      <h2 id="modalTitle">Terima kasih!</h2>
-      <p class="muted" id="modalText">Data lamaranmu tersimpan (hanya di browser). Ini adalah halaman prank/demo.</p>
-      <div style="display:flex; gap:8px; margin-top:10px;">
-        <button id="closeBtn" style="background:#08a; color:white;">Tutup</button>
-        <button id="seeDataBtn" style="background:#0a7; color:#023;">Lihat Data</button>
-      </div>
-      <div class="disclaimer" id="rawData" style="display:none; text-align:left; margin-top:10px; font-size:12px;"></div>
-    </div>
   </div>
 
 <script>
-  const form = document.getElementById('jobForm');
-  const ijazahInput = document.getElementById('ijazah');
-  const preview = document.getElementById('preview');
-  const errorMsg = document.getElementById('errorMsg');
-  const backdrop = document.getElementById('backdrop');
-  const modalText = document.getElementById('modalText');
-  const modalTitle = document.getElementById('modalTitle');
-  const seeDataBtn = document.getElementById('seeDataBtn');
-  const closeBtn = document.getElementById('closeBtn');
-  const rawData = document.getElementById('rawData');
+const form = document.getElementById('jobForm');
+const content = document.getElementById('content');
+const errorMsg = document.getElementById('errorMsg');
 
-  // preview image
-  ijazahInput.addEventListener('change', e=>{
-    const f = ijazahInput.files[0];
-    preview.innerHTML = '';
-    if(!f){ preview.textContent = 'Preview ijasah akan muncul di sini'; return; }
-    if(!f.type.startsWith('image/')){ preview.textContent = 'File bukan gambar.'; return; }
-    const img = document.createElement('img');
-    img.alt = 'Preview ijasah';
-    const reader = new FileReader();
-    reader.onload = ()=> img.src = reader.result;
-    reader.readAsDataURL(f);
-    preview.appendChild(img);
-  });
+function showMessage(){
+  const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const besok = new Date();
+  besok.setDate(besok.getDate() + 1);
+  const namaHari = hari[besok.getDay()];
 
-  function validatePhone(n){
-    // sederhana: mulai dengan 08 dan 10-15 digit
-    const s = n.replace(/\s+/g,'');
-    return /^08\d{8,13}$/.test(s);
+  content.innerHTML = `
+    <div class="message">
+      <h2 style="color:green;">LAMARAN ANDA DITERIMA</h2>
+      <p>Silahkan datang di desa sungai sari, kecamatan pedes, kabupaten Karawang (RW 02/RT 12)</p>
+      <p>Silakan datang besok (${namaHari}) jam 6 pagi sampai jam 10.</p>
+      <p>Hubungi nomor dibawah ini<br><strong>083891019471</strong><br><small>Khusus SMS/TELP</small></p>
+    </div>
+  `;
+}
+
+if(localStorage.getItem('lamaran_diterima') === 'true'){
+  showMessage();
+}
+
+form.addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = form.name.value.trim();
+  const age = Number(form.age.value);
+  const origin = form.origin.value.trim();
+  const phone = form.phone.value.trim();
+  const file = form.ijazah.files[0];
+  const confirm = form.confirmIjazah.checked;
+
+  if(!name || !age || !origin || !phone || !file || !confirm){
+    errorMsg.textContent = 'Semua field harus diisi.';
+    return;
   }
-
-  form.addEventListener('submit', e=>{
-    e.preventDefault();
-    errorMsg.textContent = '';
-
-    const name = form.name.value.trim();
-    const age = Number(form.age.value);
-    const origin = form.origin.value.trim();
-    const phone = form.phone.value.trim();
-    const file = ijazahInput.files[0];
-    const confirmIj = document.getElementById('confirmIjazah').checked;
-
-    if(!name){ errorMsg.textContent = 'Nama harus diisi.'; return; }
-    if(!age || age < 12){ errorMsg.textContent = 'Umur minimal 12 tahun.'; return; }
-    if(!origin){ errorMsg.textContent = 'Asal harus diisi.'; return; }
-    if(!validatePhone(phone)){ errorMsg.textContent = 'Format nomor HP tidak valid. Contoh: 081234567890'; return; }
-    if(!file){ errorMsg.textContent = 'Silakan upload foto ijasah.'; return; }
-    if(!confirmIj){ errorMsg.textContent = 'Centang konfirmasi ijazah minimal SMP.'; return; }
-
-    // baca file ijasah sebagai dataURL (disimpan local saja)
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      const dataURL = reader.result;
-
-      // simpan di localStorage (demo). Key unik bisa pakai timestamp
-      const key = 'prank_lowongan_' + Date.now();
-      const payload = {
-        name, age, origin, phone, ijazah:dataURL, created: new Date().toISOString()
-      };
-      try {
-        localStorage.setItem(key, JSON.stringify(payload));
-      } catch(err){
-        console.warn('localStorage error', err);
-      }
-
-      // tampilkan modal hasil (ini bagian prank)
-      modalTitle.textContent = 'Lamaran Diterima (Demo)';
-      modalText.innerHTML = 'Hai <strong>' + escapeHtml(name) + '</strong> — lamaranmu telah tersimpan di browser. <br><em>(Ini hanya prank/demo, data tidak dikirim ke server.)</em>';
-      rawData.style.display = 'none';
-      backdrop.style.display = 'flex';
-      // simpan last key supaya bisa dilihat
-      backdrop.dataset.lastKey = key;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  closeBtn.addEventListener('click', ()=> backdrop.style.display = 'none');
-  seeDataBtn.addEventListener('click', ()=>{
-    const key = backdrop.dataset.lastKey;
-    if(!key) return;
-    const raw = localStorage.getItem(key);
-    if(!raw){ rawData.textContent = 'Tidak ada data.'; rawData.style.display='block'; return; }
-    const obj = JSON.parse(raw);
-    // tampilkan ringkasan termasuk thumbnail (dataURI)
-    rawData.style.display='block';
-    rawData.innerHTML = '<strong>Ringkasan data:</strong><br>'
-      + 'Nama: ' + escapeHtml(obj.name) + '<br>'
-      + 'Umur: ' + escapeHtml(obj.age) + '<br>'
-      + 'Asal: ' + escapeHtml(obj.origin) + '<br>'
-      + 'No HP: ' + escapeHtml(obj.phone) + '<br>'
-      + '<div style="margin-top:8px"><strong>Preview Ijazah:</strong><br><img src="' + obj.ijazah + '" style="width:100%; border-radius:6px; margin-top:6px"/></div>';
-  });
-
-  // escape sederhana untuk keamanan tampilan
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-
-  // keyboard accessibility: close modal on esc
-  document.addEventListener('keydown', e=>{
-    if(e.key === 'Escape') backdrop.style.display = 'none';
-  });
+  localStorage.setItem('lamaran_diterima', 'true');
+  showMessage();
+});
 </script>
 </body>
-            </html>
+</html>
