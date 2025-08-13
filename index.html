@@ -1,157 +1,374 @@
 <!doctype html>
+
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Lowongan Kerja — Jaga Toko</title>
-<style>
-  html,body{
-    height:100%;
-    margin:0;
-    font-family: Arial, sans-serif;
-  }
-  body{
-    background: url('./background.jpg') center/cover no-repeat fixed;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .overlay {
-    position: absolute;
-    inset:0;
-    background: rgba(0,0,0,0.45);
-  }
-  .card {
-    position: relative;
-    z-index:2;
-    width: 360px;
-    max-width: calc(100% - 40px);
-    background: rgba(255,255,255,0.95);
-    border-radius:12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    padding:18px;
-  }
-  h1{
-    margin:0 0 8px 0;
-    font-size:18px;
-    color:#112;
-    text-align:center;
-  }
-  p.lead{
-    margin:0 0 14px 0;
-    font-size:13px;
-    color:#334;
-    text-align:center;
-  }
-  label{
-    display:block;
-    font-size:13px;
-    margin-bottom:6px;
-  }
-  input[type="text"], input[type="number"], input[type="tel"]{
-    width:100%;
-    padding:8px 10px;
-    border-radius:8px;
-    border:1px solid #cfcfcf;
-    margin-bottom:12px;
-    font-size:14px;
-  }
-  input[type="file"]{
-    margin-bottom:10px;
-  }
-  button{
-    width:100%;
-    padding:10px;
-    background:#0b7;
-    color:#032;
-    font-weight:600;
-    border:0;
-    border-radius:8px;
-    cursor:pointer;
-  }
-  .note{
-    font-size:12px;
-    color:#b22;
-    text-align:center;
-    margin-top:10px;
-  }
-  .message{
-    font-size:14px;
-    color:#000;
-    background:#fff;
-    padding:12px;
-    border-radius:8px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-    text-align:center;
-    line-height:1.4;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kiyalpa — Modern Minimalist Browser (Single‑File)</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root{
+      --bg: #f7f7f8; --fg:#0c0c0d; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
+      --accent:#4f46e5; --accent-2:#06b6d4; --danger:#ef4444; --ok:#10b981;
+    }
+    .dark{ --bg:#0b0c0f; --fg:#e5e7eb; --muted:#94a3b8; --card:#0f1115; --border:#1f2937; }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font:14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+    .app{ max-width:1200px; margin-inline:auto; padding:16px; }
+    header{ display:flex; align-items:center; gap:10px; }
+    .logo{ display:flex; align-items:center; gap:10px; user-select:none; }
+    .logo-badge{ width:32px; height:32px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:inset 0 0 0 1px #0002; }
+    .logo-title{ font-weight:700; letter-spacing:.2px; }
+    .chip{ font-size:12px; padding:4px 8px; border:1px solid var(--border); background:color-mix(in oklab, var(--card), #fff 5%); border-radius:999px; opacity:.9; display:flex; align-items:center; gap:6px }/* toolbar */
+.bar{ margin-top:12px; display:flex; gap:8px; align-items:center; }
+.btn{ border:1px solid var(--border); background:var(--card); border-radius:12px; padding:8px 10px; cursor:pointer; }
+.btn.icon{ width:40px; height:40px; display:grid; place-items:center; }
+.btn:hover{ filter:brightness(1.02) }
+.btn.danger{ color:#fff; background:var(--danger); border-color:#0000 }
+.btn.ok{ color:#fff; background:var(--ok); border-color:#0000 }
+.input{ flex:1; display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:8px 10px; }
+.input input{ width:100%; border:0; outline:0; background:transparent; color:var(--fg); font-size:14px }
+
+/* tabs */
+.tabs{ margin-top:12px; display:flex; gap:8px; align-items:center; overflow:auto; padding-bottom:2px; }
+.tab{ display:flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--border); background:var(--card); border-radius:999px; white-space:nowrap; }
+.tab.active{ background:linear-gradient(180deg, color-mix(in oklab, var(--card), #fff 8%), var(--card)); border-color:color-mix(in oklab, var(--border), #000 8%); box-shadow:0 1px 0 #0001 }
+.tab .x{ width:18px; height:18px; display:grid; place-items:center; border-radius:50%; cursor:pointer; }
+.tab .x:hover{ background:#0001 }
+
+/* layout */
+.surface{ margin-top:12px; border:1px solid var(--border); background:var(--card); border-radius:16px; overflow:hidden; min-height:70vh; display:flex; flex-direction:column; }
+iframe{ width:100%; height:65vh; border:0; background:#fff }
+.shelf{ border-top:1px solid var(--border); padding:8px; display:flex; gap:8px; overflow:auto; }
+.pill{ padding:6px 10px; border:1px solid var(--border); background:var(--bg); border-radius:12px; cursor:pointer; white-space:nowrap }
+
+/* dialogs */
+dialog{ border:1px solid var(--border); background:var(--card); color:var(--fg); border-radius:16px; padding:0; width:min(92vw,680px); box-shadow:0 20px 60px #0005 }
+.dlg-h{ padding:14px 16px; border-bottom:1px solid var(--border); font-weight:600 }
+.dlg-b{ padding:12px 16px; max-height:60vh; overflow:auto }
+.row{ display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid var(--border); background:var(--bg); border-radius:12px; padding:10px; }
+.row + .row{ margin-top:8px }
+.switch{ inline-size:44px; block-size:26px; background:#0002; border-radius:999px; position:relative; cursor:pointer }
+.knob{ position:absolute; inset-block:3px; inline-size:20px; border-radius:50%; background:#fff; box-shadow:0 2px 6px #0003; transition:.2s; left:3px }
+.switch[data-on="true"]{ background:color-mix(in oklab, var(--accent), #000 15%) }
+.switch[data-on="true"] .knob{ left:calc(100% - 23px) }
+
+.muted{ color:var(--muted) }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px }
+.kbd{ font:12px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; border:1px solid var(--border); background:var(--bg); padding:2px 6px; border-radius:6px }
+.small{ font-size:12px }
+.right{ margin-left:auto }
+
+@media (max-width:640px){ .btn span{ display:none } }
+
+  </style>
 </head>
 <body>
-  <div class="overlay"></div>
-  <div class="card" id="content">
-    <h1>Lowongan Kerja — Jaga Toko</h1>
-    <p class="lead">Butuh pekerja untuk jaga toko. Isi data di bawah untuk melamar.</p>
-    <form id="jobForm">
-      <label>Nama lengkap</label>
-      <input name="name" type="text" placeholder="Contoh: Budi Santoso" required />
-      <label>Umur</label>
-      <input name="age" type="number" placeholder="Umur (tahun)" min="12" required />
-      <label>Asal</label>
-      <input name="origin" type="text" placeholder="Contoh: Jakarta" required />
-      <label>Nomor HP</label>
-      <input name="phone" type="tel" placeholder="08xxxxxxxxxx" required />
-      <label>Upload Foto Ijazah (minimal SMP)</label>
-      <input name="ijazah" type="file" accept="image/*" required />
-      <label>
-        <input type="checkbox" name="confirmIjazah" required /> Saya memastikan ijazah minimal tingkat SMP
-      </label>
-      <button type="submit">Kirim Lamaran</button>
-      <div class="note" id="errorMsg"></div>
-    </form>
-  </div>
+  <div class="app" id="app">
+    <header>
+      <div class="logo">
+        <div class="logo-badge"></div>
+        <div class="logo-title">Kiyalpa</div>
+      </div>
+      <div class="chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Modern · Minimal</div>
+      <div class="right chip" id="modeChip">Direct</div>
+    </header><!-- Toolbar -->
+<div class="bar">
+  <button class="btn icon" title="Back" id="btnBack">◀</button>
+  <button class="btn icon" title="Forward" id="btnForward">▶</button>
+  <button class="btn icon" title="Reload" id="btnReload">⟳</button>
+  <div class="input"><span class="muted">🔎</span><input id="address" placeholder="Ketik URL atau kata kunci… (Enter untuk buka)" /></div>
+  <button class="btn" id="btnGo"><span>Buka</span> ↵</button>
+  <button class="btn" id="btnReader" title="Reader Mode">Reader</button>
+  <button class="btn" id="btnBookmark" title="Bookmark">☆</button>
+  <button class="btn icon" id="btnSettings" title="Pengaturan">⚙</button>
+  <button class="btn icon" id="btnCmd" title="Perintah Cepat (Ctrl+K)">⌘</button>
+</div>
 
-<script>
-const form = document.getElementById('jobForm');
-const content = document.getElementById('content');
-const errorMsg = document.getElementById('errorMsg');
+<!-- Tabs -->
+<div class="tabs" id="tabs"></div>
 
-function showMessage(){
-  const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const besok = new Date();
-  besok.setDate(besok.getDate() + 1);
-  const namaHari = hari[besok.getDay()];
+<!-- Surface / Renderer -->
+<div class="surface">
+  <iframe id="view" src="about:blank" referrerpolicy="no-referrer"></iframe>
+  <div class="shelf" id="shelf"></div>
+</div>
 
-  content.innerHTML = `
-    <div class="message">
-      <h2 style="color:green;">LAMARAN ANDA DITERIMA</h2>
-      <p>Silahkan datang di desa sungai sari, kecamatan pedes, kabupaten Karawang (RW 02/RT 12)</p>
-      <p>Silakan datang besok (${namaHari}) jam 6 pagi sampai jam 10.</p>
-      <p>Hubungi nomor dibawah ini<br><strong>083891019471</strong><br><small>Khusus SMS/TELP</small></p>
+  </div>  <!-- History Dialog -->  <dialog id="dlgHistory">
+    <div class="dlg-h">Riwayat</div>
+    <div class="dlg-b" id="histBody"></div>
+  </dialog>  <!-- Settings Dialog -->  <dialog id="dlgSettings">
+    <div class="dlg-h">Pengaturan</div>
+    <div class="dlg-b">
+      <div class="grid">
+        <div class="row"><div><div><b>Tema</b></div><div class="small muted">Terang/Gelap</div></div>
+          <div>
+            <button class="btn" id="lightBtn">Terang</button>
+            <button class="btn" id="darkBtn">Gelap</button>
+            <button class="btn" id="sysBtn">Sistem</button>
+          </div>
+        </div><div class="row"><div><div><b>Incognito</b></div><div class="small muted">Nonaktifkan simpan riwayat & bookmark</div></div>
+      <div class="switch" id="incogSw" role="switch" aria-label="Incognito"><div class="knob"></div></div>
     </div>
-  `;
-}
 
-if(localStorage.getItem('lamaran_diterima') === 'true'){
-  showMessage();
-}
+    <div class="row"><div><div><b>Privacy Relay (Proxy)</b></div><div class="small muted">Opsional (bukan VPN). Gunakan endpoint GET: <code class="kbd">{relay}?url=</code></div></div>
+      <div class="switch" id="relaySw" role="switch" aria-label="Relay"><div class="knob"></div></div>
+    </div>
 
-form.addEventListener('submit', e=>{
-  e.preventDefault();
-  const name = form.name.value.trim();
-  const age = Number(form.age.value);
-  const origin = form.origin.value.trim();
-  const phone = form.phone.value.trim();
-  const file = form.ijazah.files[0];
-  const confirm = form.confirmIjazah.checked;
+    <div class="row" style="grid-column:1/-1; flex-direction:column; align-items:stretch">
+      <label for="relayUrl"><b>Relay URL</b> <span class="small muted">Contoh: https://YOUR‑RELAY.example.com/proxy?url=</span></label>
+      <input id="relayUrl" class="btn" placeholder="https://…/proxy?url=" />
+      <div class="small muted">Catatan: Banyak situs melarang iframe/CSP. Gunakan Reader Mode + Relay untuk konten artikel.</div>
+    </div>
 
-  if(!name || !age || !origin || !phone || !file || !confirm){
-    errorMsg.textContent = 'Semua field harus diisi.';
-    return;
-  }
-  localStorage.setItem('lamaran_diterima', 'true');
-  showMessage();
-});
-</script>
-</body>
+    <div class="row"><div><div><b>Riwayat</b></div><div class="small muted">Lihat atau hapus riwayat</div></div>
+      <div>
+        <button class="btn" id="btnOpenHistory">Buka</button>
+        <button class="btn danger" id="btnClearHistory">Hapus</button>
+      </div>
+    </div>
+
+    <div class="row"><div><div><b>Bookmarks</b></div><div class="small muted">Kelola bookmark</div></div>
+      <div>
+        <button class="btn danger" id="btnClearBm">Hapus</button>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:10px" class="small muted">Kiyalpa adalah UI demo. Gunakan secara sah & patuhi hukum/ToS situs.</div>
+  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px">
+    <button class="btn" id="btnCloseSettings">Tutup</button>
+  </div>
+</div>
+
+  </dialog>  <!-- Command Palette -->  <dialog id="dlgCmd">
+    <div class="dlg-h">Perintah Cepat</div>
+    <div class="dlg-b">
+      <input id="cmdInput" class="btn" placeholder="/new · /close · /reader · /open <url> · /relay · /incog" />
+      <div class="small muted" style="margin-top:8px">Tekan Enter untuk eksekusi. Pintasan: <span class="kbd">Ctrl</span>+<span class="kbd">K</span></div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px"><button class="btn" id="cmdClose">Tutup</button></div>
+    </div>
+  </dialog>  <script>
+    ;(() => {
+      const d = document
+      const $ = sel => d.querySelector(sel)
+      const $$ = sel => [...d.querySelectorAll(sel)]
+
+      // --- state ---
+      const state = {
+        tabs: [],
+        active: null,
+        bookmarks: [],
+        history: [],
+        dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+        incog: false,
+        relayOn: false,
+        relayUrl: ''
+      }
+
+      const persist = {
+        load(){
+          try{
+            const s = JSON.parse(localStorage.getItem('kiyalpa_state')||'{}')
+            if (s && typeof s==='object') {
+              Object.assign(state, s, { active:null })
+            }
+          }catch(e){}
+        },
+        save(){ if(state.incog) return; localStorage.setItem('kiyalpa_state', JSON.stringify({
+          bookmarks: state.bookmarks,
+          history: state.history.slice(0,300),
+          dark: state.dark,
+          relayOn: state.relayOn,
+          relayUrl: state.relayUrl
+        }))}
+      }
+
+      // --- helpers ---
+      const ensureHttp = (v) => {
+        if (!v) return ''
+        if (/^https?:\/\//i.test(v)) return v
+        if (/^[\w.-]+\.[a-z]{2,}/i.test(v)) return 'https://' + v
+        return 'https://duckduckgo.com/?q=' + encodeURIComponent(v)
+      }
+      const nice = (u) => { try{ const x=new URL(u); return (x.hostname.replace(/^www\./,''))+x.pathname.replace(/\/$/,'') }catch{ return u } }
+
+      // --- UI refs ---
+      const address = $('#address')
+      const iframe = $('#view')
+      const tabsEl = $('#tabs')
+      const shelf = $('#shelf')
+      const modeChip = $('#modeChip')
+
+      // dialogs
+      const dlgSettings = $('#dlgSettings')
+      const dlgHistory = $('#dlgHistory')
+      const dlgCmd = $('#dlgCmd')
+
+      // --- actions ---
+      function newTab(url) {
+        const id = crypto.randomUUID()
+        const tab = { id, url: url||'https://example.com', title:'Start', reader:false, html:'' }
+        state.tabs.push(tab); state.active = id
+        render()
+        openUrl(tab.url)
+      }
+      function closeTab(id){
+        const i = state.tabs.findIndex(t=>t.id===id)
+        if(i>=0){ state.tabs.splice(i,1) }
+        if(state.active===id){ state.active = state.tabs[0]?.id || null }
+        render()
+      }
+      function setActive(id){ state.active=id; render(); const t=activeTab(); if(t) address.value=t.url }
+      function activeTab(){ return state.tabs.find(t=>t.id===state.active) }
+
+      function openUrl(v){
+        const url = ensureHttp(v)
+        const t = activeTab(); if(!t) return
+        t.url = url; t.title = nice(url); t.reader=false; t.html=''
+        address.value = url
+        const src = state.relayOn && state.relayUrl ? state.relayUrl + encodeURIComponent(url) : url
+        iframe.src = src
+        addHistory(url)
+        render()
+      }
+
+      async function reader(){
+        const t = activeTab(); if(!t||!t.url) return
+        const endpoint = state.relayOn && state.relayUrl ? state.relayUrl + encodeURIComponent(t.url) : t.url
+        try{
+          const res = await fetch(endpoint, { headers: state.relayOn? { 'X-Kiyalpa-Relay':'1' } : {} })
+          const txt = await res.text()
+          let html = txt
+          try{ const doc = new DOMParser().parseFromString(txt,'text/html'); const main=doc.querySelector('article, main, [role="main"]'); html = (main? main.innerHTML : (doc.body?.innerHTML||txt)) }catch{}
+          t.reader = true
+          t.html = '<base href="'+t.url+'">'+html
+          iframe.srcdoc = t.html
+          render()
+        }catch(e){ alert('Reader gagal. Aktifkan Relay dan pastikan URL relay benar.') }
+      }
+
+      function addBookmark(){
+        const t = activeTab(); if(!t) return
+        if(state.bookmarks.some(b=>b.url===t.url)) return
+        state.bookmarks.unshift({ id: crypto.randomUUID(), title:t.title, url:t.url })
+        if(!state.incog) persist.save()
+        renderShelf()
+      }
+
+      function addHistory(url){
+        if(state.incog) return
+        state.history.unshift({ id:crypto.randomUUID(), title:nice(url), url, time:new Date().toISOString() })
+        state.history = state.history.slice(0,300)
+        persist.save()
+      }
+
+      function renderTabs(){
+        tabsEl.innerHTML = ''
+        state.tabs.forEach(t => {
+          const el = d.createElement('div')
+          el.className = 'tab' + (t.id===state.active ? ' active':'' )
+          el.innerHTML = `<span>${t.title}</span><span class="x" title="Tutup">✕</span>`
+          el.onclick = (e)=>{ if(e.target.closest('.x')){ closeTab(t.id) } else { setActive(t.id) } }
+          tabsEl.appendChild(el)
+        })
+        // add button
+        const add = d.createElement('button')
+        add.className='btn'; add.textContent='+ Tab baru'; add.onclick=()=>newTab('https://example.com')
+        tabsEl.appendChild(add)
+      }
+
+      function renderShelf(){
+        shelf.innerHTML = ''
+        state.bookmarks.forEach(b=>{
+          const el = d.createElement('button')
+          el.className='pill'; el.textContent = b.title
+          el.title = b.url
+          el.onclick = ()=>{ setActive(state.active); openUrl(b.url) }
+          shelf.appendChild(el)
+        })
+        if(state.bookmarks.length===0){
+          const h = d.createElement('div'); h.className='small muted'; h.textContent='Belum ada bookmark. Klik ☆ untuk menambah.'; shelf.appendChild(h)
+        }
+      }
+
+      function render(){
+        d.documentElement.classList.toggle('dark', state.dark)
+        modeChip.textContent = state.relayOn ? 'Relay' : 'Direct'
+        renderTabs(); renderShelf();
+      }
+
+      // --- init ---
+      persist.load()
+      if(state.dark) d.documentElement.classList.add('dark')
+      newTab('https://example.com')
+      // defaults
+      state.bookmarks = state.bookmarks.length? state.bookmarks : [
+        {id:crypto.randomUUID(), title:'MDN', url:'https://developer.mozilla.org'},
+        {id:crypto.randomUUID(), title:'Wikipedia', url:'https://wikipedia.org'},
+        {id:crypto.randomUUID(), title:'Archive', url:'https://archive.org'}
+      ]
+      render()
+
+      // --- events ---
+      $('#btnGo').onclick = () => openUrl(address.value)
+      address.onkeydown = (e)=>{ if(e.key==='Enter') openUrl(address.value) }
+      $('#btnReload').onclick = () => { const t=activeTab(); if(!t) return; t.reader? (iframe.srcdoc = t.html) : (iframe.contentWindow?.location.reload?.()) }
+      $('#btnBack').onclick = () => iframe.contentWindow?.history?.back?.()
+      $('#btnForward').onclick = () => iframe.contentWindow?.history?.forward?.()
+      $('#btnBookmark').onclick = addBookmark
+      $('#btnReader').onclick = reader
+
+      // settings
+      $('#btnSettings').onclick = ()=> dlgSettings.showModal()
+      $('#btnCloseSettings').onclick = ()=> dlgSettings.close()
+      $('#lightBtn').onclick = ()=>{ state.dark=false; persist.save(); render() }
+      $('#darkBtn').onclick = ()=>{ state.dark=true; persist.save(); render() }
+      $('#sysBtn').onclick = ()=>{ state.dark=window.matchMedia('(prefers-color-scheme: dark)').matches; persist.save(); render() }
+
+      const inc = $('#incogSw'); const relay = $('#relaySw'); const relayUrl = $('#relayUrl')
+      inc.dataset.on = String(state.incog)
+      relay.dataset.on = String(state.relayOn)
+      relayUrl.value = state.relayUrl || ''
+
+      inc.onclick = ()=>{ state.incog = !state.incog; inc.dataset.on=String(state.incog) }
+      relay.onclick = ()=>{ state.relayOn = !state.relayOn; relay.dataset.on=String(state.relayOn); persist.save(); render() }
+      relayUrl.onchange = ()=>{ state.relayUrl = relayUrl.value.trim(); persist.save() }
+
+      // history
+      $('#btnOpenHistory').onclick = ()=>{
+        const wrap = $('#histBody'); wrap.innerHTML=''
+        if(state.history.length===0){ wrap.innerHTML = '<div class="muted small">Belum ada riwayat.</div>' }
+        state.history.forEach(h=>{
+          const row = d.createElement('div'); row.className='row'
+          row.innerHTML = `<div><div><b>${h.title}</b></div><div class="small muted">${new Date(h.time).toLocaleString()}</div></div>`
+          const go = d.createElement('button'); go.className='btn'; go.textContent='Buka'; go.onclick=()=>{ dlgHistory.close(); openUrl(h.url) }
+          row.appendChild(go); wrap.appendChild(row)
+        })
+        dlgHistory.showModal()
+      }
+      $('#btnClearHistory').onclick = ()=>{ state.history=[]; persist.save(); }
+      $('#btnClearBm').onclick = ()=>{ state.bookmarks=[]; persist.save(); renderShelf() }
+
+      // command palette
+      $('#btnCmd').onclick = ()=>{ $('#cmdInput').value=''; dlgCmd.showModal(); $('#cmdInput').focus() }
+      $('#cmdClose').onclick = ()=> dlgCmd.close()
+      d.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey)&& e.key.toLowerCase()==='k'){ e.preventDefault(); $('#btnCmd').click() } })
+      $('#cmdInput').addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){
+          const v = e.target.value.trim()
+          if(v==='/new') newTab('https://example.com')
+          else if(v==='/close') closeTab(state.active)
+          else if(v==='/reader') reader()
+          else if(v.startsWith('/open ')) openUrl(v.slice(6))
+          else if(v==='/relay') { state.relayOn=!state.relayOn; relay.dataset.on=String(state.relayOn); render(); persist.save() }
+          else if(v==='/incog') { state.incog=!state.incog; inc.dataset.on=String(state.incog) }
+          dlgCmd.close()
+        }
+      })
+
+      // expose for debug
+      window.KIYALPA = { state, newTab, openUrl }
+    })()
+  </script></body>
   </html>
