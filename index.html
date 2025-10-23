@@ -3,214 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K7 N - Sejarah Prasejarah</title>
+  <title>K7 N</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #fff;
       margin: 0;
       padding: 0;
+      background-color: #ffffff;
       color: #222;
       text-align: center;
     }
     header {
-      margin-top: 20px;
+      padding: 10px;
+      border-bottom: 2px solid #eee;
+      position: relative;
     }
-    header img {
+    .logo {
       width: 100px;
-      border-radius: 50%;
-    }
-    header h1 {
-      margin: 10px 0;
-      font-size: 28px;
-      color: #111;
-    }
-    .info {
-      font-size: 14px;
-      color: #555;
+      height: auto;
     }
     .running-text {
-      background: #111;
-      color: #fff;
-      padding: 8px 0;
-      overflow: hidden;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      font-size: 14px;
-      z-index: 999;
+      background: #111;
+      color: #00ff88;
+      padding: 6px 0;
+      font-weight: bold;
+      overflow: hidden;
+      z-index: 10;
     }
     .running-text span {
       display: inline-block;
-      animation: scrollText 15s linear infinite;
+      white-space: nowrap;
+      animation: scroll 15s linear infinite;
     }
-    @keyframes scrollText {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+    @keyframes scroll {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
     }
     .clock {
-      font-size: 16px;
-      margin: 10px 0;
-      color: #555;
+      position: fixed;
+      top: 35px;
+      right: 15px;
+      font-size: 14px;
+      color: #444;
     }
-    .slider {
-      max-width: 600px;
-      margin: 30px auto;
+    h1 {
+      margin-top: 60px;
+      font-size: 28px;
+    }
+    .info {
+      margin: 10px auto;
+      line-height: 1.6;
+      color: #333;
+    }
+    .slideshow {
       position: relative;
+      max-width: 700px;
+      margin: 20px auto;
       overflow: hidden;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .slide {
       display: none;
     }
     .slide img {
       width: 100%;
-      border-radius: 12px 12px 0 0;
+      height: auto;
+      border-radius: 15px;
     }
     .caption {
-      background: #f9f9f9;
-      padding: 15px;
-      font-size: 14px;
-      border-radius: 0 0 12px 12px;
+      background: #fff;
+      padding: 10px;
+      font-size: 16px;
+      color: #222;
     }
     .controls {
-      margin-top: 10px;
+      margin: 10px;
     }
     button {
-      background-color: #007bff;
+      background: #222;
+      color: #fff;
       border: none;
-      color: white;
-      padding: 10px 18px;
-      font-size: 14px;
-      margin: 5px;
+      padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s;
     }
     button:hover {
-      background-color: #0056b3;
+      background: #00a86b;
     }
-    .contact {
-      margin-top: 25px;
-    }
-    .contact a {
-      text-decoration: none;
-      color: white;
-      background: #25d366;
-      padding: 10px 18px;
-      border-radius: 30px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-    }
-    .contact img {
-      width: 20px;
-      height: 20px;
+    .wa-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
     }
   </style>
 </head>
 <body>
 
-  <div class="running-text">
-    <span>Rizki Alpazri > Info mabar Free Fire</span>
-  </div>
+  <div class="running-text"><span>Rizki Alpazri > Info mabar free fire</span></div>
+  <div class="clock" id="clock"></div>
 
   <header>
-    <!-- Logo fix direct link -->
-    <img src="https://i.ibb.co/KULTzZu/logo-k7n.png" alt="Logo K7N">
-    <h1>K7 N</h1>
+    <img src="https://ibb.co.com/1GMXQJWP" alt="Logo SMK" class="logo">
+    <h1>Web K7 N</h1>
     <div class="info">
-      Nama: Rizki Alpazri | Kelas: 10 | Jurusan: TMI | Umur: 16 Tahun<br>
-      SMK Trijaya Sakti
+      <p><strong>Nama:</strong> Rizki Alpazri</p>
+      <p><strong>Kelas:</strong> 10</p>
+      <p><strong>Jurusan:</strong> TMI</p>
+      <p><strong>Umur:</strong> 16</p>
+      <p><strong>SMK:</strong> Trijaya Sakti</p>
     </div>
   </header>
 
-  <div class="clock" id="clock"></div>
-
-  <div class="slider">
-    <div class="slide" id="slide1">
-      <img src="https://i.ibb.co/abcd1234/zaman-batu.png" alt="Zaman Batu">
+  <section class="slideshow">
+    <div class="slide">
+      <img src="https://ibb.co.com/gLHz2bfP" alt="Zaman Batu">
       <div class="caption">
-        <h3>Zaman Batu</h3>
-        <p>
-          Zaman Batu merupakan masa prasejarah ketika manusia menggunakan peralatan yang terbuat dari batu. 
-          Alat-alat batu digunakan untuk berburu, memotong, dan melindungi diri. 
-          Zaman ini terbagi menjadi Paleolitikum, Mesolitikum, dan Neolitikum.
-        </p>
+        <h2>Zaman Batu</h2>
+        <p>Zaman Batu merupakan masa awal kehidupan manusia di mana alat-alat dibuat dari batu. Manusia hidup secara nomaden, berburu, dan mengumpulkan makanan. Zaman ini menandai awal mula peradaban manusia dengan penemuan api dan bahasa sederhana.</p>
       </div>
     </div>
 
-    <div class="slide" id="slide2">
-      <img src="https://i.ibb.co/xyz789/zaman-besi.png" alt="Zaman Besi">
+    <div class="slide">
+      <img src="https://ibb.co.com/0Rs082PN" alt="Zaman Besi">
       <div class="caption">
-        <h3>Zaman Besi</h3>
-        <p>
-          Zaman Besi adalah periode di mana manusia telah mengenal teknik pengolahan logam, khususnya besi. 
-          Perkakas dan senjata menjadi lebih kuat dan tahan lama. 
-          Masa ini menandai kemajuan pesat dalam teknologi dan kehidupan sosial manusia.
-        </p>
+        <h2>Zaman Besi</h2>
+        <p>Zaman Besi adalah masa di mana manusia mulai mengenal dan mengolah logam besi untuk dijadikan alat dan senjata. Kehidupan menjadi lebih maju dengan sistem pertanian, perdagangan, dan pemukiman yang berkembang pesat.</p>
       </div>
     </div>
-  </div>
 
-  <div class="controls">
-    <button id="prevBtn">Sebelumnya</button>
-    <button id="nextBtn">Selanjutnya</button>
-  </div>
+    <div class="controls">
+      <button onclick="prevSlide()">Sebelumnya</button>
+      <button onclick="nextSlide()">Selanjutnya</button>
+    </div>
+  </section>
 
-  <div class="contact">
-    <a href="https://wa.me/6283891019471" target="_blank">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
-      Contact Rizki Alpazri
-    </a>
-  </div>
+  <a href="https://wa.me/6283891019471" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="wa-icon" alt="WhatsApp">
+  </a>
 
   <script>
-    let currentSlide = 1;
-    const slides = document.querySelectorAll('.slide');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    let isClickable = true;
-
-    function showSlide(n) {
-      slides.forEach((slide, index) => {
-        slide.style.display = (index + 1 === n) ? 'block' : 'none';
-      });
-    }
-
-    showSlide(currentSlide);
-
-    function disableButtons() {
-      isClickable = false;
-      setTimeout(() => { isClickable = true; }, 800);
-    }
-
-    prevBtn.addEventListener('click', () => {
-      if (isClickable && currentSlide > 1) {
-        currentSlide--;
-        showSlide(currentSlide);
-        disableButtons();
-      }
-    });
-
-    nextBtn.addEventListener('click', () => {
-      if (isClickable && currentSlide < slides.length) {
-        currentSlide++;
-        showSlide(currentSlide);
-        disableButtons();
-      }
-    });
-
+    // Jam realtime
     function updateClock() {
       const now = new Date();
-      const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      document.getElementById('clock').textContent = time;
+      document.getElementById('clock').textContent = now.toLocaleTimeString();
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    // Slide Manual
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    function showSlide(n) {
+      slides.forEach(slide => slide.style.display = 'none');
+      slides[n].style.display = 'block';
+    }
+    function nextSlide() {
+      if (slideIndex < slides.length - 1) slideIndex++;
+      showSlide(slideIndex);
+    }
+    function prevSlide() {
+      if (slideIndex > 0) slideIndex--;
+      showSlide(slideIndex);
+    }
+    showSlide(slideIndex);
   </script>
+
 </body>
 </html>
