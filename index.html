@@ -57,6 +57,58 @@
       font-size: 18px;
       margin: 0;
     }
+
+    /* Bagian konten sejarah */
+    .sejarah {
+      max-width: 800px;
+      margin: 40px auto;
+      text-align: left;
+      padding: 0 20px;
+      line-height: 1.6;
+    }
+
+    .sejarah h3 {
+      font-size: 24px;
+      color: #111;
+      margin-top: 30px;
+    }
+
+    .gambar-sejarah {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f5f5f5;
+      display: block;
+      margin: 10px 0;
+    }
+
+    /* Tombol WhatsApp */
+    .wa-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background-color: #25D366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .wa-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .wa-btn img {
+      width: 30px;
+      height: 30px;
+    }
+
   </style>
 </head>
 <body>
@@ -70,6 +122,31 @@
     <h1>K7 N</h1>
     <h2>Awal Mula Prasejarah Dimulai</h2>
   </header>
+
+  <section class="sejarah">
+    <h3>🪨 Zaman Batu</h3>
+    <img src="#" alt="Gambar Zaman Batu (belum dikirim)" class="gambar-sejarah">
+    <p>
+      Zaman Batu merupakan masa paling awal dalam sejarah manusia, di mana manusia purba mulai menggunakan batu
+      sebagai alat utama untuk bertahan hidup. Alat batu ini digunakan untuk berburu, memotong daging, dan membuat
+      api. Pada masa ini, manusia masih hidup secara nomaden (berpindah-pindah) dan menggantungkan hidup dari alam
+      sekitar. Mereka juga mulai mengenal seni dengan melukis di dinding gua menggunakan bahan alami.
+    </p>
+
+    <h3>⚒️ Zaman Besi</h3>
+    <img src="#" alt="Gambar Zaman Besi (belum dikirim)" class="gambar-sejarah">
+    <p>
+      Setelah manusia menguasai teknik mengolah logam, dimulailah Zaman Besi. Pada masa ini, peralatan dan senjata
+      mulai dibuat dari besi yang jauh lebih kuat dibandingkan batu dan perunggu. Munculnya pertanian dan perdagangan
+      menandai perubahan besar dalam kehidupan manusia. Mereka mulai menetap, membentuk desa, dan mengenal sistem
+      pemerintahan sederhana. Zaman Besi menjadi pondasi bagi munculnya peradaban modern.
+    </p>
+  </section>
+
+  <!-- Tombol WhatsApp -->
+  <a href="https://wa.me/6283891019471" target="_blank" class="wa-btn">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Logo">
+  </a>
 
 </body>
 </html>
