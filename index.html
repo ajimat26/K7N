@@ -1,40 +1,169 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>K7 N - Awal Mula Prasejarah</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K7 N - Awal Mula Prasejarah</title>
+<style>
+    :root {
+        --primary: #25D366;
+        --bg: #0d0d0d;
+        --text: #ffffff;
+        --subtext: #bbbbbb;
     }
-    .fade-in { animation: fadeIn 2s ease-in-out; }
-  </style>
+    body {
+        background: linear-gradient(135deg, #111, #000);
+        color: var(--text);
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        overflow-x: hidden;
+    }
+    header {
+        padding: 40px 20px 20px 20px;
+        animation: fadeIn 1.2s ease;
+    }
+    img.logo {
+        width: 110px;
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        transition: transform 0.3s;
+    }
+    img.logo:hover {
+        transform: scale(1.05);
+    }
+    h1 {
+        font-size: 30px;
+        margin: 10px 0;
+        letter-spacing: 1px;
+    }
+    .info {
+        color: var(--subtext);
+        font-size: 15px;
+        margin-bottom: 30px;
+    }
+    .slideshow-container {
+        position: relative;
+        max-width: 850px;
+        margin: auto;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0 25px rgba(255,255,255,0.15);
+    }
+    .mySlides {
+        display: none;
+        position: relative;
+        animation: fade 1s ease;
+    }
+    img.slide {
+        width: 100%;
+        vertical-align: middle;
+    }
+    .caption {
+        position: absolute;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        width: 100%;
+        padding: 15px;
+        font-size: 17px;
+        backdrop-filter: blur(4px);
+    }
+    .btn {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 30px;
+        font-size: 16px;
+        margin-top: 30px;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 0 15px rgba(37,211,102,0.4);
+    }
+    .btn:hover {
+        background: #1da851;
+        box-shadow: 0 0 25px rgba(37,211,102,0.6);
+    }
+    footer {
+        margin-top: 50px;
+        color: var(--subtext);
+        font-size: 13px;
+        padding-bottom: 20px;
+    }
+    audio {
+        display: none;
+    }
+    @keyframes fade {
+        from {opacity: .4} 
+        to {opacity: 1}
+    }
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(-10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+</style>
 </head>
-<body class="bg-gradient-to-b from-yellow-100 to-orange-200 min-h-screen flex flex-col items-center p-6">
+<body>
 
-  <!-- Musik Latar -->
-  <audio id="bgMusic" autoplay loop>
-    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7c497c5ff5.mp3" type="audio/mpeg">
-  </audio>
+<header>
+    <img src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti" class="logo">
+    <h1>K7 N - Awal Mula Prasejarah</h1>
+    <div class="info">
+        <p>Nama: <b>Rizki Alpazri</b></p>
+        <p>Kelas: <b>10</b></p>
+        <p>SMK: <b>Trijaya Sakti</b></p>
+        <p>Jurusan: <b>TMI</b></p>
+    </div>
+</header>
 
-  <script>
-    // Agar musik bisa diputar otomatis di sebagian browser
-    document.addEventListener('click', function() {
-      document.getElementById('bgMusic').play();
-    });
-  </script>
+<!-- SLIDESHOW -->
+<div class="slideshow-container">
 
-  <!-- Header -->
-  <header class="text-center mb-8 fade-in">
-    <img src="https://iili.io/KULTzZu.png" 
-         alt="Logo SMK Trijaya Sakti" 
-         class="mx-auto w-32 mb-4 rounded-full shadow-lg border-4 border-yellow-400 bg-white p-2">
-    <h1 class="text-5xl font-extrabold text-amber-700 drop-shadow-md">K7 N</h1>
-    <p class="text-lg text-gray-700 mt-2 tracking-wide">Awal Mula Prasejarah Dimulai</p>
-  </header>
+    <div class="mySlides fade">
+        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Cave_painting_of_a_horse.jpg" alt="Gua Lukisan Prasejarah">
+        <div class="caption">Manusia purba mulai menggambar di dinding gua sebagai bentuk ekspresi dan komunikasi pertama.</div>
+    </div>
+
+    <div class="mySlides fade">
+        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/d/da/Neolithic_farming.jpg" alt="Pertanian Zaman Batu">
+        <div class="caption">Zaman Neolitikum: manusia mulai bercocok tanam dan menetap, menandai akhir masa berburu dan meramu.</div>
+    </div>
+</div>
+
+<!-- BUTTON WHATSAPP -->
+<a href="https://wa.me/6283891019471?text=Halo%20Rizki%20Alpazri%2C%20saya%20ingin%20menghubungi%20Anda" target="_blank">
+    <button class="btn">Contact Rizki Alpazri</button>
+</a>
+
+<!-- MUSIK -->
+<audio autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2023/02/23/audio_eb90b13f61.mp3?filename=peaceful-nature-142995.mp3" type="audio/mpeg">
+</audio>
+
+<footer>
+    <p>© 2025 Rizki Alpazri | K7 N - Awal Mula Prasejarah</p>
+</footer>
+
+<script>
+let slideIndex = 0;
+showSlides();
+
+function showSlides() {
+    let slides = document.getElementsByClassName("mySlides");
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";  
+    }
+    slideIndex++;
+    if (slideIndex > slides.length) {slideIndex = 1}    
+    slides[slideIndex-1].style.display = "block";  
+    setTimeout(showSlides, 5000); // 5 detik per slide
+}
+</script>
+
+</body>
+</html>  </header>
 
   <!-- Identitas -->
   <div class="bg-white/80 p-4 rounded-xl shadow-md mb-8 text-center">
@@ -205,6 +334,7 @@
   </script>
 </body>
 </html>
+
 
 
 
