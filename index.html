@@ -39,6 +39,7 @@
       left: 0;
       width: 100%;
       font-size: 14px;
+      z-index: 999;
     }
     .running-text span {
       display: inline-block;
@@ -122,7 +123,7 @@
   </div>
 
   <header>
-    <img src="https://freeimage.host/i/KULTzZu" alt="Logo K7N">
+    <img src="https://i.ibb.co/KULTzZu/logo-k7n.png" alt="Logo K7N">
     <h1>K7 N</h1>
     <div class="info">
       Nama: Rizki Alpazri | Kelas: 10 | Jurusan: TMI | Umur: 16 Tahun<br>
@@ -171,7 +172,7 @@
   </div>
 
   <audio controls autoplay loop>
-    <source src="https://files.catbox.moe/m4y2kz.mp3" type="audio/mpeg">
+    <source src="https://cdn.pixabay.com/audio/2023/05/03/audio_3a32a0c02c.mp3" type="audio/mpeg">
     Browser Anda tidak mendukung pemutar audio.
   </audio>
 
@@ -180,6 +181,7 @@
     const slides = document.querySelectorAll('.slide');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    let isClickable = true;
 
     function showSlide(n) {
       slides.forEach((slide, index) => {
@@ -189,17 +191,24 @@
 
     showSlide(currentSlide);
 
+    function disableButtons() {
+      isClickable = false;
+      setTimeout(() => { isClickable = true; }, 800);
+    }
+
     prevBtn.addEventListener('click', () => {
-      if (currentSlide > 1) {
+      if (isClickable && currentSlide > 1) {
         currentSlide--;
         showSlide(currentSlide);
+        disableButtons();
       }
     });
 
     nextBtn.addEventListener('click', () => {
-      if (currentSlide < slides.length) {
+      if (isClickable && currentSlide < slides.length) {
         currentSlide++;
         showSlide(currentSlide);
+        disableButtons();
       }
     });
 
