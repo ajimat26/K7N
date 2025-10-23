@@ -13,24 +13,25 @@
       text-align: center;
     }
 
+    /* Running Text */
     .running-text {
       background-color: #111;
       color: #fff;
       padding: 10px 0;
-      font-size: 15px;
+      font-size: 16px;
       overflow: hidden;
       position: relative;
+      white-space: nowrap;
     }
 
     .running-text span {
       display: inline-block;
-      white-space: nowrap;
-      position: relative;
-      animation: scroll 20s linear infinite;
+      padding-left: 100%;
+      animation: scroll 10s linear infinite;
     }
 
     @keyframes scroll {
-      0% { transform: translateX(100%); }
+      0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
 
@@ -119,6 +120,7 @@
       font-weight: bold;
     }
 
+    /* Slider */
     .slider {
       max-width: 850px;
       margin: 40px auto;
@@ -172,14 +174,44 @@
 
     #prevBtn { left: 15px; }
     #nextBtn { right: 15px; }
+
+    /* WhatsApp Floating Button */
+    .wa-float {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      bottom: 20px;
+      right: 20px;
+      background-color: #25d366;
+      color: #fff;
+      border-radius: 50%;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s;
+    }
+
+    .wa-float:hover {
+      transform: scale(1.1);
+    }
+
+    .wa-float img {
+      width: 35px;
+      height: 35px;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Running Text -->
   <div class="running-text">
-    <span>Rizki Alpazri > Info mabar Free Fire 🔥🔥🔥</span>
+    <span id="running-text"></span>
   </div>
 
+  <!-- Header -->
   <header>
     <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
     <h1>K7 N</h1>
@@ -241,26 +273,45 @@
     <button id="nextBtn" class="nav-btn">❯</button>
   </div>
 
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" />
+  </a>
+
   <script>
+    // Running Text
+    const runningTextElement = document.getElementById('running-text');
+    const messages = [
+      { text: "Tugas Rizki Alpazri", color: "#e74c3c" },
+      { text: "Info mabar FF Bot", color: "#3498db" },
+      { text: "Jangan mudah tertarik hanya karena dia menarik, ingat yang menarik belum tentu yang terbaik", color: "#f1c40f" },
+      { text: "TERIMAKASIH ATAS PERHATIANMU", color: "#2ecc71" }
+    ];
+    let currentIndex = 0;
+    function updateRunningText() {
+      const msg = messages[currentIndex];
+      runningTextElement.innerHTML = `<strong style="color:${msg.color}">${msg.text}</strong>`;
+      currentIndex = (currentIndex + 1) % messages.length;
+    }
+    updateRunningText();
+    setInterval(updateRunningText, 5000);
+
     // Slider
     const slides = document.getElementById('slides');
     const totalSlides = slides.children.length;
-    let currentIndex = 0;
-
+    let slideIndex = 0;
     function updateSlide() {
-      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+      slides.style.transform = `translateX(-${slideIndex * 100}%)`;
     }
-
     document.getElementById('prevBtn').addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
+      if (slideIndex > 0) {
+        slideIndex--;
         updateSlide();
       }
     });
-
     document.getElementById('nextBtn').addEventListener('click', () => {
-      if (currentIndex < totalSlides - 1) {
-        currentIndex++;
+      if (slideIndex < totalSlides - 1) {
+        slideIndex++;
         updateSlide();
       }
     });
@@ -270,18 +321,15 @@
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const closeBtn = document.getElementById('closeBtn');
-
     previewImages.forEach(img => {
       img.addEventListener('click', () => {
         lightbox.style.display = 'flex';
         lightboxImg.src = img.src;
       });
     });
-
     closeBtn.addEventListener('click', () => {
       lightbox.style.display = 'none';
     });
-
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) {
         lightbox.style.display = 'none';
