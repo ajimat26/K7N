@@ -1,211 +1,262 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K7 N - Awal Mula Prasejarah</title>
-<style>
-    :root {
-        --primary: #25D366;
-        --text: #111;
-        --subtext: #555;
-        --bg: #ffffff;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K7 N - Awal Mula Prasejarah Dimulai</title>
+  <style>
     body {
-        background: var(--bg);
-        color: var(--text);
-        font-family: "Poppins", sans-serif;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-        overflow-x: hidden;
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
     }
 
-    /* RUNNING TEXT REALTIME */
-    .running-text {
-        background: var(--primary);
-        color: #fff;
-        font-weight: bold;
-        font-size: 16px;
-        padding: 10px 0;
-        overflow: hidden;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1000;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .running-text span {
-        display: inline-block;
-        white-space: nowrap;
-        padding-left: 100%;
-        animation: scrollText 15s linear infinite;
-    }
-    @keyframes scrollText {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-100%); }
-    }
-
+    /* Header */
     header {
-        padding: 90px 20px 20px 20px;
-        animation: fadeIn 1.2s ease;
+      padding: 20px;
+      background: #fff;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-    img.logo {
-        width: 120px;
-        border-radius: 50%;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        transition: transform 0.3s;
-    }
-    img.logo:hover { transform: scale(1.05); }
 
-    h1 {
-        font-size: 28px;
-        margin: 15px 0;
-        letter-spacing: 1px;
+    .logo {
+      width: 80px;
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
     }
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #a15c00;
+    }
+
+    /* Running text */
+    marquee {
+      background: #f5f5f5;
+      color: #333;
+      padding: 6px 0;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    /* Clock */
+    #clock {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.05);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
+
+    /* Info Box */
     .info {
-        color: var(--subtext);
-        font-size: 15px;
-        margin-bottom: 40px;
-        line-height: 1.6;
+      background: #fafafa;
+      display: inline-block;
+      margin-top: 15px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
     }
 
-    /* SLIDESHOW */
+    /* Section */
+    .section {
+      margin: 40px auto;
+      max-width: 650px;
+      background: #fafafa;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .section h2 {
+      color: #a15c00;
+    }
+
+    .section img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    /* Manual Slide */
     .slideshow-container {
-        position: relative;
-        max-width: 850px;
-        margin: auto;
-        border-radius: 15px;
-        overflow: hidden;
-        background: #f7f7f7;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      position: relative;
+      max-width: 600px;
+      margin: auto;
     }
+
     .mySlides {
-        display: none;
-        position: relative;
-        animation: fade 1s ease;
+      display: none;
+      animation: fade 1s;
     }
-    img.slide {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-    .caption {
-        padding: 20px;
-        font-size: 17px;
-        color: var(--text);
-        background: #fff;
-        border-top: 1px solid #eee;
-    }
-
-    .btn {
-        background: var(--primary);
-        color: #fff;
-        border: none;
-        border-radius: 25px;
-        padding: 12px 28px;
-        font-size: 16px;
-        margin-top: 35px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    .btn:hover {
-        background: #1da851;
-        transform: scale(1.05);
-    }
-
-    footer {
-        margin-top: 60px;
-        color: var(--subtext);
-        font-size: 13px;
-        padding-bottom: 25px;
-    }
-
-    audio { display: none; }
 
     @keyframes fade {
-        from {opacity: .4} 
-        to {opacity: 1}
+      from {opacity: .4}
+      to {opacity: 1}
     }
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(-10px);}
-        to {opacity: 1; transform: translateY(0);}
+
+    .prev, .next {
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      width: auto;
+      margin-top: -22px;
+      padding: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      border-radius: 0 3px 3px 0;
+      user-select: none;
+      background: rgba(0,0,0,0.4);
     }
-</style>
+
+    .next {
+      right: 0;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .prev:hover, .next:hover {
+      background-color: rgba(0,0,0,0.7);
+    }
+
+    /* Contact Button */
+    .contact-btn {
+      background: #25D366;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      display: inline-block;
+      margin: 30px 0;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .contact-btn:hover {
+      background: #1ebe5d;
+    }
+
+    /* Footer */
+    footer {
+      padding: 15px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    audio {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<!-- RUNNING TEXT -->
-<div class="running-text">
-    <span>Rizki Alpazri > Info mabar Free Fire 🔥 Rizki Alpazri > Info mabar Free Fire 🔥 Rizki Alpazri > Info mabar Free Fire 🔥</span>
-</div>
+  <!-- Running Text -->
+  <marquee behavior="scroll" direction="left" scrollamount="3">
+    🌍 Rizki Alpazri > Info mabar Free Fire 🔥
+  </marquee>
 
-<header>
-    <img src="https://iili.io/KULTzZu.md.png" alt="Logo SMK Trijaya Sakti" class="logo">
-    <h1>K7 N - Awal Mula Prasejarah</h1>
-    <div class="info">
-        <p>Nama: <b>Rizki Alpazri</b></p>
-        <p>Kelas: <b>10</b></p>
-        <p>SMK: <b>Trijaya Sakti</b></p>
-        <p>Jurusan: <b>TMI</b></p>
+  <!-- Header -->
+  <header>
+    <div id="clock"></div>
+    <img class="logo" src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti">
+    <div class="title">K7 N</div>
+    <p>Awal Mula Prasejarah Dimulai</p>
+  </header>
+
+  <!-- Info -->
+  <div class="info">
+    <b>Nama:</b> Rizki Alpazri<br>
+    <b>Kelas:</b> 10<br>
+    <b>SMK:</b> Trijaya Sakti<br>
+    <b>Jurusan:</b> TMI
+  </div>
+
+  <!-- Zaman Batu -->
+  <div class="section">
+    <h2>Zaman Batu</h2>
+    <div class="slideshow-container">
+      <div class="mySlides">
+        <img src="https://iili.io/2MJgfNv.jpg" alt="Zaman Batu 1">
+      </div>
+      <div class="mySlides">
+        <img src="https://iili.io/2MJeOIf.jpg" alt="Zaman Batu 2">
+      </div>
+      <a class="prev" onclick="plusSlides(-1)">❮</a>
+      <a class="next" onclick="plusSlides(1)">❯</a>
     </div>
-</header>
+    <p>
+      Zaman Batu merupakan periode awal manusia mulai menggunakan batu sebagai alat utama. 
+      Mereka hidup secara nomaden, berburu dan meramu makanan. 
+      Lukisan di dinding gua menunjukkan bukti kecerdasan dan seni awal manusia purba.
+    </p>
+  </div>
 
-<!-- SLIDESHOW -->
-<div class="slideshow-container">
+  <!-- Zaman Besi -->
+  <div class="section">
+    <h2>Zaman Besi</h2>
+    <img src="https://iili.io/2MJeOIf.jpg" alt="Zaman Besi">
+    <p>
+      Pada Zaman Besi, manusia telah mampu melebur logam dan menciptakan alat dari besi. 
+      Mereka mulai bertani, membuat senjata, dan membangun permukiman tetap. 
+      Periode ini menandai awal peradaban modern manusia di bumi.
+    </p>
+  </div>
 
-    <div class="mySlides fade">
-        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Cave_painting_of_a_horse.jpg" alt="Lukisan Gua">
-        <div class="caption">
-            <b>Zaman Paleolitikum</b><br>
-            Manusia purba mulai melukis di dinding gua menggunakan tanah liat dan arang. Lukisan ini menjadi bentuk komunikasi dan ekspresi awal.
-        </div>
-    </div>
+  <!-- Contact -->
+  <a class="contact-btn" href="https://wa.me/6281234567890?text=Halo%20Rizki%20Alpazri%2C%20saya%20tertarik%20dengan%20sejarah%20prasejarah!" target="_blank">
+    📞 Contact Rizki Alpazri
+  </a>
 
-    <div class="mySlides fade">
-        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/d/da/Neolithic_farming.jpg" alt="Pertanian Zaman Batu">
-        <div class="caption">
-            <b>Zaman Neolitikum</b><br>
-            Manusia mulai mengenal pertanian dan peternakan. Mereka hidup menetap, membangun rumah sederhana, dan menciptakan alat dari batu halus.
-        </div>
-    </div>
+  <!-- Music -->
+  <audio controls autoplay loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    Browser Anda tidak mendukung pemutar musik.
+  </audio>
 
-    <div class="mySlides fade">
-        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/9/97/Bronze-age-tools.jpg" alt="Zaman Perunggu">
-        <div class="caption">
-            <b>Zaman Perunggu</b><br>
-            Manusia menemukan cara melebur logam dan membuat alat dari perunggu. Teknologi berkembang pesat pada masa ini.
-        </div>
-    </div>
+  <!-- Footer -->
+  <footer>
+    © 2025 K7 N | Website oleh Rizki Alpazri
+  </footer>
 
-</div>
+  <script>
+    // Real-time clock
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-<!-- BUTTON WHATSAPP -->
-<a href="https://wa.me/6283891019471?text=Halo%20Rizki%20Alpazri%2C%20saya%20ingin%20menghubungi%20Anda" target="_blank">
-    <button class="btn">Contact Rizki Alpazri</button>
-</a>
+    // Manual slideshow
+    let slideIndex = 1;
+    showSlides(slideIndex);
 
-<!-- MUSIK -->
-<audio autoplay loop>
-    <source src="https://cdn.pixabay.com/download/audio/2023/02/23/audio_eb90b13f61.mp3?filename=peaceful-nature-142995.mp3" type="audio/mpeg">
-</audio>
+    function plusSlides(n) {
+      showSlides(slideIndex += n);
+    }
 
-<footer>
-    <p>© 2025 Rizki Alpazri | K7 N - Awal Mula Prasejarah</p>
-</footer>
-
-<script>
-let slideIndex = 0;
-showSlides();
-function showSlides() {
-    let slides = document.getElementsByClassName("mySlides");
-    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";  
-    slideIndex++;
-    if (slideIndex > slides.length) slideIndex = 1;    
-    slides[slideIndex-1].style.display = "block";  
-    setTimeout(showSlides, 5000); // 5 detik per slide
-}
-</script>
+    function showSlides(n) {
+      let slides = document.getElementsByClassName("mySlides");
+      if (n > slides.length) { slideIndex = 1 }
+      if (n < 1) { slideIndex = slides.length }
+      for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+      }
+      slides[slideIndex-1].style.display = "block";
+    }
+  </script>
 
 </body>
 </html>
