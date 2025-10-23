@@ -3,160 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K7 N</title>
+  <title>K7 N - Awal Mula Prasejarah</title>
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      margin: 0;
-      background: #fff;
+      background-color: #ffffff;
       color: #222;
+      margin: 0;
       text-align: center;
     }
+
+    /* Running text modern */
     .running-text {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #111;
-      color: #00ff88;
-      padding: 6px 0;
-      font-weight: bold;
+      background-color: #111;
+      color: #fff;
+      padding: 10px 0;
+      font-size: 15px;
       overflow: hidden;
-      z-index: 10;
+      position: relative;
     }
+
     .running-text span {
       display: inline-block;
       white-space: nowrap;
-      animation: scroll 15s linear infinite;
+      position: relative;
+      animation: scroll 20s linear infinite;
     }
+
     @keyframes scroll {
-      from { transform: translateX(100%); }
-      to { transform: translateX(-100%); }
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
     }
-    .clock {
-      position: fixed;
-      top: 35px;
-      right: 15px;
-      font-size: 14px;
-      color: #555;
-    }
+
     header {
-      padding: 10px;
-      border-bottom: 2px solid #eee;
+      padding: 40px 20px;
     }
-    .logo {
-      width: 100px;
-      margin-top: 50px;
+
+    header img {
+      width: 120px;
+      height: auto;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
+
     h1 {
-      font-size: 28px;
-      margin: 10px 0;
+      font-size: 32px;
+      margin: 15px 0 5px;
     }
-    .info {
-      line-height: 1.6;
-      color: #333;
+
+    h2 {
+      color: #777;
+      font-weight: 400;
+      font-size: 18px;
+      margin: 0;
     }
-    .slideshow {
-      max-width: 700px;
-      margin: 20px auto;
-      border-radius: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    /* Slider Section */
+    .slider {
+      max-width: 800px;
+      margin: 40px auto;
+      position: relative;
       overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .slide { display: none; }
-    .slide img { width: 100%; height: auto; border-radius: 15px 15px 0 0; }
-    .caption {
-      background: #fff;
-      padding: 15px;
+
+    .slides {
+      display: flex;
+      transition: transform 0.6s ease;
     }
-    .controls { margin: 15px; }
-    button {
-      background: #222;
-      color: #fff;
+
+    .slides img {
+      width: 100%;
+      border-radius: 20px;
+    }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
       border: none;
-      padding: 10px 15px;
-      border-radius: 8px;
+      font-size: 20px;
       cursor: pointer;
-      margin: 0 5px;
+      padding: 10px 18px;
+      border-radius: 50%;
+      transition: background 0.3s;
     }
-    button:hover { background: #00a86b; }
-    .wa-icon {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
+
+    .nav-btn:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    #prevBtn { left: 15px; }
+    #nextBtn { right: 15px; }
+
+    /* Info bawah logo */
+    .info-diri {
+      margin-top: 25px;
+      font-size: 15px;
+      color: #444;
     }
   </style>
 </head>
 <body>
 
-  <div class="running-text"><span>Rizki Alpazri > Info mabar free fire</span></div>
-  <div class="clock" id="clock"></div>
+  <div class="running-text">
+    <span>Rizki Alpazri > Info mabar Free Fire 🔥🔥🔥</span>
+  </div>
 
   <header>
-    <img src="https://i.ibb.co/YyB2LwT/logo-smk.png" alt="Logo SMK" class="logo">
-    <h1>Web K7 N</h1>
-    <div class="info">
-      <p><strong>Nama:</strong> Rizki Alpazri</p>
-      <p><strong>Kelas:</strong> 10</p>
-      <p><strong>Jurusan:</strong> TMI</p>
-      <p><strong>Umur:</strong> 16</p>
-      <p><strong>SMK:</strong> Trijaya Sakti</p>
-    </div>
+    <img src="https://ibb.co.com/1GMXQJWP" alt="Logo SMK">
+    <h1>K7 N</h1>
+    <h2>Awal Mula Prasejarah Dimulai</h2>
   </header>
 
-  <section class="slideshow">
-    <div class="slide">
-      <img src="https://i.ibb.co/MZVv2nJ/zaman-batu.png" alt="Zaman Batu">
-      <div class="caption">
-        <h2>Zaman Batu</h2>
-        <p>Zaman Batu merupakan masa awal kehidupan manusia di mana alat-alat dibuat dari batu. Manusia hidup nomaden, berburu, dan mengumpulkan makanan. Ini menandai awal mula peradaban manusia dengan penemuan api dan bahasa sederhana.</p>
-      </div>
+  <div class="slider">
+    <div class="slides" id="slides">
+      <img src="https://ibb.co.com/gLHz2bfP" alt="Zaman Batu">
+      <img src="https://ibb.co.com/0Rs082PN" alt="Zaman Besi">
     </div>
+    <button id="prevBtn" class="nav-btn">❮</button>
+    <button id="nextBtn" class="nav-btn">❯</button>
+  </div>
 
-    <div class="slide">
-      <img src="https://i.ibb.co/gMkZbZk/zaman-besi.png" alt="Zaman Besi">
-      <div class="caption">
-        <h2>Zaman Besi</h2>
-        <p>Zaman Besi adalah masa ketika manusia mulai mengolah logam besi untuk alat dan senjata. Kehidupan menjadi lebih maju dengan pertanian, perdagangan, serta pemukiman yang berkembang pesat.</p>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button onclick="prevSlide()">Sebelumnya</button>
-      <button onclick="nextSlide()">Selanjutnya</button>
-    </div>
-  </section>
-
-  <a href="https://wa.me/6283891019471" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="wa-icon">
-  </a>
+  <div class="info-diri">
+    <p>Dibuat oleh: <strong>Rizki Alpazri</strong></p>
+    <p>SMK N 1 Batanghari</p>
+  </div>
 
   <script>
-    // Jam realtime
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('clock').textContent = now.toLocaleTimeString();
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    const slides = document.getElementById('slides');
+    const totalSlides = slides.children.length;
+    let currentIndex = 0;
 
-    // Slide manual
-    let slideIndex = 0;
-    const slides = document.querySelectorAll('.slide');
-    function showSlide(n) {
-      slides.forEach(slide => slide.style.display = 'none');
-      slides[n].style.display = 'block';
-    }
-    function nextSlide() {
-      if (slideIndex < slides.length - 1) slideIndex++;
-      showSlide(slideIndex);
-    }
-    function prevSlide() {
-      if (slideIndex > 0) slideIndex--;
-      showSlide(slideIndex);
-    }
-    showSlide(slideIndex);
+    const updateSlide = () => {
+      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+    };
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateSlide();
+      }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentIndex < totalSlides - 1) {
+        currentIndex++;
+        updateSlide();
+      }
+    });
   </script>
+
 </body>
 </html>
