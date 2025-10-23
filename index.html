@@ -6,35 +6,97 @@
   <title>K7 N - Awal Mula Prasejarah</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
     }
-    .fade-up { opacity: 0; animation: fadeInUp 1s ease-out forwards; }
-    .fade-up-delay { opacity: 0; animation: fadeInUp 1s ease-out forwards; animation-delay: 0.5s; }
-    .fade-up-delay2 { opacity: 0; animation: fadeInUp 1s ease-out forwards; animation-delay: 1s; }
+    .fade-in { animation: fadeIn 2s ease-in-out; }
   </style>
 </head>
-<body class="bg-gradient-to-b from-yellow-100 to-orange-200 min-h-screen flex flex-col items-center justify-start p-6 relative">
+<body class="bg-gradient-to-b from-yellow-100 to-orange-200 min-h-screen flex flex-col items-center p-6">
 
   <!-- Musik Latar -->
-  <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/10/19/audio_0edcdbb646.mp3?filename=ancient-ritual-122369.mp3" type="audio/mpeg">
+  <audio id="bgMusic" autoplay loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7c497c5ff5.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- Tombol Musik -->
-  <button id="musicBtn" onclick="toggleMusic()" class="fixed top-5 right-5 bg-amber-700 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-amber-800 transition">
-    ▶️ Putar Musik
-  </button>
+  <script>
+    // Agar musik bisa diputar otomatis di sebagian browser
+    document.addEventListener('click', function() {
+      document.getElementById('bgMusic').play();
+    });
+  </script>
 
   <!-- Header -->
-  <header class="text-center mt-14 mb-10 fade-up">
-    <!-- Logo SMK -->
-    <img src="https://raw.githubusercontent.com/ajimat26/K7N/main/logo-smk.png" 
-         alt="Logo SMK Trijaya Sakti" 
-         class="mx-auto w-24 h-24 mb-3 rounded-full shadow-lg border-2 border-amber-700 bg-white">
+  <header class="text-center mb-8 fade-in">
+    <img src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti" class="mx-auto w-32 mb-4 rounded-full shadow-lg border-4 border-yellow-400">
     <h1 class="text-5xl font-extrabold text-amber-700 drop-shadow-md">K7 N</h1>
     <p class="text-lg text-gray-700 mt-2 tracking-wide">Awal Mula Prasejarah Dimulai</p>
+  </header>
+
+  <!-- Identitas -->
+  <div class="bg-white/80 p-4 rounded-xl shadow-md mb-8 text-center">
+    <p class="text-gray-800"><b>Nama:</b> Rizki Alpazri</p>
+    <p class="text-gray-800"><b>Kelas:</b> 10</p>
+    <p class="text-gray-800"><b>SMK:</b> Trijaya Sakti</p>
+    <p class="text-gray-800"><b>Jurusan:</b> TMI</p>
+  </div>
+
+  <!-- Slide Gambar -->
+  <main class="bg-white rounded-2xl shadow-2xl p-6 max-w-3xl text-center">
+    <div class="relative">
+      <div id="slide1" class="slide fade-in">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cave_painting_Lascaux.jpg" 
+             alt="Lukisan Gua Lascaux" 
+             class="rounded-xl mx-auto mb-5 shadow-lg">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-3">Lukisan Gua Lascaux</h2>
+        <p class="text-gray-600 leading-relaxed">
+          Lukisan ini ditemukan di Prancis dan menggambarkan kehidupan manusia purba pada masa berburu. 
+          Gambar binatang di dinding gua menjadi bukti awal kemampuan seni manusia prasejarah.
+        </p>
+      </div>
+
+      <div id="slide2" class="slide hidden fade-in">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Neolithic_farming.jpg" 
+             alt="Pertanian Zaman Neolitikum" 
+             class="rounded-xl mx-auto mb-5 shadow-lg">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-3">Pertanian Zaman Neolitikum</h2>
+        <p class="text-gray-600 leading-relaxed">
+          Pada masa Neolitikum, manusia mulai mengenal bercocok tanam dan beternak. 
+          Mereka hidup menetap dan membentuk peradaban awal di berbagai wilayah dunia.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tombol Navigasi Slide -->
+    <div class="flex justify-center mt-6 space-x-4">
+      <button onclick="showSlide(1)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl">Gambar 1</button>
+      <button onclick="showSlide(2)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl">Gambar 2</button>
+    </div>
+  </main>
+
+  <!-- Tombol WhatsApp -->
+  <a href="https://wa.me/6283891019471" target="_blank" 
+     class="mt-8 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg flex items-center space-x-2">
+     <span>💬 Hubungi Saya di WhatsApp</span>
+  </a>
+
+  <!-- Footer -->
+  <footer class="mt-10 text-gray-700 text-sm text-center">
+    © 2025 K7 N | SMK Trijaya Sakti | Edukasi Sejarah Nusantara
+  </footer>
+
+  <!-- Script Slide -->
+  <script>
+    function showSlide(num) {
+      document.getElementById('slide1').classList.add('hidden');
+      document.getElementById('slide2').classList.add('hidden');
+      document.getElementById('slide' + num).classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>    <p class="text-lg text-gray-700 mt-2 tracking-wide">Awal Mula Prasejarah Dimulai</p>
     <div class="mt-4 text-gray-800">
       <p><b>Nama:</b> Rizki Alpazri</p>
       <p><b>Kelas:</b> 10</p>
@@ -320,4 +382,5 @@
   </script>
 </body>
 </html>
+
 
