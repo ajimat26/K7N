@@ -142,7 +142,7 @@
       <p><strong>Zaman Batu</strong></p>
     </div>
     <div>
-      <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Poster Zaman Besi" class="preview-img">
+      <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Besi" class="preview-img">
       <p><strong>Zaman Besi</strong></p>
     </div>
   </div>
@@ -165,7 +165,7 @@
       </div>
     </div>
     <div class="slide">
-      <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
+      <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Zaman Besi">
       <div class="slide-text">
         <h3>Zaman Besi ⚒️</h3>
         <p>Zaman Besi adalah masa di mana manusia sudah mengenal cara mengolah logam, terutama besi.
@@ -185,28 +185,25 @@
 </a>
 
 <script>
-  // Running text full fix
+  // Running text
   const texts = [
     "Tugas Rizki Alpazri",
     "Info mabar FF Bot",
     "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
     "TERIMAKASIH ATAS PERHATIANMU"
   ];
-
   let runningTextIndex = 0;
   const runningTextEl = document.getElementById("running-text");
-
   function updateRunningText() {
     runningTextEl.innerText = texts[runningTextIndex];
     runningTextEl.style.animation = "none";
-    void runningTextEl.offsetWidth; // reset animation
+    void runningTextEl.offsetWidth;
     const width = runningTextEl.offsetWidth;
-    const duration = width * 15; // sesuaikan kecepatan scroll
+    const duration = width * 15;
     runningTextEl.style.animation = `scrollText ${duration}ms linear infinite`;
     runningTextIndex = (runningTextIndex + 1) % texts.length;
     setTimeout(updateRunningText, duration + 500);
   }
-
   updateRunningText();
 
   // Slider
@@ -222,14 +219,12 @@
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   const closeBtn = document.getElementById('closeBtn');
-
   previewImgs.forEach(img=>{
     img.addEventListener('click', ()=>{
       lightbox.style.display = 'flex';
       lightboxImg.src = img.src;
     });
   });
-
   closeBtn.addEventListener('click', ()=>{ lightbox.style.display = 'none'; });
   lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
 </script>
