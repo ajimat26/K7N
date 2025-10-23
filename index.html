@@ -7,12 +7,12 @@
 <style>
     :root {
         --primary: #25D366;
-        --bg: #0d0d0d;
-        --text: #ffffff;
-        --subtext: #bbbbbb;
+        --text: #111;
+        --subtext: #555;
+        --bg: #ffffff;
     }
     body {
-        background: linear-gradient(135deg, #111, #000);
+        background: var(--bg);
         color: var(--text);
         font-family: "Poppins", sans-serif;
         margin: 0;
@@ -21,10 +21,10 @@
         overflow-x: hidden;
     }
 
-    /* RUNNING TEXT REAL TIME */
+    /* RUNNING TEXT REALTIME */
     .running-text {
-        background: #111;
-        color: #25D366;
+        background: var(--primary);
+        color: #fff;
         font-weight: bold;
         font-size: 16px;
         padding: 10px 0;
@@ -33,7 +33,7 @@
         top: 0;
         width: 100%;
         z-index: 1000;
-        box-shadow: 0 0 10px rgba(0,0,0,0.6);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .running-text span {
         display: inline-block;
@@ -47,35 +47,38 @@
     }
 
     header {
-        padding: 90px 20px 20px 20px; /* tambahkan padding karena running text fixed di atas */
+        padding: 90px 20px 20px 20px;
         animation: fadeIn 1.2s ease;
     }
     img.logo {
         width: 120px;
         border-radius: 50%;
-        box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
         transition: transform 0.3s;
     }
     img.logo:hover { transform: scale(1.05); }
 
     h1 {
-        font-size: 30px;
-        margin: 10px 0;
+        font-size: 28px;
+        margin: 15px 0;
         letter-spacing: 1px;
     }
     .info {
         color: var(--subtext);
         font-size: 15px;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
+        line-height: 1.6;
     }
 
+    /* SLIDESHOW */
     .slideshow-container {
         position: relative;
         max-width: 850px;
         margin: auto;
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 0 0 25px rgba(255,255,255,0.15);
+        background: #f7f7f7;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     .mySlides {
         display: none;
@@ -85,43 +88,39 @@
     img.slide {
         width: 100%;
         height: auto;
-        vertical-align: middle;
         display: block;
     }
     .caption {
-        position: absolute;
-        bottom: 0;
-        background: rgba(0,0,0,0.6);
-        color: #fff;
-        width: 100%;
-        padding: 15px;
+        padding: 20px;
         font-size: 17px;
-        backdrop-filter: blur(4px);
+        color: var(--text);
+        background: #fff;
+        border-top: 1px solid #eee;
     }
 
     .btn {
         background: var(--primary);
         color: #fff;
         border: none;
-        border-radius: 30px;
-        padding: 12px 30px;
+        border-radius: 25px;
+        padding: 12px 28px;
         font-size: 16px;
-        margin-top: 30px;
+        margin-top: 35px;
         cursor: pointer;
         transition: 0.3s;
-        box-shadow: 0 0 15px rgba(37,211,102,0.4);
     }
     .btn:hover {
         background: #1da851;
-        box-shadow: 0 0 25px rgba(37,211,102,0.6);
+        transform: scale(1.05);
     }
 
     footer {
-        margin-top: 50px;
+        margin-top: 60px;
         color: var(--subtext);
         font-size: 13px;
-        padding-bottom: 20px;
+        padding-bottom: 25px;
     }
+
     audio { display: none; }
 
     @keyframes fade {
@@ -142,7 +141,7 @@
 </div>
 
 <header>
-    <img src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti" class="logo">
+    <img src="https://iili.io/KULTzZu.md.png" alt="Logo SMK Trijaya Sakti" class="logo">
     <h1>K7 N - Awal Mula Prasejarah</h1>
     <div class="info">
         <p>Nama: <b>Rizki Alpazri</b></p>
@@ -156,14 +155,29 @@
 <div class="slideshow-container">
 
     <div class="mySlides fade">
-        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Cave_painting_of_a_horse.jpg" alt="Gua Lukisan Prasejarah">
-        <div class="caption">Manusia purba mulai menggambar di dinding gua sebagai bentuk ekspresi dan komunikasi pertama.</div>
+        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/1/16/Cave_painting_of_a_horse.jpg" alt="Lukisan Gua">
+        <div class="caption">
+            <b>Zaman Paleolitikum</b><br>
+            Manusia purba mulai melukis di dinding gua menggunakan tanah liat dan arang. Lukisan ini menjadi bentuk komunikasi dan ekspresi awal.
+        </div>
     </div>
 
     <div class="mySlides fade">
         <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/d/da/Neolithic_farming.jpg" alt="Pertanian Zaman Batu">
-        <div class="caption">Zaman Neolitikum: manusia mulai bercocok tanam dan menetap, menandai akhir masa berburu dan meramu.</div>
+        <div class="caption">
+            <b>Zaman Neolitikum</b><br>
+            Manusia mulai mengenal pertanian dan peternakan. Mereka hidup menetap, membangun rumah sederhana, dan menciptakan alat dari batu halus.
+        </div>
     </div>
+
+    <div class="mySlides fade">
+        <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/9/97/Bronze-age-tools.jpg" alt="Zaman Perunggu">
+        <div class="caption">
+            <b>Zaman Perunggu</b><br>
+            Manusia menemukan cara melebur logam dan membuat alat dari perunggu. Teknologi berkembang pesat pada masa ini.
+        </div>
+    </div>
+
 </div>
 
 <!-- BUTTON WHATSAPP -->
