@@ -6,21 +6,11 @@
   <title>K7 N</title>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: "Poppins", sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #ffffff;
+      background: #fff;
       color: #222;
       text-align: center;
-    }
-    header {
-      padding: 10px;
-      border-bottom: 2px solid #eee;
-      position: relative;
-    }
-    .logo {
-      width: 100px;
-      height: auto;
     }
     .running-text {
       position: fixed;
@@ -48,42 +38,38 @@
       top: 35px;
       right: 15px;
       font-size: 14px;
-      color: #444;
+      color: #555;
+    }
+    header {
+      padding: 10px;
+      border-bottom: 2px solid #eee;
+    }
+    .logo {
+      width: 100px;
+      margin-top: 50px;
     }
     h1 {
-      margin-top: 60px;
       font-size: 28px;
+      margin: 10px 0;
     }
     .info {
-      margin: 10px auto;
       line-height: 1.6;
       color: #333;
     }
     .slideshow {
-      position: relative;
       max-width: 700px;
       margin: 20px auto;
-      overflow: hidden;
       border-radius: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
-    .slide {
-      display: none;
-    }
-    .slide img {
-      width: 100%;
-      height: auto;
-      border-radius: 15px;
-    }
+    .slide { display: none; }
+    .slide img { width: 100%; height: auto; border-radius: 15px 15px 0 0; }
     .caption {
       background: #fff;
-      padding: 10px;
-      font-size: 16px;
-      color: #222;
+      padding: 15px;
     }
-    .controls {
-      margin: 10px;
-    }
+    .controls { margin: 15px; }
     button {
       background: #222;
       color: #fff;
@@ -91,16 +77,14 @@
       padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
+      margin: 0 5px;
     }
-    button:hover {
-      background: #00a86b;
-    }
+    button:hover { background: #00a86b; }
     .wa-icon {
       position: fixed;
       bottom: 20px;
       right: 20px;
       width: 50px;
-      height: 50px;
     }
   </style>
 </head>
@@ -110,7 +94,7 @@
   <div class="clock" id="clock"></div>
 
   <header>
-    <img src="https://i.ibb.co/1GMXQJWP/logo-smk.png" alt="Logo SMK" class="logo">
+    <img src="https://i.ibb.co/YyB2LwT/logo-smk.png" alt="Logo SMK" class="logo">
     <h1>Web K7 N</h1>
     <div class="info">
       <p><strong>Nama:</strong> Rizki Alpazri</p>
@@ -123,18 +107,18 @@
 
   <section class="slideshow">
     <div class="slide">
-      <img src="https://i.ibb.co/gLHz2bfP/zaman-batu.png" alt="Zaman Batu">
+      <img src="https://i.ibb.co/MZVv2nJ/zaman-batu.png" alt="Zaman Batu">
       <div class="caption">
         <h2>Zaman Batu</h2>
-        <p>Zaman Batu merupakan masa awal kehidupan manusia di mana alat-alat dibuat dari batu. Manusia hidup secara nomaden, berburu, dan mengumpulkan makanan. Zaman ini menandai awal mula peradaban manusia dengan penemuan api dan bahasa sederhana.</p>
+        <p>Zaman Batu merupakan masa awal kehidupan manusia di mana alat-alat dibuat dari batu. Manusia hidup nomaden, berburu, dan mengumpulkan makanan. Ini menandai awal mula peradaban manusia dengan penemuan api dan bahasa sederhana.</p>
       </div>
     </div>
 
     <div class="slide">
-      <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
+      <img src="https://i.ibb.co/gMkZbZk/zaman-besi.png" alt="Zaman Besi">
       <div class="caption">
         <h2>Zaman Besi</h2>
-        <p>Zaman Besi adalah masa di mana manusia mulai mengenal dan mengolah logam besi untuk dijadikan alat dan senjata. Kehidupan menjadi lebih maju dengan sistem pertanian, perdagangan, dan pemukiman yang berkembang pesat.</p>
+        <p>Zaman Besi adalah masa ketika manusia mulai mengolah logam besi untuk alat dan senjata. Kehidupan menjadi lebih maju dengan pertanian, perdagangan, serta pemukiman yang berkembang pesat.</p>
       </div>
     </div>
 
@@ -145,7 +129,7 @@
   </section>
 
   <a href="https://wa.me/6283891019471" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="wa-icon" alt="WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="wa-icon">
   </a>
 
   <script>
@@ -157,7 +141,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Slide Manual
+    // Slide manual
     let slideIndex = 0;
     const slides = document.querySelectorAll('.slide');
     function showSlide(n) {
@@ -174,6 +158,5 @@
     }
     showSlide(slideIndex);
   </script>
-
 </body>
 </html>
