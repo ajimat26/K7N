@@ -1,215 +1,127 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K7 N - Awal Mula Prasejarah</title>
-  <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background-color: #ffffff;
-      color: #222;
-      margin: 0;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K7 N - Awal Mula Prasejarah</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: #ffffff;
+    color: #222;
+    margin: 0;
+    text-align: center;
+  }
 
-    /* Running Text dengan Typing Effect */
-    .running-text {
-      background-color: #111;
-      color: #fff;
-      padding: 10px 0;
-      font-size: 16px;
-      overflow: hidden;
-      position: relative;
-      white-space: nowrap;
-    }
+  /* Running Text Scroll Normal */
+  .running-text {
+    background-color: #111;
+    color: #fff;
+    padding: 10px 0;
+    font-size: 16px;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+  }
 
-    .running-text span {
-      display: inline-block;
-      white-space: nowrap;
-      border-right: 2px solid orange;
-      overflow: hidden;
-    }
+  .running-text span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scrollText linear infinite;
+  }
 
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
+  @keyframes scrollText {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
 
-    @keyframes blink-caret {
-      50% { border-color: transparent; }
-    }
+  /* Header */
+  header {
+    padding: 40px 20px;
+    position: relative;
+  }
 
-    /* Header */
-    header {
-      padding: 40px 20px;
-      position: relative;
-    }
+  header img {
+    width: 120px;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
 
-    header img {
-      width: 120px;
-      height: auto;
-      border-radius: 50%;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
+  h1 { font-size: 32px; margin: 15px 0 5px; }
+  h2 { color: #777; font-weight: 400; font-size: 18px; margin: 0; }
 
-    h1 {
-      font-size: 32px;
-      margin: 15px 0 5px;
-    }
+  /* Poster Section */
+  .poster-section { padding: 20px; background-color: #f5f5f5; }
+  .poster-section h2 { font-size: 26px; margin-bottom: 20px; color: #333; }
+  .poster-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+  }
+  .poster-container img {
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    transition: transform 0.3s;
+    cursor: pointer;
+  }
+  .poster-container img:hover { transform: scale(1.03); }
 
-    h2 {
-      color: #777;
-      font-weight: 400;
-      font-size: 18px;
-      margin: 0;
-    }
+  /* Lightbox / Preview */
+  .lightbox {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+  }
+  .lightbox img {
+    max-width: 90%; max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  }
+  .lightbox .close-btn {
+    position: absolute; top: 20px; right: 30px;
+    font-size: 36px; color: white; cursor: pointer; font-weight: bold;
+  }
 
-    /* Poster Section */
-    .poster-section {
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
+  /* Slider */
+  .slider {
+    max-width: 850px;
+    margin: 40px auto;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    background-color: #f9f9f9;
+  }
+  .slides { display: flex; transition: transform 0.6s ease; }
+  .slide { min-width: 100%; box-sizing: border-box; }
+  .slide img { width: 100%; border-radius: 15px 15px 0 0; }
+  .slide-text { padding: 15px; font-size: 16px; line-height: 1.6; text-align: left; color: #333; }
+  .nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background-color: rgba(0,0,0,0.6); color: white; border: none;
+    font-size: 22px; cursor: pointer; padding: 8px 14px; border-radius: 50%;
+    transition: background 0.3s;
+  }
+  .nav-btn:hover { background-color: rgba(0,0,0,0.8); }
+  #prevBtn { left: 15px; } #nextBtn { right: 15px; }
 
-    .poster-section h2 {
-      font-size: 26px;
-      margin-bottom: 20px;
-      color: #333;
-    }
+  /* WhatsApp Floating Button */
+  .wa-float {
+    position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
+    background-color: #25d366; color: #fff; border-radius: 50%;
+    text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    z-index: 1000; display: flex; justify-content: center; align-items: center;
+    transition: transform 0.3s;
+  }
+  .wa-float:hover { transform: scale(1.1); }
+  .wa-float img { width: 35px; height: 35px; }
 
-    .poster-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    .poster-container img {
-      width: 350px;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-      transition: transform 0.3s;
-      cursor: pointer;
-    }
-
-    .poster-container img:hover {
-      transform: scale(1.03);
-    }
-
-    /* Lightbox / Preview */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    }
-
-    .lightbox .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      font-size: 36px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* Slider */
-    .slider {
-      max-width: 850px;
-      margin: 40px auto;
-      position: relative;
-      overflow: hidden;
-      border-radius: 15px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-      background-color: #f9f9f9;
-    }
-
-    .slides {
-      display: flex;
-      transition: transform 0.6s ease;
-    }
-
-    .slide {
-      min-width: 100%;
-      box-sizing: border-box;
-    }
-
-    .slide img {
-      width: 100%;
-      border-radius: 15px 15px 0 0;
-    }
-
-    .slide-text {
-      padding: 15px;
-      font-size: 16px;
-      line-height: 1.6;
-      text-align: left;
-      color: #333;
-    }
-
-    .nav-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background-color: rgba(0,0,0,0.6);
-      color: white;
-      border: none;
-      font-size: 22px;
-      cursor: pointer;
-      padding: 8px 14px;
-      border-radius: 50%;
-      transition: background 0.3s;
-    }
-
-    .nav-btn:hover {
-      background-color: rgba(0,0,0,0.8);
-    }
-
-    #prevBtn { left: 15px; }
-    #nextBtn { right: 15px; }
-
-    /* WhatsApp Floating Button */
-    .wa-float {
-      position: fixed;
-      width: 60px;
-      height: 60px;
-      bottom: 20px;
-      right: 20px;
-      background-color: #25d366;
-      color: #fff;
-      border-radius: 50%;
-      text-align: center;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: transform 0.3s;
-    }
-
-    .wa-float:hover {
-      transform: scale(1.1);
-    }
-
-    .wa-float img {
-      width: 35px;
-      height: 35px;
-    }
-  </style>
+</style>
 </head>
 <body>
 
@@ -250,8 +162,6 @@
   <!-- Slider -->
   <div class="slider">
     <div class="slides" id="slides">
-
-      <!-- Slide 1 -->
       <div class="slide">
         <img src="https://i.ibb.co/gLHz2bfP/zaman-batu.png" alt="Zaman Batu">
         <div class="slide-text">
@@ -261,8 +171,6 @@
           Mereka tinggal di gua-gua, mulai mengenal api, dan membuat alat-alat sederhana dari batu seperti kapak genggam dan serpih.</p>
         </div>
       </div>
-
-      <!-- Slide 2 -->
       <div class="slide">
         <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
         <div class="slide-text">
@@ -273,7 +181,6 @@
           Zaman Besi menandai berakhirnya masa prasejarah dan awal peradaban manusia modern.</p>
         </div>
       </div>
-
     </div>
 
     <button id="prevBtn" class="nav-btn">❮</button>
@@ -282,4 +189,60 @@
 
   <!-- WhatsApp Floating Button -->
   <a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
-    <img src="https://upload.wikimedia.org/wikipedia
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+  </a>
+
+<script>
+  // Running Text Berurutan
+  const texts = [
+    "Tugas Rizki Alpazri",
+    "Info mabar FF Bot",
+    "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
+    "TERIMAKASIH ATAS PERHATIANMU"
+  ];
+  const runningText = document.getElementById("running-text");
+  let index = 0;
+
+  function showNextText() {
+    runningText.innerText = texts[index];
+    const width = runningText.offsetWidth;
+    const duration = width * 15; // sesuaikan kecepatan scroll
+    runningText.style.animation = `scrollText ${duration}ms linear forwards`;
+    runningText.addEventListener("animationend", next, { once: true });
+  }
+
+  function next() {
+    index = (index + 1) % texts.length;
+    runningText.style.animation = "";
+    setTimeout(showNextText, 500);
+  }
+
+  showNextText();
+
+  // Slider
+  const slides = document.getElementById('slides');
+  const totalSlides = slides.children.length;
+  let currentIndex = 0;
+  function updateSlide() { slides.style.transform = `translateX(-${currentIndex * 100}%)`; }
+  document.getElementById('prevBtn').addEventListener('click', () => { if(currentIndex>0){currentIndex--;updateSlide();} });
+  document.getElementById('nextBtn').addEventListener('click', () => { if(currentIndex<totalSlides-1){currentIndex++;updateSlide();} });
+
+  // Lightbox Poster
+  const previewImgs = document.querySelectorAll('.preview-img');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const closeBtn = document.getElementById('closeBtn');
+
+  previewImgs.forEach(img=>{
+    img.addEventListener('click', ()=>{
+      lightbox.style.display = 'flex';
+      lightboxImg.src = img.src;
+    });
+  });
+
+  closeBtn.addEventListener('click', ()=>{ lightbox.style.display = 'none'; });
+  lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
+</script>
+
+</body>
+</html>
