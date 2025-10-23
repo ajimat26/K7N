@@ -7,195 +7,69 @@
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      margin: 0;
       background-color: #ffffff;
       color: #222;
+      margin: 0;
       text-align: center;
     }
 
-    /* Running Text */
+    /* Running text modern */
     .running-text {
-      background: #111;
-      color: white;
-      padding: 8px 0;
+      background-color: #111;
+      color: #fff;
+      padding: 10px 0;
       font-size: 15px;
       overflow: hidden;
-      white-space: nowrap;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
     }
 
     .running-text span {
       display: inline-block;
-      padding-left: 100%;
+      white-space: nowrap;
+      position: relative;
       animation: scroll 20s linear infinite;
     }
 
     @keyframes scroll {
-      from { transform: translateX(0%); }
-      to { transform: translateX(-100%); }
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
     }
 
     header {
-      margin-top: 15px;
+      padding: 40px 20px;
     }
 
     header img {
-      width: 100px;
+      width: 120px;
       height: auto;
       border-radius: 50%;
-    }
-
-    h1 {
-      margin-top: 10px;
-      font-size: 28px;
-    }
-
-    .clock {
-      position: fixed;
-      top: 8px;
-      right: 15px;
-      font-size: 14px;
-      color: #f8f8f8;
-      font-weight: 500;
-    }
-
-    .slider {
-      position: relative;
-      max-width: 700px;
-      margin: 30px auto;
-    }
-
-    .slide {
-      display: none;
-      padding: 20px;
-    }
-
-    .slide img {
-      width: 100%;
-      border-radius: 12px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
-    .active {
-      display: block;
+    h1 {
+      font-size: 32px;
+      margin: 15px 0 5px;
     }
 
-    .btn {
-      background-color: #111;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .btn:hover {
-      background-color: #444;
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 14px;
-      color: #444;
-      padding-bottom: 20px;
-    }
-
-    audio {
-      margin-top: 20px;
-    }
-
-    .contact-btn {
-      background-color: #25d366;
-      color: white;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 25px;
-      text-decoration: none;
-      font-size: 16px;
-      display: inline-block;
-      transition: 0.3s;
-    }
-
-    .contact-btn:hover {
-      background-color: #1ebd5a;
+    h2 {
+      color: #777;
+      font-weight: 400;
+      font-size: 18px;
+      margin: 0;
     }
   </style>
 </head>
 <body>
+
   <div class="running-text">
     <span>Rizki Alpazri > Info mabar Free Fire 🔥🔥🔥</span>
   </div>
-  <div class="clock" id="clock"></div>
 
   <header>
-    <img src="https://freeimage.host/i/KULTzZu" alt="Logo K7 N">
-    <h1>🌍 K7 N - Awal Mula Prasejarah</h1>
+    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
+    <h1>K7 N</h1>
+    <h2>Awal Mula Prasejarah Dimulai</h2>
   </header>
 
-  <div class="slider">
-    <div class="slide active" id="slide1">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Lascaux_horse.jpg" alt="Zaman Batu">
-      <h2>Zaman Batu</h2>
-      <p>Pada Zaman Batu, manusia mulai menggunakan batu sebagai alat untuk berburu, memotong, dan bertahan hidup. Mereka tinggal di gua dan mulai belajar mengontrol api. Zaman ini menjadi tonggak awal perkembangan manusia modern.</p>
-    </div>
-
-    <div class="slide" id="slide2">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/Neolithic_farmstead_and_house.jpg" alt="Zaman Besi">
-      <h2>Zaman Besi</h2>
-      <p>Pada Zaman Besi, manusia telah menguasai teknik peleburan logam. Mereka membuat senjata, alat pertanian, dan membangun pemukiman permanen. Perkembangan budaya dan sistem sosial mulai terbentuk pada masa ini.</p>
-    </div>
-
-    <button class="btn" onclick="prevSlide()">Sebelumnya</button>
-    <button class="btn" onclick="nextSlide()">Selanjutnya</button>
-  </div>
-
-  <audio controls autoplay loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    Browser kamu tidak mendukung pemutar musik.
-  </audio>
-
-  <br><br>
-  <a href="https://wa.me/6283891019471" class="contact-btn">Contact Rizki Alpazri</a>
-
-  <footer>
-    <p>Nama: <b>Rizki Alpazri</b><br>
-    Kelas: 10<br>
-    SMK: Trijaya Sakti<br>
-    Jurusan: TMI</p>
-  </footer>
-
-  <script>
-    // Jam realtime
-    function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // Slide
-    let current = 0;
-    const slides = document.querySelectorAll(".slide");
-
-    function showSlide(index) {
-      slides.forEach(slide => slide.classList.remove("active"));
-      slides[index].classList.add("active");
-    }
-
-    function nextSlide() {
-      current = (current + 1) % slides.length;
-      showSlide(current);
-    }
-
-    function prevSlide() {
-      current = (current - 1 + slides.length) % slides.length;
-      showSlide(current);
-    }
-  </script>
 </body>
 </html>
