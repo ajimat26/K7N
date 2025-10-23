@@ -3,259 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K7 N - Awal Mula Prasejarah Dimulai</title>
+  <title>K7 N - Awal Mula Prasejarah</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #ffffff;
       color: #333;
       margin: 0;
-      padding: 0;
       text-align: center;
     }
-
-    /* Header */
     header {
-      padding: 20px;
       background: #fff;
-      position: relative;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 10px;
+      border-bottom: 2px solid #e0e0e0;
     }
-
-    .logo {
-      width: 80px;
-      height: auto;
-      display: block;
-      margin: 0 auto 10px;
+    header img {
+      height: 80px;
     }
-
-    .title {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #a15c00;
-    }
-
-    /* Running text */
     marquee {
-      background: #f5f5f5;
-      color: #333;
-      padding: 6px 0;
-      font-weight: 600;
+      background: #0078ff;
+      color: white;
+      padding: 8px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 28px;
+      margin-top: 10px;
+      color: #222;
+    }
+    p {
+      max-width: 700px;
+      margin: 15px auto;
+      line-height: 1.6;
+      font-size: 17px;
+    }
+    .slideshow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .slide {
+      display: none;
+      width: 90%;
+      max-width: 700px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      background: #0078ff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
       font-size: 15px;
     }
-
-    /* Clock */
-    #clock {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.05);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      color: #444;
-      font-size: 14px;
+    button:hover {
+      background: #005fcc;
     }
-
-    /* Info Box */
-    .info {
-      background: #fafafa;
-      display: inline-block;
+    .contact {
+      margin-top: 25px;
+    }
+    .clock {
       margin-top: 15px;
-      padding: 15px 25px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: left;
-    }
-
-    /* Section */
-    .section {
-      margin: 40px auto;
-      max-width: 650px;
-      background: #fafafa;
-      border-radius: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
-
-    .section h2 {
-      color: #a15c00;
-    }
-
-    .section img {
-      width: 100%;
-      border-radius: 10px;
-    }
-
-    /* Manual Slide */
-    .slideshow-container {
-      position: relative;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    .mySlides {
-      display: none;
-      animation: fade 1s;
-    }
-
-    @keyframes fade {
-      from {opacity: .4}
-      to {opacity: 1}
-    }
-
-    .prev, .next {
-      cursor: pointer;
-      position: absolute;
-      top: 50%;
-      width: auto;
-      margin-top: -22px;
-      padding: 10px;
-      color: white;
-      font-weight: bold;
       font-size: 18px;
-      border-radius: 0 3px 3px 0;
-      user-select: none;
-      background: rgba(0,0,0,0.4);
+      color: #444;
+      font-weight: bold;
     }
-
-    .next {
-      right: 0;
-      border-radius: 3px 0 0 3px;
-    }
-
-    .prev:hover, .next:hover {
-      background-color: rgba(0,0,0,0.7);
-    }
-
-    /* Contact Button */
-    .contact-btn {
-      background: #25D366;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 50px;
-      display: inline-block;
-      margin: 30px 0;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.3s;
-    }
-
-    .contact-btn:hover {
-      background: #1ebe5d;
-    }
-
-    /* Footer */
     footer {
-      padding: 15px;
-      font-size: 13px;
-      color: #777;
-    }
-
-    audio {
-      margin-top: 10px;
+      margin-top: 40px;
+      padding: 20px;
+      background: #f9f9f9;
+      font-size: 15px;
+      border-top: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
 
-  <!-- Running Text -->
-  <marquee behavior="scroll" direction="left" scrollamount="3">
-    🌍 Rizki Alpazri > Info mabar Free Fire 🔥
-  </marquee>
+  <marquee scrollamount="3">Rizki Alpazri &gt; Info mabar free fire</marquee>
 
-  <!-- Header -->
   <header>
-    <div id="clock"></div>
-    <img class="logo" src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti">
-    <div class="title">K7 N</div>
-    <p>Awal Mula Prasejarah Dimulai</p>
+    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
   </header>
 
-  <!-- Info -->
-  <div class="info">
-    <b>Nama:</b> Rizki Alpazri<br>
-    <b>Kelas:</b> 10<br>
-    <b>SMK:</b> Trijaya Sakti<br>
-    <b>Jurusan:</b> TMI
-  </div>
+  <h1>Awal Mula Zaman Prasejarah</h1>
+  <p>
+    Zaman prasejarah adalah masa ketika manusia belum mengenal tulisan. 
+    Pada masa ini, manusia hidup secara nomaden (berpindah-pindah), 
+    menggunakan alat dari batu, tulang, dan kayu. 
+    Seiring waktu, mereka mulai bercocok tanam, beternak, dan membentuk komunitas.
+  </p>
 
-  <!-- Zaman Batu -->
-  <div class="section">
-    <h2>Zaman Batu</h2>
-    <div class="slideshow-container">
-      <div class="mySlides">
-        <img src="https://iili.io/2MJgfNv.jpg" alt="Zaman Batu 1">
-      </div>
-      <div class="mySlides">
-        <img src="https://iili.io/2MJeOIf.jpg" alt="Zaman Batu 2">
-      </div>
-      <a class="prev" onclick="plusSlides(-1)">❮</a>
-      <a class="next" onclick="plusSlides(1)">❯</a>
+  <div class="slideshow">
+    <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cave_painting_Lascaux.jpg" alt="Lukisan gua prasejarah">
+    <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Bronze_Age_tools_from_the_Adabrock_hoard.jpg" alt="Peralatan Zaman Perunggu">
+    <img class="slide" src="https://upload.wikimedia.org/wikipedia/commons/d/da/Neolithic_farming.jpg" alt="Pertanian Zaman Neolitikum">
+    <div>
+      <button onclick="plusSlides(-1)">⟨ Sebelumnya</button>
+      <button onclick="plusSlides(1)">Berikutnya ⟩</button>
     </div>
-    <p>
-      Zaman Batu merupakan periode awal manusia mulai menggunakan batu sebagai alat utama. 
-      Mereka hidup secara nomaden, berburu dan meramu makanan. 
-      Lukisan di dinding gua menunjukkan bukti kecerdasan dan seni awal manusia purba.
-    </p>
   </div>
 
-  <!-- Zaman Besi -->
-  <div class="section">
-    <h2>Zaman Besi</h2>
-    <img src="https://iili.io/2MJeOIf.jpg" alt="Zaman Besi">
-    <p>
-      Pada Zaman Besi, manusia telah mampu melebur logam dan menciptakan alat dari besi. 
-      Mereka mulai bertani, membuat senjata, dan membangun permukiman tetap. 
-      Periode ini menandai awal peradaban modern manusia di bumi.
-    </p>
+  <div class="clock" id="clock"></div>
+
+  <div class="contact">
+    <a href="https://wa.me/6281234567890" target="_blank">
+      <button>Contact Rizki Alpazri</button>
+    </a>
   </div>
 
-  <!-- Contact -->
-  <a class="contact-btn" href="https://wa.me/6281234567890?text=Halo%20Rizki%20Alpazri%2C%20saya%20tertarik%20dengan%20sejarah%20prasejarah!" target="_blank">
-    📞 Contact Rizki Alpazri
-  </a>
-
-  <!-- Music -->
-  <audio controls autoplay loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    Browser Anda tidak mendukung pemutar musik.
-  </audio>
-
-  <!-- Footer -->
   <footer>
-    © 2025 K7 N | Website oleh Rizki Alpazri
+    <p>Nama: Rizki Alpazri</p>
+    <p>Kelas: 10 | SMK Trijaya Sakti | Jurusan: TMI</p>
   </footer>
 
-  <script>
-    // Real-time clock
-    function updateClock() {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const seconds = now.getSeconds().toString().padStart(2, '0');
-      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+  <audio id="music" controls autoplay loop>
+    <source src="https://files.catbox.moe/3xq1xv.mp3" type="audio/mpeg">
+    Browser kamu tidak mendukung pemutar musik.
+  </audio>
 
-    // Manual slideshow
+  <script>
+    // Slide Manual
     let slideIndex = 1;
     showSlides(slideIndex);
-
     function plusSlides(n) {
       showSlides(slideIndex += n);
     }
-
     function showSlides(n) {
-      let slides = document.getElementsByClassName("mySlides");
-      if (n > slides.length) { slideIndex = 1 }
-      if (n < 1) { slideIndex = slides.length }
+      let slides = document.getElementsByClassName("slide");
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
       for (let i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
       }
       slides[slideIndex-1].style.display = "block";
     }
+
+    // Jam Digital Real-Time
+    function updateClock() {
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, '0');
+      const menit = now.getMinutes().toString().padStart(2, '0');
+      const detik = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `🕒 ${jam}:${menit}:${detik}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
   </script>
 
 </body>
