@@ -13,7 +13,7 @@
     text-align: center;
   }
 
-  /* Running Text Bold */
+  /* Running Text Bold Fix */
   .running-text {
     background-color: #111;
     color: #fff;
@@ -22,21 +22,20 @@
     overflow: hidden;
     position: relative;
     white-space: nowrap;
+    font-weight: bold;
   }
 
   .running-text span {
     display: inline-block;
     padding-left: 100%;
-    font-weight: bold;
-    animation: scrollText linear infinite;
+    animation: scrollText 10s linear infinite;
   }
 
   @keyframes scrollText {
-    0% { transform: translateX(0); }
+    0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
   }
 
-  /* Header */
   header {
     padding: 40px 20px;
     position: relative;
@@ -52,12 +51,9 @@
   h1 { font-size: 32px; margin: 15px 0 5px; }
   h2 { color: #777; font-weight: 400; font-size: 18px; margin: 0; }
 
-  /* Poster Section */
   .poster-section { padding: 20px; background-color: #f5f5f5; }
   .poster-section h2 { font-size: 26px; margin-bottom: 20px; color: #333; }
-  .poster-container {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
-  }
+  .poster-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
   .poster-container img {
     width: 350px;
     border-radius: 10px;
@@ -67,7 +63,7 @@
   }
   .poster-container img:hover { transform: scale(1.03); }
 
-  /* Lightbox / Preview */
+  /* Lightbox */
   .lightbox {
     display: none;
     position: fixed;
@@ -88,7 +84,6 @@
     font-size: 36px; color: white; cursor: pointer; font-weight: bold;
   }
 
-  /* Slider */
   .slider {
     max-width: 850px;
     margin: 40px auto;
@@ -111,7 +106,6 @@
   .nav-btn:hover { background-color: rgba(0,0,0,0.8); }
   #prevBtn { left: 15px; } #nextBtn { right: 15px; }
 
-  /* WhatsApp Floating Button */
   .wa-float {
     position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
     background-color: #25d366; color: #fff; border-radius: 50%;
@@ -126,99 +120,91 @@
 </head>
 <body>
 
-  <!-- Running Text -->
-  <div class="running-text">
-    <span id="running-text"></span>
+<div class="running-text">
+  <span id="running-text"></span>
+</div>
+
+<header>
+  <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
+  <h1>K7 N</h1>
+  <h2>Awal Mula Prasejarah Dimulai</h2>
+  <p><strong>Nama:</strong> Rizki Alpazri | <strong>Kelas:</strong> 10 | <strong>Jurusan:</strong> TMI | <strong>Umur:</strong> 16</p>
+</header>
+
+<section class="poster-section">
+  <h2>Poster Prasejarah</h2>
+  <div class="poster-container">
+    <div>
+      <img src="https://i.supaimg.com/43102cc4-b937-4ef1-bd32-076c899cca8a.png" alt="Poster Zaman Batu" class="preview-img">
+      <p><strong>Zaman Batu</strong></p>
+    </div>
+    <div>
+      <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Besi" class="preview-img">
+      <p><strong>Zaman Besi</strong></p>
+    </div>
   </div>
+</section>
 
-  <!-- Header -->
-  <header>
-    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
-    <h1>K7 N</h1>
-    <h2>Awal Mula Prasejarah Dimulai</h2>
-    <p><strong>Nama:</strong> Rizki Alpazri | <strong>Kelas:</strong> 10 | <strong>Jurusan:</strong> TMI | <strong>Umur:</strong> 16</p>
-  </header>
+<div class="lightbox" id="lightbox">
+  <span class="close-btn" id="closeBtn">&times;</span>
+  <img id="lightbox-img" src="" alt="Preview Poster">
+</div>
 
-  <!-- Poster Prasejarah -->
-  <section class="poster-section">
-    <h2>Poster Prasejarah</h2>
-    <div class="poster-container">
-      <div>
-        <img src="https://i.supaimg.com/43102cc4-b937-4ef1-bd32-076c899cca8a.png" alt="Poster Zaman Batu" class="preview-img">
-        <p><strong>Zaman Batu</strong></p>
-      </div>
-      <div>
-        <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Besi" class="preview-img">
-        <p><strong>Zaman Besi</strong></p>
+<div class="slider">
+  <div class="slides" id="slides">
+    <div class="slide">
+      <img src="https://i.ibb.co/gLHz2bfP/zaman-batu.png" alt="Zaman Batu">
+      <div class="slide-text">
+        <h3>Zaman Batu 🪨</h3>
+        <p>Zaman Batu merupakan periode awal dalam sejarah manusia ketika peralatan sebagian besar terbuat dari batu.
+        Pada masa ini, manusia purba hidup dengan cara berburu dan mengumpulkan makanan (food gathering).
+        Mereka tinggal di gua-gua, mulai mengenal api, dan membuat alat-alat sederhana dari batu seperti kapak genggam dan serpih.</p>
       </div>
     </div>
-  </section>
-
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox">
-    <span class="close-btn" id="closeBtn">&times;</span>
-    <img id="lightbox-img" src="" alt="Preview Poster">
-  </div>
-
-  <!-- Slider -->
-  <div class="slider">
-    <div class="slides" id="slides">
-      <div class="slide">
-        <img src="https://i.ibb.co/gLHz2bfP/zaman-batu.png" alt="Zaman Batu">
-        <div class="slide-text">
-          <h3>Zaman Batu 🪨</h3>
-          <p>Zaman Batu merupakan periode awal dalam sejarah manusia ketika peralatan sebagian besar terbuat dari batu.
-          Pada masa ini, manusia purba hidup dengan cara berburu dan mengumpulkan makanan (food gathering).
-          Mereka tinggal di gua-gua, mulai mengenal api, dan membuat alat-alat sederhana dari batu seperti kapak genggam dan serpih.</p>
-        </div>
-      </div>
-      <div class="slide">
-        <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
-        <div class="slide-text">
-          <h3>Zaman Besi ⚒️</h3>
-          <p>Zaman Besi adalah masa di mana manusia sudah mengenal cara mengolah logam, terutama besi.
-          Pada periode ini, peralatan seperti senjata, mata bajak, dan perkakas rumah tangga dibuat dari besi,
-          sehingga kehidupan menjadi lebih maju.
-          Zaman Besi menandai berakhirnya masa prasejarah dan awal peradaban manusia modern.</p>
-        </div>
+    <div class="slide">
+      <img src="https://i.ibb.co/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
+      <div class="slide-text">
+        <h3>Zaman Besi ⚒️</h3>
+        <p>Zaman Besi adalah masa di mana manusia sudah mengenal cara mengolah logam, terutama besi.
+        Pada periode ini, peralatan seperti senjata, mata bajak, dan perkakas rumah tangga dibuat dari besi,
+        sehingga kehidupan menjadi lebih maju.
+        Zaman Besi menandai berakhirnya masa prasejarah dan awal peradaban manusia modern.</p>
       </div>
     </div>
-
-    <button id="prevBtn" class="nav-btn">❮</button>
-    <button id="nextBtn" class="nav-btn">❯</button>
   </div>
 
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
-  </a>
+  <button id="prevBtn" class="nav-btn">❮</button>
+  <button id="nextBtn" class="nav-btn">❯</button>
+</div>
+
+<a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+</a>
 
 <script>
-  // Running Text Berurutan Bold
+  // Running text full fix
   const texts = [
     "Tugas Rizki Alpazri",
     "Info mabar FF Bot",
     "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
     "TERIMAKASIH ATAS PERHATIANMU"
   ];
-  const runningText = document.getElementById("running-text");
-  let index = 0;
 
-  function showNextText() {
-    runningText.innerText = texts[index];
-    const width = runningText.offsetWidth;
+  let runningTextIndex = 0;
+  const runningTextEl = document.getElementById("running-text");
+
+  function updateRunningText() {
+    runningTextEl.innerText = texts[runningTextIndex];
+    runningTextEl.style.animation = "none";
+    void runningTextEl.offsetWidth; // reset animation
+    const width = runningTextEl.offsetWidth;
     const duration = width * 15; // sesuaikan kecepatan scroll
-    runningText.style.animation = `scrollText ${duration}ms linear forwards`;
-    runningText.addEventListener("animationend", next, { once: true });
+    runningTextEl.style.animation = `scrollText ${duration}ms linear infinite`;
+    runningTextIndex = (runningTextIndex + 1) % texts.length;
+    setTimeout(updateRunningText, duration + 500);
   }
 
-  function next() {
-    index = (index + 1) % texts.length;
-    runningText.style.animation = "";
-    setTimeout(showNextText, 500);
-  }
-
-  showNextText();
+  updateRunningText();
 
   // Slider
   const slides = document.getElementById('slides');
@@ -244,6 +230,5 @@
   closeBtn.addEventListener('click', ()=>{ lightbox.style.display = 'none'; });
   lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
 </script>
-
 </body>
 </html>
