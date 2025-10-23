@@ -18,23 +18,179 @@
 <body class="bg-gradient-to-b from-yellow-100 to-orange-200 min-h-screen flex flex-col items-center justify-start p-6 relative">
 
   <!-- Musik Latar -->
-  <audio id="bgMusic" loop autoplay>
+  <audio id="bgMusic" loop>
     <source src="https://cdn.pixabay.com/download/audio/2022/10/19/audio_0edcdbb646.mp3?filename=ancient-ritual-122369.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Tombol Musik -->
-  <button onclick="toggleMusic()" class="fixed top-5 right-5 bg-amber-700 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-amber-800 transition">
-    🔊 Musik: ON
+  <button id="musicBtn" onclick="toggleMusic()" class="fixed top-5 right-5 bg-amber-700 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-amber-800 transition">
+    ▶️ Putar Musik
   </button>
 
   <!-- Header -->
   <header class="text-center mt-14 mb-10 fade-up">
     <!-- Logo SMK -->
-    <img src="https://raw.githubusercontent.com/ajimat26/K7N/main/logo-smk.png" alt="Logo SMK Trijaya Sakti" class="mx-auto w-24 h-24 mb-3">
+    <img src="https://raw.githubusercontent.com/ajimat26/K7N/main/logo-smk.png" 
+         alt="Logo SMK Trijaya Sakti" 
+         class="mx-auto w-24 h-24 mb-3 rounded-full shadow-lg border-2 border-amber-700 bg-white">
     <h1 class="text-5xl font-extrabold text-amber-700 drop-shadow-md">K7 N</h1>
     <p class="text-lg text-gray-700 mt-2 tracking-wide">Awal Mula Prasejarah Dimulai</p>
+    <div class="mt-4 text-gray-800">
+      <p><b>Nama:</b> Rizki Alpazri</p>
+      <p><b>Kelas:</b> 10</p>
+      <p><b>SMK:</b> Trijaya Sakti</p>
+      <p><b>Jurusan:</b> TMI</p>
+    </div>
   </header>
 
+  <!-- Navigasi -->
+  <nav class="flex flex-wrap justify-center gap-4 mb-8 fade-up-delay">
+    <a href="#zamanbatu" class="bg-white px-5 py-2 rounded-xl shadow hover:bg-amber-100 transition">🪨 Zaman Batu</a>
+    <a href="#zamanperunggu" class="bg-white px-5 py-2 rounded-xl shadow hover:bg-amber-100 transition">🥇 Zaman Perunggu</a>
+    <a href="#zamanbesi" class="bg-white px-5 py-2 rounded-xl shadow hover:bg-amber-100 transition">⚙️ Zaman Besi</a>
+  </nav>
+
+  <!-- Poster Awal -->
+  <main class="bg-white rounded-2xl shadow-2xl p-6 max-w-3xl text-center fade-up-delay2">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cave_painting_Lascaux.jpg" 
+         alt="Poster Awal Mula Prasejarah" 
+         class="rounded-xl mx-auto mb-5 shadow-lg">
+    <h2 class="text-3xl font-semibold text-gray-800 mb-3">Awal Mula Prasejarah</h2>
+    <p class="text-gray-600 leading-relaxed">
+      Zaman prasejarah adalah masa sebelum manusia mengenal tulisan. Pada masa ini, manusia hidup secara nomaden 
+      dan bergantung pada alam. Mereka berburu, meramu, dan kemudian mulai bercocok tanam. Bukti kehidupan mereka 
+      dapat ditemukan melalui lukisan gua, alat batu, serta fosil yang tersebar di berbagai belahan dunia.
+    </p>
+
+    <!-- Tombol WhatsApp -->
+    <a href="https://wa.me/6283891019471" 
+       target="_blank"
+       class="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded-xl text-lg shadow hover:bg-green-700 transition">
+       💬 Hubungi via WhatsApp
+    </a>
+  </main>
+
+  <!-- Slide Gambar Prasejarah -->
+  <section class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up text-center">
+    <h2 class="text-2xl font-bold text-amber-700 mb-3">📜 Cerita Prasejarah</h2>
+
+    <div class="relative w-full overflow-hidden rounded-2xl">
+      <img id="slideImage" 
+           src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Homo_erectus_1.JPG" 
+           alt="Gambar Prasejarah"
+           class="w-full h-64 object-cover rounded-xl shadow-md transition duration-500">
+      <p id="slideText" class="mt-4 text-gray-700">
+        Homo erectus adalah manusia purba yang hidup jutaan tahun lalu. Mereka sudah dapat menggunakan api dan alat batu sederhana.
+      </p>
+    </div>
+
+    <div class="mt-4 flex justify-center gap-3">
+      <button onclick="prevSlide()" class="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-800 transition">⬅️ Sebelumnya</button>
+      <button onclick="nextSlide()" class="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-800 transition">➡️ Selanjutnya</button>
+    </div>
+  </section>
+
+  <!-- Bagian Zaman Batu -->
+  <section id="zamanbatu" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up">
+    <h2 class="text-2xl font-bold text-amber-700 mb-3">🪨 Zaman Batu</h2>
+    <p class="text-gray-600 leading-relaxed">
+      Pada Zaman Batu, manusia mulai menggunakan batu sebagai alat utama untuk bertahan hidup. 
+      Mereka membuat kapak genggam, pisau, dan alat pemotong dari batu kasar. Kehidupan masih berpindah-pindah 
+      mengikuti ketersediaan makanan.
+    </p>
+  </section>
+
+  <!-- Bagian Zaman Perunggu -->
+  <section id="zamanperunggu" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up-delay">
+    <h2 class="text-2xl font-bold text-amber-700 mb-3">🥇 Zaman Perunggu</h2>
+    <p class="text-gray-600 leading-relaxed">
+      Zaman Perunggu menandai kemajuan besar: manusia mulai mencampur logam tembaga dengan timah 
+      untuk membuat perunggu. Dari sini lahir alat, senjata, dan perhiasan yang lebih kuat serta indah. 
+      Kehidupan mulai menetap dan berkembang menjadi masyarakat yang lebih kompleks.
+    </p>
+  </section>
+
+  <!-- Bagian Zaman Besi -->
+  <section id="zamanbesi" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up-delay2 mb-16">
+    <h2 class="text-2xl font-bold text-amber-700 mb-3">⚙️ Zaman Besi</h2>
+    <p class="text-gray-600 leading-relaxed">
+      Pada Zaman Besi, manusia menemukan cara mengolah besi sehingga menghasilkan alat dan senjata yang sangat kuat. 
+      Masa ini juga menjadi awal munculnya kerajaan-kerajaan pertama dan perkembangan sistem sosial yang lebih teratur.
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-5 text-gray-700 text-sm pb-10 fade-up">
+    © 2025 K7 N | SMK Trijaya Sakti Karawang - Rizki Alpazri (TMI)
+  </footer>
+
+  <script>
+    // Musik toggle
+    const music = document.getElementById("bgMusic");
+    const musicBtn = document.getElementById("musicBtn");
+    let isPlaying = false;
+
+    function toggleMusic() {
+      if (isPlaying) {
+        music.pause();
+        musicBtn.textContent = "▶️ Putar Musik";
+      } else {
+        music.play().then(() => {
+          musicBtn.textContent = "⏸️ Hentikan Musik";
+        }).catch(() => {
+          alert("Klik tombol untuk memulai musik (browser membatasi autoplay).");
+        });
+      }
+      isPlaying = !isPlaying;
+    }
+
+    // Otomatis aktifkan musik jika diizinkan
+    window.addEventListener("load", () => {
+      const playPromise = music.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isPlaying = true;
+          musicBtn.textContent = "⏸️ Hentikan Musik";
+        }).catch(() => {
+          // Browser tidak izinkan autoplay
+          musicBtn.textContent = "▶️ Putar Musik";
+        });
+      }
+    });
+
+    // Slide Gambar
+    const slides = [
+      {
+        img: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Homo_erectus_1.JPG",
+        text: "Homo erectus adalah manusia purba yang hidup jutaan tahun lalu. Mereka sudah dapat menggunakan api dan alat batu sederhana."
+      },
+      {
+        img: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Neolithic.jpg",
+        text: "Pada masa Neolitikum, manusia mulai bercocok tanam dan menetap di suatu tempat. Inilah awal mula peradaban manusia modern."
+      }
+    ];
+    let currentSlide = 0;
+    const slideImage = document.getElementById("slideImage");
+    const slideText = document.getElementById("slideText");
+
+    function showSlide(index) {
+      const slide = slides[index];
+      slideImage.src = slide.img;
+      slideText.textContent = slide.text;
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+  </script>
+</body>
+</html>
   <!-- Navigasi -->
   <nav class="flex gap-4 mb-8 fade-up-delay">
     <a href="#zamanbatu" class="bg-white px-5 py-2 rounded-xl shadow hover:bg-amber-100 transition">🪨 Zaman Batu</a>
@@ -164,3 +320,4 @@
   </script>
 </body>
 </html>
+
