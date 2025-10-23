@@ -20,19 +20,44 @@
         text-align: center;
         overflow-x: hidden;
     }
+
+    /* RUNNING TEXT REAL TIME */
+    .running-text {
+        background: #111;
+        color: #25D366;
+        font-weight: bold;
+        font-size: 16px;
+        padding: 10px 0;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    .running-text span {
+        display: inline-block;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: scrollText 15s linear infinite;
+    }
+    @keyframes scrollText {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+
     header {
-        padding: 40px 20px 20px 20px;
+        padding: 90px 20px 20px 20px; /* tambahkan padding karena running text fixed di atas */
         animation: fadeIn 1.2s ease;
     }
     img.logo {
-        width: 110px;
+        width: 120px;
         border-radius: 50%;
         box-shadow: 0 0 20px rgba(255,255,255,0.3);
         transition: transform 0.3s;
     }
-    img.logo:hover {
-        transform: scale(1.05);
-    }
+    img.logo:hover { transform: scale(1.05); }
+
     h1 {
         font-size: 30px;
         margin: 10px 0;
@@ -43,6 +68,7 @@
         font-size: 15px;
         margin-bottom: 30px;
     }
+
     .slideshow-container {
         position: relative;
         max-width: 850px;
@@ -58,7 +84,9 @@
     }
     img.slide {
         width: 100%;
+        height: auto;
         vertical-align: middle;
+        display: block;
     }
     .caption {
         position: absolute;
@@ -70,6 +98,7 @@
         font-size: 17px;
         backdrop-filter: blur(4px);
     }
+
     .btn {
         background: var(--primary);
         color: #fff;
@@ -86,15 +115,15 @@
         background: #1da851;
         box-shadow: 0 0 25px rgba(37,211,102,0.6);
     }
+
     footer {
         margin-top: 50px;
         color: var(--subtext);
         font-size: 13px;
         padding-bottom: 20px;
     }
-    audio {
-        display: none;
-    }
+    audio { display: none; }
+
     @keyframes fade {
         from {opacity: .4} 
         to {opacity: 1}
@@ -106,6 +135,11 @@
 </style>
 </head>
 <body>
+
+<!-- RUNNING TEXT -->
+<div class="running-text">
+    <span>Rizki Alpazri > Info mabar Free Fire 🔥 Rizki Alpazri > Info mabar Free Fire 🔥 Rizki Alpazri > Info mabar Free Fire 🔥</span>
+</div>
 
 <header>
     <img src="https://freeimage.host/i/KULTzZu" alt="Logo SMK Trijaya Sakti" class="logo">
@@ -149,192 +183,15 @@
 <script>
 let slideIndex = 0;
 showSlides();
-
 function showSlides() {
     let slides = document.getElementsByClassName("mySlides");
-    for (let i = 0; i < slides.length; i++) {
-        slides[i].style.display = "none";  
-    }
+    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";  
     slideIndex++;
-    if (slideIndex > slides.length) {slideIndex = 1}    
+    if (slideIndex > slides.length) slideIndex = 1;    
     slides[slideIndex-1].style.display = "block";  
     setTimeout(showSlides, 5000); // 5 detik per slide
 }
 </script>
 
 </body>
-</html>  </header>
-
-  <!-- Identitas -->
-  <div class="bg-white/80 p-4 rounded-xl shadow-md mb-8 text-center">
-    <p class="text-gray-800"><b>Nama:</b> Rizki Alpazri</p>
-    <p class="text-gray-800"><b>Kelas:</b> 10</p>
-    <p class="text-gray-800"><b>SMK:</b> Trijaya Sakti</p>
-    <p class="text-gray-800"><b>Jurusan:</b> TMI</p>
-  </div>
-
-  <!-- Slide Gambar -->
-  <main class="bg-white rounded-2xl shadow-2xl p-6 max-w-3xl text-center">
-    <div class="relative">
-      <div id="slide1" class="slide fade-in">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Cave_painting_Lascaux.jpg" 
-             alt="Lukisan Gua Lascaux" 
-             class="rounded-xl mx-auto mb-5 shadow-lg">
-        <h2 class="text-3xl font-semibold text-gray-800 mb-3">Lukisan Gua Lascaux</h2>
-        <p class="text-gray-600 leading-relaxed">
-          Lukisan ini ditemukan di Prancis dan menggambarkan kehidupan manusia purba pada masa berburu. 
-          Gambar binatang di dinding gua menjadi bukti awal kemampuan seni manusia prasejarah.
-        </p>
-      </div>
-
-      <div id="slide2" class="slide hidden fade-in">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Neolithic_farming.jpg" 
-             alt="Pertanian Zaman Neolitikum" 
-             class="rounded-xl mx-auto mb-5 shadow-lg">
-        <h2 class="text-3xl font-semibold text-gray-800 mb-3">Pertanian Zaman Neolitikum</h2>
-        <p class="text-gray-600 leading-relaxed">
-          Pada masa Neolitikum, manusia mulai mengenal bercocok tanam dan beternak. 
-          Mereka hidup menetap dan membentuk peradaban awal di berbagai wilayah dunia.
-        </p>
-      </div>
-    </div>
-
-    <!-- Tombol Navigasi Slide -->
-    <div class="flex justify-center mt-6 space-x-4">
-      <button onclick="showSlide(1)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl">Gambar 1</button>
-      <button onclick="showSlide(2)" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl">Gambar 2</button>
-    </div>
-  </main>
-
-  <!-- Tombol WhatsApp -->
-  <a href="https://wa.me/6283891019471" target="_blank" 
-     class="mt-8 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg flex items-center space-x-2">
-     <span>💬 Hubungi Saya di WhatsApp</span>
-  </a>
-
-  <!-- Footer -->
-  <footer class="mt-10 text-gray-700 text-sm text-center">
-    © 2025 K7 N | SMK Trijaya Sakti | Edukasi Sejarah Nusantara
-  </footer>
-
-  <!-- Script Slide -->
-  <script>
-    function showSlide(num) {
-      document.getElementById('slide1').classList.add('hidden');
-      document.getElementById('slide2').classList.add('hidden');
-      document.getElementById('slide' + num).classList.remove('hidden');
-    }
-  </script>
-
-</body>
-</html>       class="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded-xl text-lg shadow hover:bg-green-700 transition">
-       💬 Hubungi via WhatsApp
-    </a>
-  </main>
-
-  <!-- Slide Gambar Prasejarah -->
-  <section class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up text-center">
-    <h2 class="text-2xl font-bold text-amber-700 mb-3">📜 Cerita Prasejarah</h2>
-
-    <div class="relative w-full overflow-hidden rounded-2xl">
-      <img id="slideImage" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Homo_erectus_1.JPG" 
-           alt="Gambar Prasejarah"
-           class="w-full h-64 object-cover rounded-xl shadow-md transition duration-500">
-      <p id="slideText" class="mt-4 text-gray-700">
-        Homo erectus adalah manusia purba yang hidup jutaan tahun lalu. Mereka sudah dapat menggunakan api dan alat batu sederhana.
-      </p>
-    </div>
-
-    <div class="mt-4 flex justify-center gap-3">
-      <button onclick="prevSlide()" class="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-800 transition">⬅️ Sebelumnya</button>
-      <button onclick="nextSlide()" class="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-800 transition">➡️ Selanjutnya</button>
-    </div>
-  </section>
-
-  <!-- Bagian Zaman Batu -->
-  <section id="zamanbatu" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up">
-    <h2 class="text-2xl font-bold text-amber-700 mb-3">🪨 Zaman Batu</h2>
-    <p class="text-gray-600 leading-relaxed">
-      Pada Zaman Batu, manusia mulai menggunakan batu sebagai alat utama untuk bertahan hidup. 
-      Mereka membuat kapak genggam, pisau, dan alat pemotong dari batu kasar. Kehidupan masih berpindah-pindah 
-      mengikuti ketersediaan makanan.
-    </p>
-  </section>
-
-  <!-- Bagian Zaman Perunggu -->
-  <section id="zamanperunggu" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up-delay">
-    <h2 class="text-2xl font-bold text-amber-700 mb-3">🥇 Zaman Perunggu</h2>
-    <p class="text-gray-600 leading-relaxed">
-      Zaman Perunggu menandai kemajuan besar: manusia mulai mencampur logam tembaga dengan timah 
-      untuk membuat perunggu. Dari sini lahir alat, senjata, dan perhiasan yang lebih kuat serta indah. 
-      Kehidupan mulai menetap dan berkembang menjadi masyarakat yang lebih kompleks.
-    </p>
-  </section>
-
-  <!-- Bagian Zaman Besi -->
-  <section id="zamanbesi" class="max-w-3xl bg-white rounded-2xl shadow-2xl p-6 mt-10 fade-up-delay2 mb-16">
-    <h2 class="text-2xl font-bold text-amber-700 mb-3">⚙️ Zaman Besi</h2>
-    <p class="text-gray-600 leading-relaxed">
-      Pada Zaman Besi, manusia menemukan cara mengolah besi sehingga menghasilkan alat dan senjata yang sangat kuat. 
-      Masa ini juga menjadi awal munculnya kerajaan-kerajaan pertama dan perkembangan sistem sosial yang lebih teratur.
-    </p>
-  </section>
-
-  <!-- Footer -->
-  <footer class="mt-5 text-gray-700 text-sm pb-10 fade-up">
-    © 2025 K7 N | SMK Trijaya Sakti Karawang
-  </footer>
-
-  <script>
-    // Musik toggle
-    const music = document.getElementById("bgMusic");
-    const btn = document.querySelector("button");
-    let playing = true;
-    function toggleMusic() {
-      if (playing) {
-        music.pause();
-        btn.textContent = "🔇 Musik: OFF";
-      } else {
-        music.play();
-        btn.textContent = "🔊 Musik: ON";
-      }
-      playing = !playing;
-    }
-
-    // Slide Gambar
-    const slides = [
-      {
-        img: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Homo_erectus_1.JPG",
-        text: "Homo erectus adalah manusia purba yang hidup jutaan tahun lalu. Mereka sudah dapat menggunakan api dan alat batu sederhana."
-      },
-      {
-        img: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Neolithic.jpg",
-        text: "Pada masa Neolitikum, manusia mulai bercocok tanam dan menetap di suatu tempat. Inilah awal mula peradaban manusia modern."
-      }
-    ];
-    let currentSlide = 0;
-    const slideImage = document.getElementById("slideImage");
-    const slideText = document.getElementById("slideText");
-
-    function showSlide(index) {
-      const slide = slides[index];
-      slideImage.src = slide.img;
-      slideText.textContent = slide.text;
-    }
-
-    function nextSlide() {
-      currentSlide = (currentSlide + 1) % slides.length;
-      showSlide(currentSlide);
-    }
-
-    function prevSlide() {
-      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-      showSlide(currentSlide);
-    }
-  </script>
-</body>
 </html>
-
-
-
-
