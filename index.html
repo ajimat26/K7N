@@ -58,14 +58,14 @@
       margin: 0;
     }
 
-    /* Slider Section */
+    /* SLIDER AREA */
     .slider {
       max-width: 800px;
       margin: 40px auto;
       position: relative;
       overflow: hidden;
-      border-radius: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
     }
 
     .slides {
@@ -75,36 +75,30 @@
 
     .slides img {
       width: 100%;
-      border-radius: 20px;
+      border-radius: 15px;
     }
 
     .nav-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0,0,0,0.6);
       color: white;
       border: none;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
-      padding: 10px 18px;
+      padding: 8px 14px;
       border-radius: 50%;
       transition: background 0.3s;
     }
 
     .nav-btn:hover {
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0,0,0,0.8);
     }
 
     #prevBtn { left: 15px; }
     #nextBtn { right: 15px; }
 
-    /* Info bawah logo */
-    .info-diri {
-      margin-top: 25px;
-      font-size: 15px;
-      color: #444;
-    }
   </style>
 </head>
 <body>
@@ -114,23 +108,19 @@
   </div>
 
   <header>
-    <img src="https://ibb.co.com/1GMXQJWP" alt="Logo SMK">
+    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
     <h1>K7 N</h1>
     <h2>Awal Mula Prasejarah Dimulai</h2>
   </header>
 
+  <!-- SLIDER GAMBAR -->
   <div class="slider">
     <div class="slides" id="slides">
-      <img src="https://ibb.co.com/gLHz2bfP" alt="Zaman Batu">
-      <img src="https://ibb.co.com/0Rs082PN" alt="Zaman Besi">
+      <img src="https://i.ibb.co.com/gLHz2bfP/zaman-batu.png" alt="Zaman Batu">
+      <img src="https://i.ibb.co.com/0Rs082PN/zaman-besi.png" alt="Zaman Besi">
     </div>
     <button id="prevBtn" class="nav-btn">❮</button>
     <button id="nextBtn" class="nav-btn">❯</button>
-  </div>
-
-  <div class="info-diri">
-    <p>Dibuat oleh: <strong>Rizki Alpazri</strong></p>
-    <p>SMK N 1 Batanghari</p>
   </div>
 
   <script>
@@ -138,9 +128,9 @@
     const totalSlides = slides.children.length;
     let currentIndex = 0;
 
-    const updateSlide = () => {
+    function updateSlide() {
       slides.style.transform = `translateX(-${currentIndex * 100}%)`;
-    };
+    }
 
     document.getElementById('prevBtn').addEventListener('click', () => {
       if (currentIndex > 0) {
