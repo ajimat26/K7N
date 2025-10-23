@@ -81,10 +81,42 @@
       border-radius: 10px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.15);
       transition: transform 0.3s;
+      cursor: pointer;
     }
 
     .poster-container img:hover {
       transform: scale(1.03);
+    }
+
+    /* Lightbox / Preview */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    .lightbox .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 36px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .slider {
@@ -160,15 +192,21 @@
     <h2>Poster Prasejarah</h2>
     <div class="poster-container">
       <div>
-        <img src="https://i.supaimg.com/43102cc4-b937-4ef1-bd32-076c899cca8a.png" alt="Poster Zaman Batu">
+        <img src="https://i.supaimg.com/43102cc4-b937-4ef1-bd32-076c899cca8a.png" alt="Poster Zaman Batu" class="preview-img">
         <p><strong>Zaman Batu</strong></p>
       </div>
       <div>
-        <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Besi">
+        <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Besi" class="preview-img">
         <p><strong>Zaman Besi</strong></p>
       </div>
     </div>
   </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <img id="lightbox-img" src="" alt="Preview Poster">
+  </div>
 
   <!-- Slider -->
   <div class="slider">
@@ -204,6 +242,7 @@
   </div>
 
   <script>
+    // Slider
     const slides = document.getElementById('slides');
     const totalSlides = slides.children.length;
     let currentIndex = 0;
@@ -225,6 +264,30 @@
         updateSlide();
       }
     });
+
+    // Lightbox / Preview Mode
+    const previewImages = document.querySelectorAll('.preview-img');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('closeBtn');
+
+    previewImages.forEach(img => {
+      img.addEventListener('click', () => {
+        lightbox.style.display = 'flex';
+        lightboxImg.src = img.src;
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      lightbox.style.display = 'none';
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.style.display = 'none';
+      }
+    });
   </script>
+
 </body>
 </html>
