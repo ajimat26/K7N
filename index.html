@@ -13,7 +13,7 @@
       text-align: center;
     }
 
-    /* Running text modern */
+    /* Running text */
     .running-text {
       background-color: #111;
       color: #fff;
@@ -58,32 +58,65 @@
       margin: 0;
     }
 
-    /* Bagian konten sejarah */
-    .sejarah {
-      max-width: 800px;
-      margin: 40px auto;
-      text-align: left;
+    /* Slider */
+    .slider {
+      max-width: 850px;
+      margin: 30px auto;
+      position: relative;
       padding: 0 20px;
+    }
+
+    .slide {
+      display: none;
+      text-align: left;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    .slide img {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      background: #f5f5f5;
+    }
+
+    .slide h3 {
+      font-size: 24px;
+      color: #111;
+    }
+
+    .slide p {
+      line-height: 1.7;
+      color: #333;
+    }
+
+    .btn {
+      background-color: #111;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #444;
+    }
+
+    /* Identitas */
+    .identitas {
+      margin-top: 40px;
+      font-size: 15px;
+      color: #444;
       line-height: 1.6;
     }
 
-    .sejarah h3 {
-      font-size: 24px;
-      color: #111;
-      margin-top: 30px;
-    }
-
-    .gambar-sejarah {
-      width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #f5f5f5;
-      display: block;
-      margin: 10px 0;
-    }
-
-    /* Tombol WhatsApp */
+    /* WhatsApp Button */
     .wa-btn {
       position: fixed;
       bottom: 20px;
@@ -98,6 +131,7 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
       transition: 0.3s;
       cursor: pointer;
+      z-index: 100;
     }
 
     .wa-btn:hover {
@@ -108,7 +142,6 @@
       width: 30px;
       height: 30px;
     }
-
   </style>
 </head>
 <body>
@@ -123,30 +156,62 @@
     <h2>Awal Mula Prasejarah Dimulai</h2>
   </header>
 
-  <section class="sejarah">
-    <h3>🪨 Zaman Batu</h3>
-    <img src="#" alt="Gambar Zaman Batu (belum dikirim)" class="gambar-sejarah">
-    <p>
-      Zaman Batu merupakan masa paling awal dalam sejarah manusia, di mana manusia purba mulai menggunakan batu
-      sebagai alat utama untuk bertahan hidup. Alat batu ini digunakan untuk berburu, memotong daging, dan membuat
-      api. Pada masa ini, manusia masih hidup secara nomaden (berpindah-pindah) dan menggantungkan hidup dari alam
-      sekitar. Mereka juga mulai mengenal seni dengan melukis di dinding gua menggunakan bahan alami.
-    </p>
+  <div class="slider">
+    <div class="slide active" id="slide1">
+      <img src="#" alt="Gambar Zaman Batu (belum dikirim)">
+      <h3>🪨 Zaman Batu</h3>
+      <p>
+        Zaman Batu merupakan masa paling awal dalam sejarah manusia. Pada masa ini manusia purba menggunakan batu
+        sebagai alat untuk berburu, memotong daging, dan bertahan hidup. Mereka hidup berpindah-pindah (nomaden),
+        menggantungkan hidup dari alam, serta mulai mengenal seni melalui lukisan di dinding gua.
+      </p>
+    </div>
 
-    <h3>⚒️ Zaman Besi</h3>
-    <img src="#" alt="Gambar Zaman Besi (belum dikirim)" class="gambar-sejarah">
-    <p>
-      Setelah manusia menguasai teknik mengolah logam, dimulailah Zaman Besi. Pada masa ini, peralatan dan senjata
-      mulai dibuat dari besi yang jauh lebih kuat dibandingkan batu dan perunggu. Munculnya pertanian dan perdagangan
-      menandai perubahan besar dalam kehidupan manusia. Mereka mulai menetap, membentuk desa, dan mengenal sistem
-      pemerintahan sederhana. Zaman Besi menjadi pondasi bagi munculnya peradaban modern.
-    </p>
-  </section>
+    <div class="slide" id="slide2">
+      <img src="#" alt="Gambar Zaman Besi (belum dikirim)">
+      <h3>⚒️ Zaman Besi</h3>
+      <p>
+        Setelah menguasai teknik mengolah logam, manusia memasuki Zaman Besi. Mereka menciptakan alat dan senjata dari
+        besi yang lebih kuat. Kehidupan mulai menetap, muncul pertanian, perdagangan, serta sistem sosial sederhana.
+        Zaman ini menjadi awal mula peradaban manusia modern.
+      </p>
+    </div>
 
-  <!-- Tombol WhatsApp -->
+    <button class="btn" onclick="prevSlide()">Sebelumnya</button>
+    <button class="btn" onclick="nextSlide()">Selanjutnya</button>
+  </div>
+
+  <div class="identitas">
+    <p><b>Nama:</b> Rizki Alpazri<br>
+    <b>Kelas:</b> 10<br>
+    <b>Jurusan:</b> TMI<br>
+    <b>Umur:</b> 16 Tahun</p>
+  </div>
+
+  <!-- WhatsApp Button -->
   <a href="https://wa.me/6283891019471" target="_blank" class="wa-btn">
     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Logo">
   </a>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlide(index) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      slides[index].classList.add('active');
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+  </script>
 
 </body>
 </html>
