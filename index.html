@@ -1,242 +1,203 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K7 N - Awal Mula Prasejarah</title>
-<style>
-  body {
-    font-family: "Poppins", sans-serif;
-    background-color: #ffffff;
-    color: #222;
-    margin: 0;
-    text-align: center;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K7 N - Awal Mula Prasejarah</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #ffffff;
+      color: #222;
+      margin: 0;
+      text-align: center;
+    }
 
-  /* Running Text Bold Fix */
-  .running-text {
-    background-color: #111;
-    color: #fff;
-    padding: 10px 0;
-    font-size: 16px;
-    overflow: hidden;
-    position: relative;
-    white-space: nowrap;
-    font-weight: bold;
-  }
+    /* Running Text */
+    .running-text {
+      background-color: #111;
+      color: #fff;
+      padding: 10px 0;
+      font-size: 16px;
+      overflow: hidden;
+      position: relative;
+      white-space: nowrap;
+      font-weight: bold;
+    }
 
-  .running-text span {
-    display: inline-block;
-    padding-left: 100%;
-    animation: scrollText 10s linear infinite;
-  }
+    .running-text span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollText 10s linear infinite;
+    }
 
-  @keyframes scrollText {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-  }
+    @keyframes scrollText {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
 
-  header {
-    padding: 40px 20px;
-    position: relative;
-  }
+    header {
+      padding: 40px 20px;
+      position: relative;
+    }
 
-  header img {
-    width: 120px;
-    height: auto;
-    border-radius: 50%;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  }
+    header img {
+      width: 120px;
+      height: auto;
+      border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
 
-  h1 { font-size: 32px; margin: 15px 0 5px; }
-  h2 { color: #777; font-weight: 400; font-size: 18px; margin: 0; }
+    h1 { font-size: 32px; margin: 15px 0 5px; }
+    h2 { color: #777; font-weight: 400; font-size: 18px; margin: 0; }
 
-  .poster-section { padding: 20px; background-color: #f5f5f5; }
-  .poster-section h2 { font-size: 26px; margin-bottom: 20px; color: #333; }
-  .poster-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-  .poster-container img {
-    width: 350px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-    transition: transform 0.3s;
-    cursor: pointer;
-  }
-  .poster-container img:hover { transform: scale(1.03); }
+    .poster-section { padding: 20px; background-color: #f5f5f5; }
+    .poster-section h2 { font-size: 26px; margin-bottom: 20px; color: #333; }
+    .poster-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+    .poster-container img {
+      width: 350px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+    .poster-container img:hover { transform: scale(1.03); }
 
-  /* Lightbox */
-  .lightbox {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    justify-content: center;
-    align-items: center;
-  }
-  .lightbox img {
-    max-width: 90%; max-height: 90%;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-  }
-  .lightbox .close-btn {
-    position: absolute; top: 20px; right: 30px;
-    font-size: 36px; color: white; cursor: pointer; font-weight: bold;
-  }
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .lightbox img {
+      max-width: 90%; max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+    .lightbox .close-btn {
+      position: absolute; top: 20px; right: 30px;
+      font-size: 36px; color: white; cursor: pointer; font-weight: bold;
+    }
 
-  .slider {
-    max-width: 850px;
-    margin: 40px auto;
-    position: relative;
-    overflow: hidden;
-    border-radius: 15px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-    background-color: #f9f9f9;
-  }
-  .slides { display: flex; transition: transform 0.6s ease; }
-  .slide { min-width: 100%; box-sizing: border-box; }
-  .slide img { width: 100%; border-radius: 15px 15px 0 0; }
-  .slide-text { padding: 15px; font-size: 16px; line-height: 1.6; text-align: left; color: #333; }
-  .nav-btn {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background-color: rgba(0,0,0,0.6); color: white; border: none;
-    font-size: 22px; cursor: pointer; padding: 8px 14px; border-radius: 50%;
-    transition: background 0.3s;
-  }
-  .nav-btn:hover { background-color: rgba(0,0,0,0.8); }
-  #prevBtn { left: 15px; } #nextBtn { right: 15px; }
+    /* Tombol Penjelasan */
+    .btn-zaman {
+      display:inline-block;
+      padding:12px 25px;
+      background:#007bff;
+      color:#fff;
+      font-weight:bold;
+      border-radius:8px;
+      text-decoration:none;
+      transition:0.3s;
+      margin: 20px 0;
+    }
+    .btn-zaman:hover {
+      background:#0056b3;
+      transform:scale(1.05);
+    }
 
-  .wa-float {
-    position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
-    background-color: #25d366; color: #fff; border-radius: 50%;
-    text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-    z-index: 1000; display: flex; justify-content: center; align-items: center;
-    transition: transform 0.3s;
-  }
-  .wa-float:hover { transform: scale(1.1); }
-  .wa-float img { width: 35px; height: 35px; }
+    /* WhatsApp Float */
+    .wa-float {
+      position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
+      background-color: #25d366; color: #fff; border-radius: 50%;
+      text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      z-index: 1000; display: flex; justify-content: center; align-items: center;
+      transition: transform 0.3s;
+    }
+    .wa-float:hover { transform: scale(1.1); }
+    .wa-float img { width: 35px; height: 35px; }
 
-  .btn-explain {
-    display: inline-block; margin: 20px 0; padding: 12px 25px;
-    background-color: #222; color: #fff; font-weight: bold;
-    border-radius: 8px; text-decoration: none; transition: 0.3s;
-  }
-  .btn-explain:hover { background-color: #555; }
-</style>
+  </style>
 </head>
 <body>
 
-<!-- Running Text -->
-<div class="running-text">
-  <span id="running-text"></span>
-</div>
-
-<header>
-  <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
-  <h1>K7 N</h1>
-  <h2>Awal Mula Prasejarah Dimulai</h2>
-  <p><strong>Nama:</strong> Rizki Alpazri | <strong>Kelas:</strong> 10 | <strong>Jurusan:</strong> TMI | <strong>Umur:</strong> 16</p>
-</header>
-
-<!-- Poster Section -->
-<section class="poster-section">
-  <h2>Poster Prasejarah</h2>
-  <div class="poster-container">
-    <div><img src="https://i.supaimg.com/a03ff366-ef8b-411e-8ccd-7ff4df42e49f.jpg" alt="Poster Utama" class="preview-img"></div>
-    <div><img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Batu" class="preview-img"><p><strong>Zaman Batu</strong></p></div>
-    <div><img src="https://i.supaimg.com/0c817708-a205-43e7-9a16-6fb4972618b7.jpg" alt="Poster Zaman Besi" class="preview-img"><p><strong>Zaman Besi</strong></p></div>
+  <div class="running-text">
+    <span id="running-text"></span>
   </div>
-  <a href="https://ajimat26.github.io/K7NN/" class="btn-explain">Penjelasan Zaman Prasejarah</a>
-</section>
 
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox">
-  <span class="close-btn" id="closeBtn">&times;</span>
-  <img id="lightbox-img" src="" alt="Preview Poster">
-</div>
+  <header>
+    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
+    <h1>K7 N</h1>
+    <h2>Awal Mula Prasejarah Dimulai</h2>
+    <p><strong>Nama:</strong> Rizki Alpazri | <strong>Kelas:</strong> 10 | <strong>Jurusan:</strong> TMI | <strong>Umur:</strong> 16</p>
+  </header>
 
-<!-- Slider Section -->
-<div class="slider">
-  <div class="slides" id="slides">
-    <div class="slide">
-      <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Zaman Batu">
-      <div class="slide-text">
-        <h3>Zaman Batu 🪨</h3>
-        <p>Zaman Batu merupakan periode awal dalam sejarah manusia ketika peralatan sebagian besar terbuat dari batu.
-        Pada masa ini, manusia purba hidup dengan cara berburu dan mengumpulkan makanan (food gathering).
-        Mereka tinggal di gua-gua, mulai mengenal api, dan membuat alat-alat sederhana dari batu seperti kapak genggam dan serpih.</p>
+  <section class="poster-section">
+    <h2>Poster Prasejarah</h2>
+    <div class="poster-container">
+      <div>
+        <img src="https://i.supaimg.com/a03ff366-ef8b-411e-8ccd-7ff4df42e49f.jpg" alt="Poster 1" class="preview-img">
+      </div>
+      <div>
+        <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Batu" class="preview-img">
+        <p><strong>Zaman Batu</strong></p>
+      </div>
+      <div>
+        <img src="https://i.supaimg.com/0c817708-a205-43e7-9a16-6fb4972618b7.jpg" alt="Poster Zaman Besi" class="preview-img">
+        <p><strong>Zaman Besi</strong></p>
       </div>
     </div>
-    <div class="slide">
-      <img src="https://i.supaimg.com/0c817708-a205-43e7-9a16-6fb4972618b7.jpg" alt="Zaman Besi">
-      <div class="slide-text">
-        <h3>Zaman Besi ⚒️</h3>
-        <p>Zaman Besi adalah masa di mana manusia sudah mengenal cara mengolah logam, terutama besi.
-        Pada periode ini, peralatan seperti senjata, mata bajak, dan perkakas rumah tangga dibuat dari besi,
-        sehingga kehidupan menjadi lebih maju.
-        Zaman Besi menandai berakhirnya masa prasejarah dan awal peradaban manusia modern.</p>
-      </div>
-    </div>
+  </section>
+
+  <section>
+    <a href="https://ajimat26.github.io/K7NN/" target="_blank" class="btn-zaman">Penjelasan Zaman Prasejarah</a>
+  </section>
+
+  <div class="lightbox" id="lightbox">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <img id="lightbox-img" src="" alt="Preview Poster">
   </div>
-  <button id="prevBtn" class="nav-btn">❮</button>
-  <button id="nextBtn" class="nav-btn">❯</button>
-</div>
 
-<!-- WhatsApp Float -->
-<a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
-</a>
+  <a href="https://wa.me/628389101947" target="_blank" class="wa-float" title="Chat via WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+  </a>
 
-<!-- Audio -->
-<audio autoplay loop>
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-  Browser kamu tidak mendukung audio.
-</audio>
+  <script>
+    // Running text full fix
+    const texts = [
+      "Tugas Rizki Alpazri",
+      "Info mabar FF Bot",
+      "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
+      "TERIMAKASIH ATAS PERHATIANMU"
+    ];
 
-<script>
-  // Running text
-  const texts = [
-    "Tugas Rizki Alpazri",
-    "Info mabar FF Bot",
-    "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
-    "TERIMAKASIH ATAS PERHATIANMU"
-  ];
-  let runningTextIndex = 0;
-  const runningTextEl = document.getElementById("running-text");
-  function updateRunningText() {
-    runningTextEl.innerText = texts[runningTextIndex];
-    runningTextEl.style.animation = "none";
-    void runningTextEl.offsetWidth;
-    const width = runningTextEl.offsetWidth;
-    const duration = width * 15;
-    runningTextEl.style.animation = `scrollText ${duration}ms linear infinite`;
-    runningTextIndex = (runningTextIndex + 1) % texts.length;
-    setTimeout(updateRunningText, duration + 500);
-  }
-  updateRunningText();
+    let runningTextIndex = 0;
+    const runningTextEl = document.getElementById("running-text");
 
-  // Slider
-  const slides = document.getElementById('slides');
-  const totalSlides = slides.children.length;
-  let currentIndex = 0;
-  function updateSlide() { slides.style.transform = `translateX(-${currentIndex*100}%)`; }
-  document.getElementById('prevBtn').addEventListener('click', ()=>{ if(currentIndex>0){currentIndex--; updateSlide();} });
-  document.getElementById('nextBtn').addEventListener('click', ()=>{ if(currentIndex<totalSlides-1){currentIndex++; updateSlide();} });
+    function updateRunningText() {
+      runningTextEl.innerText = texts[runningTextIndex];
+      runningTextEl.style.animation = "none";
+      void runningTextEl.offsetWidth; // reset animation
+      const width = runningTextEl.offsetWidth;
+      const duration = width * 15; // sesuaikan kecepatan scroll
+      runningTextEl.style.animation = `scrollText ${duration}ms linear infinite`;
+      runningTextIndex = (runningTextIndex + 1) % texts.length;
+      setTimeout(updateRunningText, duration + 500);
+    }
 
-  // Lightbox
-  const previewImgs = document.querySelectorAll('.preview-img');
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img');
-  const closeBtn = document.getElementById('closeBtn');
+    updateRunningText();
 
-  previewImgs.forEach(img=>{
-    img.addEventListener('click', ()=>{
-      lightbox.style.display='flex';
-      lightboxImg.src = img.src;
+    // Lightbox Poster
+    const previewImgs = document.querySelectorAll('.preview-img');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('closeBtn');
+
+    previewImgs.forEach(img=>{
+      img.addEventListener('click', ()=>{
+        lightbox.style.display = 'flex';
+        lightboxImg.src = img.src;
+      });
     });
-  });
-  closeBtn.addEventListener('click', ()=>{ lightbox.style.display='none'; });
-  lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
-</script>
+
+    closeBtn.addEventListener('click', ()=>{ lightbox.style.display = 'none'; });
+    lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
+  </script>
+
 </body>
 </html>
