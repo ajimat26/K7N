@@ -3,145 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>K7N LOGIN</title>
+  <title>K7N PROJECT - LOGIN</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
       background: #0D0014;
-      color: white;
+      color: #E0E0E0;
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      flex-direction: column;
-      padding:20px;
+      padding: 20px;
     }
 
-    .login-box {
-      background: #1A0526;
-      padding: 25px;
-      border-radius: 20px;
+    h1.main-title {
+      font-family: 'Orbitron', sans-serif;
+      color: #66CCFF;
+      font-size: 32px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(102, 204, 255, 0.6);
+      letter-spacing: 2px;
+    }
+
+    .container {
+      background: #101322;
+      border: 1px solid #66CCFF;
+      padding: 24px;
+      border-radius: 16px;
       width: 100%;
-      max-width: 400px;
-      border: 1px solid #3F0A5E;
-      box-shadow: 0 0 20px rgba(0, 200, 255, 0.45);
+      max-width: 420px;
+      box-shadow: 0 0 25px rgba(102, 204, 255, 0.4);
     }
 
-    .title {
-      text-align: center;
-      font-family: 'Orbitron';
-      color: #55D9FF;
-      font-size: 27px;
-      margin-bottom: 20px;
+    .profile-logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #66CCFF;
+      display: block;
+      margin: 0 auto 15px;
     }
 
     input {
       width: 100%;
-      padding: 13px;
+      padding: 14px;
+      background: #152033;
+      border: 1px solid #66CCFF;
       border-radius: 10px;
-      background: #250b35;
-      border: 1px solid #55D9FF;
+      margin-bottom: 18px;
       color: white;
-      margin-bottom: 20px;
       font-size: 15px;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #00e1ff;
-      box-shadow: 0 0 10px #00cfff;
     }
 
     button {
       width: 100%;
       padding: 15px;
-      background: linear-gradient(90deg, #55D9FF, #0AA6D4);
-      border: none;
-      color: black;
-      font-weight: bold;
-      font-size: 17px;
       border-radius: 10px;
+      border: none;
       cursor: pointer;
-      transition: .3s;
+      background: linear-gradient(90deg, #66CCFF, #3399FF);
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+      box-shadow: 0 0 20px rgba(102, 204, 255, 0.6);
     }
 
     button:hover {
-      box-shadow: 0 0 20px #55d9ff;
+      background: linear-gradient(90deg, #3399FF, #66CCFF);
+      box-shadow: 0 0 30px rgba(102, 204, 255, 0.9);
     }
 
-    .error {
-      margin-top: 10px;
-      color: #ff5a5a;
-      text-align: center;
-      font-size: 14px;
-      min-height: 25px;
+    #videoContainer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
     }
+    #videoContainer.active { display: flex; }
+    #loginVideo { width: 80%; max-width: 600px; border-radius: 12px; }
   </style>
 </head>
+
 <body>
 
-  <div class="login-box">
-    <div class="title">K7N LOGIN</div>
+  <div id="videoContainer">
+      <video id="loginVideo">
+        <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">
+      </video>
+  </div>
 
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
+  <h1 class="main-title">K7N PROJECT</h1>
 
-    <button onclick="login()">LOGIN</button>
+  <div class="container">
+      <img src="https://i.supaimg.com/9775bd8b-667c-4ea3-8173-b27aeee837bc.jpg" class="profile-logo">
 
-    <div class="error" id="errorBox"></div>
+      <input id="username" placeholder="Username">
+      <input id="password" placeholder="Password" type="password">
+
+      <button onclick="loginUser()">LOGIN</button>
   </div>
 
 <script>
-async function login() {
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  const errorBox = document.getElementById("errorBox");
+const DB_URL = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";
 
-  if (!user || !pass) {
-    errorBox.textContent = "Isi username dan password!";
-    return;
-  }
+// 🔥 FIX LOGIN — MASUK AKUN SESUAI DATA, BUKAN K7N TERUS
+async function loginUser() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
 
-  try {
-    // Ambil database JSON dari repo K7NN (halaman 2)
-    const db = await fetch("https://ajimat26.github.io/K7NN/database.json")
-      .then(r => r.json());
+    const db = await fetch(DB_URL).then(r => r.json());
+    const account = db.accounts.find(a => a.username === user && a.password === pass);
 
-    const akun = db.find(x => x.username === user);
+    if (!account) return alert("Username atau Password salah!");
 
-    if (!akun) {
-      errorBox.textContent = "Akun tidak ditemukan.";
-      return;
+    // Cek expired selain admin
+    if (account.username !== "K7N") {
+        const now = new Date();
+        const exp = new Date(account.expired);
+        if (now > exp) return alert("Akun sudah EXP / kadaluarsa.");
     }
 
-    if (akun.password !== pass) {
-      errorBox.textContent = "Password salah.";
-      return;
-    }
+    // KIRIM DATA USER KE DASHBOARD
+    showVideo(() => {
+        const url =
+          `https://ajimat26.github.io/K7NN/?` +
+          `username=${encodeURIComponent(account.username)}` +
+          `&role=${encodeURIComponent(account.role || "USER")}` +
+          `&expired=${encodeURIComponent(account.expired)}` +
+          `&avatar=${encodeURIComponent(account.avatar || "https://files.catbox.moe/gc7j7o.jpg")}`;
 
-    // Jika bukan akun K7N → cek expired
-    if (akun.username !== "K7N") {
-      const now = Date.now();
-      const exp = Number(akun.expired);
+        window.location.href = url;
+    });
+}
 
-      if (exp < now) {
-        errorBox.textContent = "Akun sudah expired!";
-        return;
-      }
-    }
-
-    // Simpan session
-    localStorage.setItem("login_user", user);
-
-    // Redirect ke halaman 2
-    window.location.href = "https://ajimat26.github.io/K7NN/";
-    
-  } catch (err) {
-    errorBox.textContent = "Gagal menghubungi server.";
-    console.log(err);
-  }
+function showVideo(callback) {
+    const container = document.getElementById("videoContainer");
+    const video = document.getElementById("loginVideo");
+    container.classList.add("active");
+    video.play();
+    video.onended = callback;
 }
 </script>
 
