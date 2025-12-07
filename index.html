@@ -1,204 +1,345 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K7 N - Awal Mula Prasejarah</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K7NOVI </title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: "Poppins", sans-serif;
-      background-color: #ffffff;
-      color: #222;
-      margin: 0;
-      text-align: center;
-    }
-
-    /* Running Text */
-    .running-text {
-      background-color: #111;
-      color: #fff;
-      padding: 10px 0;
-      font-size: 16px;
-      overflow: hidden;
-      position: relative;
-      white-space: nowrap;
-      font-weight: bold;
-    }
-
-    .running-text span {
-      display: inline-block;
-      padding-left: 100%;
-      animation: scrollText 10s linear infinite;
-    }
-
-    @keyframes scrollText {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    header {
-      padding: 40px 20px;
-      position: relative;
-    }
-
-    header img {
-      width: 120px;
-      height: auto;
-      border-radius: 50%;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
-
-    h1 { font-size: 32px; margin: 15px 0 5px; }
-    h2 { color: #777; font-weight: 400; font-size: 18px; margin: 0; }
-
-    .poster-section { padding: 20px; background-color: #f5f5f5; }
-    .poster-section h2 { font-size: 26px; margin-bottom: 20px; color: #333; }
-    .poster-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-    .poster-container img {
-      width: 350px;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-      transition: transform 0.3s;
-      cursor: pointer;
-    }
-    .poster-container img:hover { transform: scale(1.03); }
-
-    /* Lightbox */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      font-family: 'Montserrat', sans-serif;
+      background: #0D0014;
+      color: #E0E0E0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-    }
-    .lightbox img {
-      max-width: 90%; max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    }
-    .lightbox .close-btn {
-      position: absolute; top: 20px; right: 30px;
-      font-size: 36px; color: white; cursor: pointer; font-weight: bold;
+      padding: 20px;
+      position: relative; 
+      overflow-x: hidden;
     }
 
-    /* Tombol Penjelasan */
-    .btn-zaman {
-      display:inline-block;
-      padding:12px 25px;
-      background:#007bff;
-      color:#fff;
-      font-weight:bold;
-      border-radius:8px;
-      text-decoration:none;
-      transition:0.3s;
-      margin: 20px 0;
-    }
-    .btn-zaman:hover {
-      background:#0056b3;
-      transform:scale(1.05);
+    /* Main App Container */
+    .app-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        z-index: 10;
     }
 
-    /* WhatsApp Float */
-    .wa-float {
-      position: fixed; width: 60px; height: 60px; bottom: 20px; right: 20px;
-      background-color: #25d366; color: #fff; border-radius: 50%;
-      text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-      z-index: 1000; display: flex; justify-content: center; align-items: center;
-      transition: transform 0.3s;
+    /* Header/Title */
+    h1.main-title {
+      font-family: 'Orbitron', sans-serif;
+      color: #BE60EE;
+      font-size: 32px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(190, 96, 238, 0.6);
+      letter-spacing: 2px;
     }
-    .wa-float:hover { transform: scale(1.1); }
-    .wa-float img { width: 35px; height: 35px; }
 
+    /* Main Content Panels */
+    .container {
+      background: #1A0526;
+      border: 1px solid #3F0A5E;
+      padding: 24px;
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 0 25px rgba(190, 96, 238, 0.4);
+      backdrop-filter: blur(5px);
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    /* Profile Card and Details */
+    .profile-card {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .profile-logo {
+      width: 100px; 
+      height: 100px; 
+      margin: 0 auto 15px; 
+      display: block; 
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(190, 96, 238, 0.8); 
+      border: 3px solid #BE60EE; 
+      object-fit: cover;
+    }
+
+    /* Section Titles and Inputs */
+    .section-title { 
+      font-family: 'Orbitron', sans-serif; 
+      font-size: 18px; 
+      color: #BE60EE; 
+      margin-bottom: 15px; 
+      text-align: left; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+    }
+    
+    input[type="text"], input[type="password"] { 
+      width: 100%; 
+      padding: 14px 18px; 
+      border-radius: 10px; 
+      background: #2D0842; 
+      border: 1px solid #BE60EE; 
+      color: #E0E0E0; 
+      margin-bottom: 25px; 
+      font-size: 16px; 
+      font-family: 'Montserrat', sans-serif; 
+      outline: none; 
+      transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+    }
+    
+    input::placeholder {
+      color: #9A9A9A;
+    }
+    
+    input:focus {
+      border-color: #9a4ed1;
+      box-shadow: 0 0 10px rgba(190, 96, 238, 0.5);
+    }
+
+    /* Execute Button */
+    .execute-button { 
+      background: linear-gradient(90deg, #BE60EE, #7D26A6); 
+      color: #fff; 
+      padding: 18px; 
+      width: 100%; 
+      border-radius: 10px; 
+      font-weight: bold; 
+      border: none; 
+      margin-bottom: 12px; 
+      cursor: pointer; 
+      font-size: 18px; 
+      letter-spacing: 1px; 
+      transition: 0.3s ease, box-shadow 0.3s ease; 
+      box-shadow: 0 0 15px rgba(190, 96, 238, 0.4); 
+    }
+    
+    .execute-button:hover { 
+      background: linear-gradient(90deg, #7D26A6, #BE60EE); 
+      box-shadow: 0 0 25px rgba(190, 96, 238, 0.8); 
+    }
+
+    /* Video Container */
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(13, 0, 20, 0.95);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+    
+    .video-container.active {
+      display: flex;
+    }
+    
+    .video-wrapper {
+      width: 80%;
+      max-width: 800px;
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(190, 96, 238, 0.4);
+      border: 2px solid #BE60EE;
+    }
+    
+    .video-player {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 15px;
+    }
+
+    /* Efek asap rokok */
+    #smoke-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .smoke-particle {
+      position: absolute;
+      bottom: 0;
+      width: 5px;
+      height: 5px;
+      background-color: rgba(255, 50, 50, 0.6);
+      border-radius: 50%;
+      filter: blur(2px);
+      animation: smoke-rise linear infinite;
+    }
+
+    @keyframes smoke-rise {
+      0% {
+        transform: translateY(0) translateX(0) scale(0.5);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(-50vh) translateX(10px) scale(1.5);
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(20px) scale(2);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
-
-  <div class="running-text">
-    <span id="running-text"></span>
-  </div>
-
-  <header>
-    <img src="https://iili.io/KULTzZu.png" alt="Logo K7 N">
-    <h1>K7 N</h1>
-    <h2>Awal Mula Prasejarah Dimulai</h2>
-    <p><strong>Nama:</strong> Rizki Alpazri | <strong>Kelas:</strong> 10 | <strong>Jurusan:</strong> TMI | <strong>Umur:</strong> 16</p>
-  </header>
-
-  <section class="poster-section">
-    <h2>Poster Prasejarah</h2>
-    <div class="poster-container">
-      <div>
-        <img src="https://i.supaimg.com/a03ff366-ef8b-411e-8ccd-7ff4df42e49f.jpg" alt="Poster 1" class="preview-img">
-      </div>
-      <div>
-        <img src="https://i.supaimg.com/f21696fb-e64a-4bcb-916e-7d984547c901.png" alt="Poster Zaman Batu" class="preview-img">
-        <p><strong>Zaman Batu</strong></p>
-      </div>
-      <div>
-        <img src="https://i.supaimg.com/0c817708-a205-43e7-9a16-6fb4972618b7.jpg" alt="Poster Zaman Besi" class="preview-img">
-        <p><strong>Zaman Besi</strong></p>
-      </div>
+  <!-- Asep Rokok Background -->
+  <div id="smoke-background"></div>
+  
+  <!-- Video Container -->
+  <div class="video-container" id="videoContainer">
+    <div class="video-wrapper">
+      <!-- Hanya menghapus atribut muted agar suara dapat diputar -->
+      <video class="video-player" id="loginVideo">
+        <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
     </div>
-  </section>
-
-  <section>
-    <a href="https://ajimat26.github.io/K7NN/" target="_blank" class="btn-zaman">Penjelasan Zaman Prasejarah</a>
-  </section>
-
-  <div class="lightbox" id="lightbox">
-    <span class="close-btn" id="closeBtn">&times;</span>
-    <img id="lightbox-img" src="" alt="Preview Poster">
   </div>
+  
+  <!-- Login Form dengan Tampilan Dashboard -->
+  <div class="app-wrapper">
+    <h1 class="main-title">K7N </h1>
 
-  <a href="https://wa.me/6283891019471" target="_blank" class="wa-float" title="Chat via WhatsApp">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
-  </a>
+    <div class="container profile-card">
+        <img src="https://files.catbox.moe/gc7j7o.jpg" alt="Logo" class="profile-logo" />
+        <div class="profile-username" style="font-family: 'Orbitron', sans-serif; font-size: 24px; color: #E0E0E0; font-weight: bold; margin-bottom: 8px;">Login Account</div>
+        <div class="profile-details" style="font-size: 14px; color: #9A9A9A;">
+          Please enter your credentials to access the dashboard
+        </div>
+    </div>
+
+    <div class="container">
+        <form method="POST" action="/auth" id="loginForm">
+            <div class="section-title">Username</div>
+            <input type="text" name="username" placeholder="Enter your username" required />
+
+            <div class="section-title">Password</div>
+            <input type="password" name="key" placeholder="Enter your password" required />
+
+            <button type="submit" class="execute-button">
+              <i class="fas fa-sign-in-alt"></i> LOGIN
+            </button>
+        </form>
+    </div>
+  </div>
 
   <script>
-    // Running text full fix
-    const texts = [
-      "Tugas Rizki Alpazri",
-      "Info mabar FF Bot",
-      "Jangan mudah tertarik hanya karna dia menarik, ingat yang menarik belum tentu yang terbaik",
-      "TERIMAKASIH ATAS PERHATIANMU"
-    ];
-
-    let runningTextIndex = 0;
-    const runningTextEl = document.getElementById("running-text");
-
-    function updateRunningText() {
-      runningTextEl.innerText = texts[runningTextIndex];
-      runningTextEl.style.animation = "none";
-      void runningTextEl.offsetWidth; // reset animation
-      const width = runningTextEl.offsetWidth;
-      const duration = width * 15; // sesuaikan kecepatan scroll
-      runningTextEl.style.animation = `scrollText ${duration}ms linear infinite`;
-      runningTextIndex = (runningTextIndex + 1) % texts.length;
-      setTimeout(updateRunningText, duration + 500);
-    }
-
-    updateRunningText();
-
-    // Lightbox Poster
-    const previewImgs = document.querySelectorAll('.preview-img');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const closeBtn = document.getElementById('closeBtn');
-
-    previewImgs.forEach(img=>{
-      img.addEventListener('click', ()=>{
-        lightbox.style.display = 'flex';
-        lightboxImg.src = img.src;
+    document.addEventListener('DOMContentLoaded', function() {
+      // Variabel untuk video
+      const loginForm = document.getElementById('loginForm');
+      const videoContainer = document.getElementById('videoContainer');
+      const loginVideo = document.getElementById('loginVideo');
+      
+      // Handle form submission untuk menampilkan video
+      loginForm.addEventListener('submit', function(e) {
+        // Biarkan form submit normal ke /auth
+        // Tapi juga tampilkan video sebagai feedback visual
+        
+        // Simpan reference ke form ini
+        const form = this;
+        
+        // Prevent default sementara untuk menampilkan video
+        e.preventDefault();
+        
+        // Tampilkan video
+        showSuccessVideo();
+        
+        // Setelah video selesai, submit form asli
+        loginVideo.addEventListener('ended', function() {
+          // Langsung submit form tanpa popup
+          form.submit();
+        }, { once: true }); // Hanya sekali
       });
+      
+      // Function to show success video
+      function showSuccessVideo() {
+        // Tampilkan video container
+        videoContainer.classList.add('active');
+        
+        // Play video dengan suara
+        loginVideo.play().catch(error => {
+          console.error("Error playing video:", error);
+          // Jika ada masalah dengan autoplay, submit form langsung
+          loginForm.submit();
+        });
+      }
+      
+      // Function untuk efek asap rokok
+      function createSmokeParticles() {
+        const smokeBackground = document.getElementById('smoke-background');
+        
+        for (let i = 0; i < 15; i++) {
+          setTimeout(() => {
+            createSmokeParticle(smokeBackground);
+          }, i * 200);
+        }
+        
+        setInterval(() => {
+          createSmokeParticle(smokeBackground);
+        }, 300);
+      }
+      
+      function createSmokeParticle(container) {
+        const particle = document.createElement('div');
+        particle.classList.add('smoke-particle');
+        
+        const leftPosition = Math.random() * 100;
+        particle.style.left = `${leftPosition}%`;
+        
+        const duration = 10 + Math.random() * 20;
+        particle.style.animationDuration = `${duration}s`;
+        
+        const size = 3 + Math.random() * 7;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        const red = 200 + Math.floor(Math.random() * 55);
+        const alpha = 0.3 + Math.random() * 0.4;
+        particle.style.backgroundColor = `rgba(${red}, 50, 50, ${alpha})`;
+        
+        container.appendChild(particle);
+        
+        setTimeout(() => {
+          if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+          }
+        }, duration * 1000);
+      }
+
+      // Initialize smoke background
+      createSmokeParticles();
+      
+      // Preload video untuk performa lebih baik
+      loginVideo.load();
     });
-
-    closeBtn.addEventListener('click', ()=>{ lightbox.style.display = 'none'; });
-    lightbox.addEventListener('click', e=>{ if(e.target==lightbox) lightbox.style.display='none'; });
   </script>
-
 </body>
 </html>
-
