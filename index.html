@@ -87,13 +87,22 @@
       justify-content: center;
       align-items: center;
     }
-    #videoContainer.active { display: flex; }
-    #loginVideo { width: 80%; max-width: 600px; border-radius: 12px; }
+
+    #videoContainer.active {
+      display: flex;
+    }
+
+    #loginVideo {
+      width: 80%;
+      max-width: 600px;
+      border-radius: 12px;
+    }
   </style>
 </head>
 
 <body>
 
+  <!-- VIDEO OVERLAY -->
   <div id="videoContainer">
       <video id="loginVideo">
         <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">
@@ -108,30 +117,55 @@
       <input id="username" placeholder="Username">
       <input id="password" placeholder="Password" type="password">
 
-      <button onclick="loginUser()">LOGIN</button>
+      <button id="loginBtn">LOGIN</button>
   </div>
 
 <script>
 const DB_URL = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";
 
-// 🔥 FIX LOGIN — MASUK AKUN SESUAI DATA, BUKAN K7N TERUS
+// Agar tombol pasti berfungsi
+document.getElementById("loginBtn").addEventListener("click", loginUser);
+
 async function loginUser() {
     const user = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value.trim();
 
-    const db = await fetch(DB_URL).then(r => r.json());
-    const account = db.accounts.find(a => a.username === user && a.password === pass);
+    if (!user || !pass) {
+        alert("Username dan Password wajib diisi!");
+        return;
+    }
 
-    if (!account) return alert("Username atau Password salah!");
+    let db;
+    try {
+        const response = await fetch(DB_URL + "?v=" + Date.now()); // anti-cache
+        if (!response.ok) throw new Error("Database error");
+        db = await response.json();
+    } catch (err) {
+        alert("Gagal mengambil database!");
+        console.error(err);
+        return;
+    }
 
-    // Cek expired selain admin
+    const account = db.accounts.find(a =>
+        a.username === user && a.password === pass
+    );
+
+    if (!account) {
+        alert("Username atau password salah!");
+        return;
+    }
+
     if (account.username !== "K7N") {
         const now = new Date();
         const exp = new Date(account.expired);
-        if (now > exp) return alert("Akun sudah EXP / kadaluarsa.");
+
+        if (now > exp) {
+            alert("Akun sudah kadaluarsa!");
+            return;
+        }
     }
 
-    // KIRIM DATA USER KE DASHBOARD
+    // Redirect memakai data user — FIX UTAMA
     showVideo(() => {
         const url =
           `https://ajimat26.github.io/K7NN/?` +
@@ -147,6 +181,7 @@ async function loginUser() {
 function showVideo(callback) {
     const container = document.getElementById("videoContainer");
     const video = document.getElementById("loginVideo");
+
     container.classList.add("active");
     video.play();
     video.onended = callback;
