@@ -1,382 +1,194 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>K7N PROJECT - LOGIN</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{--blue:#6AB8FF;--bg:#0D0014;--card:#101322}
-  *{box-sizing:border-box}
-  body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Montserrat,Arial,sans-serif;color:#E0E0E0;padding:20px}
-  .card{width:100%;max-width:480px;background:var(--card);border:1px solid rgba(106,184,255,0.18);padding:20px;border-radius:12px;box-shadow:0 6px 30px rgba(10,20,30,0.6)}
-  h1{font-family:Orbitron,monospace;color:var(--blue);text-align:center;margin-bottom:12px}
-  .logo{display:block;width:100px;height:100px;border-radius:50%;object-fit:cover;margin:0 auto 12px;border:3px solid var(--blue);box-shadow:0 0 12px rgba(106,184,255,0.45)}
-  input, select {width:100%;padding:10px;border-radius:10px;border:1px solid rgba(106,184,255,0.12);background:#0f1720;color:#E0E0E0;margin-bottom:10px;font-size:14px}
-  .row{display:flex;gap:10px}
-  .row > *{flex:1}
-  button{width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--blue),#3399FF);color:#00111a;font-weight:700;cursor:pointer;font-size:15px}
-  .muted{font-size:13px;color:#9aa9bb;margin-bottom:8px;text-align:center}
-  #msg{height:20px;margin-top:8px;text-align:center;font-size:13px;color:#ff8b8b}
-  .tabs{display:flex;gap:8px;margin-bottom:12px}
-  .tabs button{flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(106,184,255,0.08);color:#CDE9FF;cursor:pointer}
-  .tabs button.active{background:linear-gradient(90deg,var(--blue),#3399FF);color:#00111a}
-  .small{font-size:12px;color:#9aa9bb}
-  /* video overlay */
-  #videoOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:9999}
-  #videoOverlay.active{display:flex}
-  #loginVideo{width:84%;max-width:720px;border-radius:10px}
-  .footer-line{margin-top:12px;text-align:center;font-size:13px;color:#9aa9bb}
-</style>
-</head>
-<body>
+<!DOCTYPE html>  <html lang="id">  
+<head>  
+<meta charset="utf-8" />  
+<meta name="viewport" content="width=device-width,initial-scale=1" />  
+<title>K7N PROJECT - LOGIN</title>  
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">  
+<style>  
+  :root{--blue:#6AB8FF;--bg:#0D0014;--card:#101322}  
+  *{box-sizing:border-box}  
+  body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Montserrat,Arial,sans-serif;color:#E0E0E0;padding:20px}  
+  .card{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(106,184,255,0.18);padding:24px;border-radius:14px;box-shadow:0 6px 30px rgba(10,20,30,0.6)}  
+  h1{font-family:Orbitron,monospace;color:var(--blue);text-align:center;margin-bottom:18px}  
+  .logo{display:block;width:110px;height:110px;border-radius:50%;object-fit:cover;margin:0 auto 14px;border:3px solid var(--blue);box-shadow:0 0 12px rgba(106,184,255,0.45)}  
+  input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(106,184,255,0.12);background:#0f1720;color:#E0E0E0;margin-bottom:12px;font-size:15px}  
+  button{width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--blue),#3399FF);color:#00111a;font-weight:700;cursor:pointer;font-size:16px}  
+  button:active{transform:translateY(1px)}  
+  #msg{height:18px;margin-top:10px;text-align:center;font-size:14px;color:#ff8b8b}  
+  /* video overlay */  
+  #videoOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:9999}  
+  #videoOverlay.active{display:flex}  
+  #loginVideo{width:84%;max-width:720px;border-radius:10px}  
+</style>  
+</head>  
+<body>  <div id="videoOverlay">  
+  <video id="loginVideo" playsinline>  
+    <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">  
+    Your browser does not support video.  
+  </video>  
+</div>  <div class="card" role="main" aria-labelledby="title">  
+  <h1 id="title">K7N PROJECT</h1>  
+  <img src="https://i.supaimg.com/9775bd8b-667c-4ea3-8173-b27aeee837bc.jpg" alt="logo" class="logo" />  <label for="username" style="display:none">Username</label>
+<input id="username" autocomplete="username" placeholder="Username" inputmode="text" />
 
-<div id="videoOverlay" aria-hidden="true">
-  <video id="loginVideo" playsinline>
-    <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">
-    Your browser does not support video.
-  </video>
-</div>
+<label for="password" style="display:none">Password</label>
+<input id="password" type="password" autocomplete="current-password" placeholder="Password" />
 
-<div class="card" role="main" aria-labelledby="title">
-  <h1 id="title">K7N PROJECT</h1>
-  <img src="https://i.supaimg.com/9775bd8b-667c-4ea3-8173-b27aeee837bc.jpg" alt="logo" class="logo" />
+<button id="btnLogin" type="button">LOGIN</button>
 
-  <div class="tabs" role="tablist">
-    <button id="tabLogin" class="active" role="tab" aria-selected="true">Login</button>
-    <button id="tabRegister" role="tab" aria-selected="false">Buat Akun</button>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="panelLogin" role="tabpanel">
-    <label for="loginUser" style="display:none">Username</label>
-    <input id="loginUser" autocomplete="username" placeholder="Username" inputmode="text" />
-
-    <label for="loginPass" style="display:none">Password</label>
-    <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password" />
-
-    <button id="btnLogin" type="button">LOGIN</button>
-  </div>
-
-  <!-- REGISTER -->
-  <div id="panelRegister" role="tabpanel" style="display:none">
-    <label for="regUser" style="display:none">Username</label>
-    <input id="regUser" placeholder="Pilih username (tidak boleh K7N)" />
-
-    <label for="regPass" style="display:none">Password</label>
-    <input id="regPass" type="password" placeholder="Password" />
-
-    <div class="row">
-      <select id="expType" title="Tipe expired">
-        <option value="days" selected>Berjangka (hari)</option>
-        <option value="date">Tanggal khusus</option>
-        <option value="never">Tanpa batas (never)</option>
-      </select>
-      <input id="expValue" placeholder="30 (hari) atau YYYY-MM-DD" />
-    </div>
-
-    <button id="btnRegister" type="button">BUAT AKUN</button>
-    <div class="muted small">Default jika kosong: 30 hari. Username 'K7N' dipesan untuk owner.</div>
-  </div>
-
-  <div id="msg" role="status" aria-live="polite"></div>
-  <div class="footer-line small">Database lokal diprioritaskan. Jika tersedia, akan mencoba sinkronisasi remote (read-only).</div>
-</div>
-
-<script>
-/*
-  Perbaikan login/register:
-  - Local DB key: K7N_DB_V1
-  - Session key: K7N_SESSION_V1
-  - Remote DB fetch (fallback, read-only)
-  - Register now stores account with computed expired date (ISO string)
-  - Prevent registering username "K7N"
-  - After register -> otomatis login ke akun baru (dengan video overlay)
-  - Expired check applies to semua kecuali username "K7N"
-*/
-
-(function(){
-  const DB_KEY = "K7N_DB_V1";
-  const SESSION_KEY = "K7N_SESSION_V1";
-  const REMOTE_DB = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";
-  const DASHBOARD_URL = "https://ajimat26.github.io/K7NN/";
-  const RESERVED = ["K7N", "k7n"];
-
-  const defaultAdmin = { username: "K7N", password: "nvrz", role: "OWNER", expired: "NEVER" };
-
-  // Utilities
-  function nowISO(){ return new Date().toISOString(); }
-  function daysFromNow(days){ const d=new Date(); d.setDate(d.getDate()+Number(days)); return d.toISOString(); }
-  function parseDateInput(val){
-    // Accept YYYY-MM-DD, ISO, or numeric (days)
-    if (!val) return null;
-    val = String(val).trim();
-    // numeric (days)
-    if (/^\d+$/.test(val)) return daysFromNow(Number(val));
-    // try parseable date
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) return d.toISOString();
-    return null;
-  }
-  function isExpired(expStr){
-    if (!expStr) return false;
-    const s = String(expStr).trim().toUpperCase();
-    if (s === "NEVER" || s === "UNLIMITED") return false;
-    const d = new Date(expStr);
-    if (isNaN(d.getTime())) return false; // can't parse => assume not expired
-    return new Date() > d;
-  }
-  function setMsg(text, color){
-    const el = document.getElementById("msg");
-    el.textContent = text || "";
-    el.style.color = color || "";
-  }
-
-  // DB helpers
-  function readLocalDB(){
-    try {
-      const raw = localStorage.getItem(DB_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch(e){
-      return null;
-    }
-  }
-  function writeLocalDB(db){
-    try {
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
-      return true;
-    } catch(e){
-      console.error("Failed write DB:", e);
-      return false;
-    }
-  }
-  function initLocalDB(){
-    let db = readLocalDB();
-    if (!db || !Array.isArray(db.accounts)){
-      db = { accounts: [ defaultAdmin ] };
-      writeLocalDB(db);
-    }
-    return db;
-  }
-
-  async function fetchRemoteDB(){
-    try {
-      const res = await fetch(REMOTE_DB, {cache: "no-store"});
-      if (!res.ok) throw new Error("remote fetch failed");
-      const json = await res.json();
-      // Merge remote accounts into local if local missing those usernames (read-only remote)
-      const local = initLocalDB();
-      const remoteAccounts = Array.isArray(json.accounts) ? json.accounts : [];
-      // Add missing remote accounts to local copy (do not overwrite local)
-      remoteAccounts.forEach(r=>{
-        if (!local.accounts.some(a=>a.username === r.username)) local.accounts.push(r);
-      });
-      writeLocalDB(local);
-      return local;
-    } catch(e){
-      // ignore remote errors
-      return null;
-    }
-  }
-
-  // Init DB early
-  let DB = initLocalDB();
-  // Try to refresh remote in background (non-blocking)
-  fetchRemoteDB().then(remote => { if (remote) DB = remote; }).catch(()=>{});
-
-  // UI wiring: tabs
-  const tabLogin = document.getElementById("tabLogin");
-  const tabRegister = document.getElementById("tabRegister");
-  const panelLogin = document.getElementById("panelLogin");
-  const panelRegister = document.getElementById("panelRegister");
-
-  tabLogin.addEventListener("click", ()=>{
-    tabLogin.classList.add("active"); tabRegister.classList.remove("active");
-    panelLogin.style.display = ""; panelRegister.style.display = "none";
-    setMsg("");
-  });
-  tabRegister.addEventListener("click", ()=>{
-    tabRegister.classList.add("active"); tabLogin.classList.remove("active");
-    panelRegister.style.display = ""; panelLogin.style.display = "none";
-    setMsg("");
-  });
-
-  // Elements
-  const loginUser = document.getElementById("loginUser");
-  const loginPass = document.getElementById("loginPass");
-  const btnLogin = document.getElementById("btnLogin");
-
-  const regUser = document.getElementById("regUser");
-  const regPass = document.getElementById("regPass");
-  const expType = document.getElementById("expType");
-  const expValue = document.getElementById("expValue");
-  const btnRegister = document.getElementById("btnRegister");
-
-  const videoOverlay = document.getElementById("videoOverlay");
-  const loginVideo = document.getElementById("loginVideo");
-
-  // login function
-  async function handleLogin(){
-    setMsg("");
-    const u = String(loginUser.value || "").trim();
-    const p = String(loginPass.value || "");
-
-    if (!u || !p){ setMsg("Isi username & password.", "#ff8b8b"); return; }
-
-    // refresh DB from local storage (in case changed)
-    DB = initLocalDB();
-    // also try remote in background but do not wait
-    fetchRemoteDB().then(remote=>{ if (remote) DB = remote; }).catch(()=>{});
-
-    const account = (DB.accounts||[]).find(a => a.username === u && a.password === p);
-    if (!account){ setMsg("Username atau password salah.", "#ff8b8b"); return; }
-
-    // expired check (owner bypass)
-    if (String(account.username) !== "K7N" && isExpired(account.expired)){
-      setMsg("Akun sudah habis masa aktif.", "#ff8b8b"); return;
-    }
-
-    // create session
-    const session = {
-      username: account.username,
-      role: account.role || (account.username === "K7N" ? "OWNER" : "USER"),
-      expired: account.expired || "NEVER",
-      createdAt: nowISO()
-    };
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); }
-    catch(e){ console.warn("session save failed", e); }
-
-    // show video overlay and then redirect
-    playVideoThenRedirect();
-  }
-
-  // register function
-  function handleRegister(){
-    setMsg("");
-    const u = String(regUser.value || "").trim();
-    const p = String(regPass.value || "");
-    const type = expType.value;
-    const expVal = String(expValue.value || "").trim();
-
-    if (!u || !p){ setMsg("Isi username & password untuk membuat akun.", "#ff8b8b"); return; }
-
-    // prevent reserved username
-    if (RESERVED.includes(u)) { setMsg("Username ini dipesan (tidak boleh digunakan).", "#ff8b8b"); return; }
-
-    // reload DB from local
-    DB = initLocalDB();
-
-    // username existence check
-    if ((DB.accounts||[]).some(a => a.username === u)){
-      setMsg("Username sudah terdaftar. Pilih username lain.", "#ff8b8b"); return;
-    }
-
-    // compute expired field
-    let expired = null;
-    if (type === "never") expired = "NEVER";
-    else if (type === "date") {
-      const parsed = parseDateInput(expVal);
-      if (!parsed){ setMsg("Format tanggal tidak valid. Gunakan YYYY-MM-DD.", "#ff8b8b"); return; }
-      expired = parsed;
-    } else { // days
-      const parsed = parseDateInput(expVal || "30"); // default 30 days
-      if (!parsed){ setMsg("Nilai hari tidak valid.", "#ff8b8b"); return; }
-      expired = parsed;
-    }
-
-    // create account object
-    const acc = {
-      username: u,
-      password: p,
-      role: "USER",
-      expired: expired,
-      createdAt: nowISO()
-    };
-
-    DB.accounts.push(acc);
-    const ok = writeLocalDB(DB);
-    if (!ok) { setMsg("Gagal menyimpan akun. Pastikan browser mengizinkan localStorage.", "#ff8b8b"); return; }
-
-    setMsg("Akun berhasil dibuat. Masuk ke akun Anda...", "#00ff88");
-
-    // auto-login the new account (write session and redirect)
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ username: acc.username, role: acc.role, expired: acc.expired, createdAt: nowISO() })); }
-    catch(e){ console.warn("session save failed", e); }
-
-    // small delay supaya user lihat pesan, lalu play video+redirect
-    setTimeout(()=> playVideoThenRedirect(), 800);
-  }
-
-  function playVideoThenRedirect(){
-    // attempt to show overlay + play video; if autoplay blocked -> immediate redirect
-    videoOverlay.classList.add("active");
-    // reset video to start
-    try {
-      loginVideo.currentTime = 0;
-    } catch(e){ /* ignore */ }
-
-    const playPromise = loginVideo.play();
-    if (playPromise && typeof playPromise.then === "function"){
-      playPromise.then(()=>{
-        loginVideo.onended = ()=> {
-          videoOverlay.classList.remove("active");
-          // redirect including username param for convenience
-          const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-          const u = session.username ? `?user=${encodeURIComponent(session.username)}` : "";
-          window.location.href = DASHBOARD_URL + u;
-        };
-      }).catch(err=>{
-        // autoplay blocked -> hide overlay and redirect immediately
-        console.warn("autoplay blocked:", err);
-        videoOverlay.classList.remove("active");
-        const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-        const u = session.username ? `?user=${encodeURIComponent(session.username)}` : "";
-        window.location.href = DASHBOARD_URL + u;
-      });
-    } else {
-      // older browser
-      loginVideo.onended = ()=> {
-        videoOverlay.classList.remove("active");
-        const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-        const u = session.username ? `?user=${encodeURIComponent(session.username)}` : "";
-        window.location.href = DASHBOARD_URL + u;
-      };
-      // safety timeout in case event doesn't fire
-      setTimeout(()=>{
-        videoOverlay.classList.remove("active");
-        const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-        const u = session.username ? `?user=${encodeURIComponent(session.username)}` : "";
-        window.location.href = DASHBOARD_URL + u;
-      }, 2500);
-    }
-  }
-
-  // Wire events
-  btnLogin.addEventListener("click", handleLogin);
-  btnRegister.addEventListener("click", handleRegister);
-
-  // Enter to submit on focused inputs
-  document.addEventListener("keydown", function(e){
-    if (e.key === "Enter"){
-      const active = document.activeElement;
-      if (active === loginUser || active === loginPass) handleLogin();
-      if (active === regUser || active === regPass || active === expValue) handleRegister();
-    }
-  });
-
-  // keep UI consistent with expType
-  expType.addEventListener("change", ()=>{
-    if (expType.value === "days"){ expValue.placeholder = "30 (hari)"; }
-    else if (expType.value === "date"){ expValue.placeholder = "YYYY-MM-DD"; }
-    else { expValue.placeholder = " — tidak dipakai — "; expValue.value = ""; }
-  });
-
-  // ensure DB exists on load
-  DB = initLocalDB();
-
-})();
-</script>
-
-</body>
-  </html>
+  <div id="msg" role="status" aria-live="polite"></div>  
+</div>  <script>  
+/*  
+  Robust login script:  
+  - Tries localStorage DB first (K7N_DB_V1)  
+  - If not found, attempts to fetch remote database.json (raw.githubusercontent URL)  
+  - Validates credentials, handles expiration  
+  - Creates session in localStorage (K7N_SESSION_V1)  
+  - Plays video overlay or falls back to direct redirect  
+*/  
+(function(){  
+  const DB_KEY = "K7N_DB_V1";  
+  const SESSION_KEY = "K7N_SESSION_V1";  
+  const REMOTE_DB = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";  
+  const DASHBOARD_URL = "https://ajimat26.github.io/K7NN/";  
+  
+  const defaultAdmin = { username: "K7N", password: "nvrz", role: "OWNER", expired: "NEVER" };  
+  
+  // init local DB if missing  
+  function initLocalDB(){  
+    try {  
+      const raw = localStorage.getItem(DB_KEY);  
+      if (!raw) {  
+        const db = { accounts: [ defaultAdmin ] };  
+        localStorage.setItem(DB_KEY, JSON.stringify(db));  
+        return db;  
+      }  
+      return JSON.parse(raw);  
+    } catch(e){  
+      const db = { accounts: [ defaultAdmin ] };  
+      localStorage.setItem(DB_KEY, JSON.stringify(db));  
+      return db;  
+    }  
+  }  
+  
+  // attempt to fetch remote DB (non-blocking fallback)  
+  async function fetchRemoteDB(){  
+    try {  
+      const res = await fetch(REMOTE_DB, {cache: "no-store"});  
+      if (!res.ok) throw new Error("remote fetch failed");  
+      const json = await res.json();  
+      // write to local storage for faster subsequent access  
+      localStorage.setItem(DB_KEY, JSON.stringify(json));  
+      return json;  
+    } catch(e){  
+      // ignore and let caller use local  
+      return null;  
+    }  
+  }  
+  
+  function setMsg(text, color){  
+    const el = document.getElementById("msg");  
+    el.textContent = text || "";  
+    if (color) el.style.color = color;  
+    else el.style.color = "";  
+  }  
+  
+  // parse expiry string to Date (support YYYY-MM-DD or 9999-12-31 or NEVER)  
+  function isExpired(expStr){  
+    if (!expStr) return false;  
+    if (typeof expStr !== "string") return false;  
+    const s = expStr.trim().toUpperCase();  
+    if (s === "NEVER" || s === "UNLIMITED") return false;  
+    // try YYYY-MM-DD  
+    const d = new Date(s);  
+    if (isNaN(d.getTime())) return false; // can't parse -> assume valid  
+    const now = new Date();  
+    return now > d;  
+  }  
+  
+  // main login routine  
+  async function loginUser(){  
+    setMsg("");  
+    const user = document.getElementById("username").value.trim();  
+    const pass = document.getElementById("password").value;  
+  
+    if (!user || !pass) {  
+      setMsg("Isi username & password.", "#ff8b8b");  
+      return;  
+    }  
+  
+    // 1) check local DB  
+    let db = initLocalDB();  
+  
+    // concurrently try refresh remote in background  
+    fetchRemoteDB().then(remote => {  
+      if (remote) db = remote;  
+    }).catch(()=>{});  
+  
+    // find account  
+    const acc = (db.accounts||[]).find(a => a.username === user && a.password === pass);  
+  
+    if (!acc) {  
+      setMsg("Username atau password salah.", "#ff8b8b");  
+      return;  
+    }  
+  
+    // expired check (owner K7N unlimited)  
+    if (acc.username !== "K7N") {  
+      if (isExpired(acc.expired)) {  
+        setMsg("Akun sudah habis masa aktif.", "#ff8b8b");  
+        return;  
+      }  
+    }  
+  
+    // create session  
+    const session = {  
+      username: acc.username,  
+      role: acc.role || (acc.username === "K7N" ? "OWNER" : "USER"),  
+      expired: acc.expired || "NEVER",  
+      createdAt: (new Date()).toISOString()  
+    };  
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));  
+  
+    // play video overlay if possible  
+    const overlay = document.getElementById("videoOverlay");  
+    const video = document.getElementById("loginVideo");  
+  
+    overlay.classList.add("active");  
+    // try to play, but if autoplay blocked, just redirect immediately  
+    const p = video.play();  
+    if (p && typeof p.then === "function") {  
+      p.then(() => {  
+        video.onended = () => {  
+          window.location.href = DASHBOARD_URL;  
+        };  
+      }).catch(err => {  
+        // autoplay blocked -> immediate redirect  
+        overlay.classList.remove("active");  
+        window.location.href = DASHBOARD_URL;  
+      });  
+    } else {  
+      // older browser: wait for ended or redirect  
+      video.onended = () => window.location.href = DASHBOARD_URL;  
+      setTimeout(() => window.location.href = DASHBOARD_URL, 2000);  
+    }  
+  }  
+  
+  // wire button and Enter key  
+  document.getElementById("btnLogin").addEventListener("click", loginUser);  
+  document.addEventListener("keydown", function(e){  
+    if (e.key === "Enter") {  
+      const active = document.activeElement;  
+      // if focus is input, trigger login  
+      if (active && (active.id === "username" || active.id === "password")) {  
+        loginUser();  
+      }  
+    }  
+  });  
+  
+  // ensure local DB exists early  
+  initLocalDB();  
+  
+})();  
+</script>  </body>  
+</html>  
