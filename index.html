@@ -1,195 +1,208 @@
-<!DOCTYPE html>  <html lang="id">  
-<head>  
-<meta charset="utf-8" />  
-<meta name="viewport" content="width=device-width,initial-scale=1" />  
-<title>K7N PROJECT - LOGIN</title>  
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">  
-<style>  
-  :root{--blue:#6AB8FF;--bg:#0D0014;--card:#101322}  
-  *{box-sizing:border-box}  
-  body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Montserrat,Arial,sans-serif;color:#E0E0E0;padding:20px}  
-  .card{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(106,184,255,0.18);padding:24px;border-radius:14px;box-shadow:0 6px 30px rgba(10,20,30,0.6)}  
-  h1{font-family:Orbitron,monospace;color:var(--blue);text-align:center;margin-bottom:18px}  
-  .logo{display:block;width:110px;height:110px;border-radius:50%;object-fit:cover;margin:0 auto 14px;border:3px solid var(--blue);box-shadow:0 0 12px rgba(106,184,255,0.45)}  
-  input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(106,184,255,0.12);background:#0f1720;color:#E0E0E0;margin-bottom:12px;font-size:15px}  
-  button{width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--blue),#3399FF);color:#00111a;font-weight:700;cursor:pointer;font-size:16px}  
-  button:active{transform:translateY(1px)}  
-  #msg{height:18px;margin-top:10px;text-align:center;font-size:14px;color:#ff8b8b}  
-  /* video overlay */  
-  #videoOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:9999}  
-  #videoOverlay.active{display:flex}  
-  #loginVideo{width:84%;max-width:720px;border-radius:10px}  
-</style>  
-</head>  
-<body>  <div id="videoOverlay">  
-  <video id="loginVideo" playsinline>  
-    <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">  
-    Your browser does not support video.  
-  </video>  
-</div>  <div class="card" role="main" aria-labelledby="title">  
-  <h1 id="title">K7N X WAR CRASH</h1>  
-  <img src="https://i.supaimg.com/9775bd8b-667c-4ea3-8173-b27aeee837bc.jpg" alt="logo" class="logo" />  <label for="username" style="display:none">Username</label>
-<input id="username" autocomplete="username" placeholder="Username" inputmode="text" />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K7N PROJECT</title>
 
-<label for="password" style="display:none">Password</label>
-<input id="password" type="password" autocomplete="current-password" placeholder="Password" />
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#0d0014;
+  color:#fff;
+}
 
-<button id="btnLogin" type="button">LOGIN</button>
+/* ===== LOGIN ===== */
+#loginBox{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.card{
+  background:#101322;
+  padding:25px;
+  border-radius:14px;
+  width:100%;
+  max-width:380px;
+  box-shadow:0 0 25px rgba(0,0,0,.6);
+}
+h2{text-align:center;color:#6ab8ff}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border-radius:8px;
+  border:none;
+}
+input{background:#0f1720;color:#fff}
+button{
+  background:#6ab8ff;
+  font-weight:bold;
+  cursor:pointer;
+}
+#msg{margin-top:10px;text-align:center;color:#ff6b6b}
 
-  <div id="msg" role="status" aria-live="polite"></div>  
-</div>  <script>  
-/*  
-  Robust login script:  
-  - Tries localStorage DB first (K7N_DB_V1)  
-  - If not found, attempts to fetch remote database.json (raw.githubusercontent URL)  
-  - Validates credentials, handles expiration  
-  - Creates session in localStorage (K7N_SESSION_V1)  
-  - Plays video overlay or falls back to direct redirect  
-*/  
-(function(){  
-  const DB_KEY = "K7N_DB_V1";  
-  const SESSION_KEY = "K7N_SESSION_V1";  
-  const REMOTE_DB = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";  
-  const DASHBOARD_URL = "http://serverpublik-pirzy.anti-ddos.me:2019/dashboard";  
-  
-  const defaultAdmin = { username: "K7N", password: "nvrz", role: "OWNER", expired: "NEVER" };  
-  
-  // init local DB if missing  
-  function initLocalDB(){  
-    try {  
-      const raw = localStorage.getItem(DB_KEY);  
-      if (!raw) {  
-        const db = { accounts: [ defaultAdmin ] };  
-        localStorage.setItem(DB_KEY, JSON.stringify(db));  
-        return db;  
-      }  
-      return JSON.parse(raw);  
-    } catch(e){  
-      const db = { accounts: [ defaultAdmin ] };  
-      localStorage.setItem(DB_KEY, JSON.stringify(db));  
-      return db;  
-    }  
-  }  
-  
-  // attempt to fetch remote DB (non-blocking fallback)  
-  async function fetchRemoteDB(){  
-    try {  
-      const res = await fetch(REMOTE_DB, {cache: "no-store"});  
-      if (!res.ok) throw new Error("remote fetch failed");  
-      const json = await res.json();  
-      // write to local storage for faster subsequent access  
-      localStorage.setItem(DB_KEY, JSON.stringify(json));  
-      return json;  
-    } catch(e){  
-      // ignore and let caller use local  
-      return null;  
-    }  
-  }  
-  
-  function setMsg(text, color){  
-    const el = document.getElementById("msg");  
-    el.textContent = text || "";  
-    if (color) el.style.color = color;  
-    else el.style.color = "";  
-  }  
-  
-  // parse expiry string to Date (support YYYY-MM-DD or 9999-12-31 or NEVER)  
-  function isExpired(expStr){  
-    if (!expStr) return false;  
-    if (typeof expStr !== "string") return false;  
-    const s = expStr.trim().toUpperCase();  
-    if (s === "NEVER" || s === "UNLIMITED") return false;  
-    // try YYYY-MM-DD  
-    const d = new Date(s);  
-    if (isNaN(d.getTime())) return false; // can't parse -> assume valid  
-    const now = new Date();  
-    return now > d;  
-  }  
-  
-  // main login routine  
-  async function loginUser(){  
-    setMsg("");  
-    const user = document.getElementById("username").value.trim();  
-    const pass = document.getElementById("password").value;  
-  
-    if (!user || !pass) {  
-      setMsg("Isi username & password.", "#ff8b8b");  
-      return;  
-    }  
-  
-    // 1) check local DB  
-    let db = initLocalDB();  
-  
-    // concurrently try refresh remote in background  
-    fetchRemoteDB().then(remote => {  
-      if (remote) db = remote;  
-    }).catch(()=>{});  
-  
-    // find account  
-    const acc = (db.accounts||[]).find(a => a.username === user && a.password === pass);  
-  
-    if (!acc) {  
-      setMsg("Username atau password salah.", "#ff8b8b");  
-      return;  
-    }  
-  
-    // expired check (owner K7N unlimited)  
-    if (acc.username !== "K7N") {  
-      if (isExpired(acc.expired)) {  
-        setMsg("Akun sudah habis masa aktif.", "#ff8b8b");  
-        return;  
-      }  
-    }  
-  
-    // create session  
-    const session = {  
-      username: acc.username,  
-      role: acc.role || (acc.username === "K7N" ? "OWNER" : "USER"),  
-      expired: acc.expired || "NEVER",  
-      createdAt: (new Date()).toISOString()  
-    };  
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));  
-  
-    // play video overlay if possible  
-    const overlay = document.getElementById("videoOverlay");  
-    const video = document.getElementById("loginVideo");  
-  
-    overlay.classList.add("active");  
-    // try to play, but if autoplay blocked, just redirect immediately  
-    const p = video.play();  
-    if (p && typeof p.then === "function") {  
-      p.then(() => {  
-        video.onended = () => {  
-          window.location.href = DASHBOARD_URL;  
-        };  
-      }).catch(err => {  
-        // autoplay blocked -> immediate redirect  
-        overlay.classList.remove("active");  
-        window.location.href = DASHBOARD_URL;  
-      });  
-    } else {  
-      // older browser: wait for ended or redirect  
-      video.onended = () => window.location.href = DASHBOARD_URL;  
-      setTimeout(() => window.location.href = DASHBOARD_URL, 2000);  
-    }  
-  }  
-  
-  // wire button and Enter key  
-  document.getElementById("btnLogin").addEventListener("click", loginUser);  
-  document.addEventListener("keydown", function(e){  
-    if (e.key === "Enter") {  
-      const active = document.activeElement;  
-      // if focus is input, trigger login  
-      if (active && (active.id === "username" || active.id === "password")) {  
-        loginUser();  
-      }  
-    }  
-  });  
-  
-  // ensure local DB exists early  
-  initLocalDB();  
-  
-})();  
-</script>  </body>  
-</html>  
+/* ===== APP ===== */
+#app{
+  display:none;
+  height:100vh;
+}
+#top{
+  background:#101322;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#content{
+  height:calc(100vh - 50px);
+}
+iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+</style>
+</head>
+<body>
 
+<!-- LOGIN -->
+<div id="loginBox">
+  <div class="card">
+    <h2>K7N LOGIN</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">LOGIN</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="top">
+    <span id="info"></span>
+    <button onclick="logout()">LOGOUT</button>
+  </div>
+  <div id="content">
+    <!-- WEBSITE TUJUAN DI SINI -->
+    <iframe src="https://example.com"></iframe>
+  </div>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const SESSION_KEY = "K7N_SESSION_V1";
+const DB = [
+  {username:"K7N", password:"nvrz", role:"OWNER"},
+  {username:"TRIAL", password:"T30", role:"TRIAL"}
+];
+const TRIAL_TIME = 30 * 60 * 1000; // 30 menit
+/* ================================================= */
+
+/* ===== LOGIN ===== */
+function login(){
+  const u = user.value.trim();
+  const p = pass.value;
+
+  const acc = DB.find(a=>a.username===u && a.password===p);
+  if(!acc){ msg.innerText="Username / Password salah"; return; }
+
+  const now = Date.now();
+  const isTrial = acc.username === "TRIAL";
+
+  const session = {
+    username: acc.username,
+    role: acc.role,
+    createdAt: now,
+    expireAt: isTrial ? now + TRIAL_TIME : null
+  };
+
+  session.lockHash = btoa(
+    session.username + "|" +
+    session.createdAt + "|" +
+    (session.expireAt || "PERMANENT")
+  );
+
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  showApp();
+}
+
+/* ===== SHOW APP ===== */
+function showApp(){
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return;
+
+  const s = JSON.parse(raw);
+  const lock = btoa(
+    s.username + "|" + s.createdAt + "|" + (s.expireAt || "PERMANENT")
+  );
+
+  if(s.lockHash !== lock){
+    localStorage.removeItem(SESSION_KEY);
+    location.reload();
+    return;
+  }
+
+  loginBox.style.display="none";
+  app.style.display="block";
+
+  updateInfo();
+}
+
+/* ===== INFO BAR ===== */
+function updateInfo(){
+  const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+  if(s.username==="TRIAL"){
+    const left = Math.max(0, s.expireAt - Date.now());
+    info.innerText = "TRIAL | Sisa: " + Math.floor(left/60000) + " menit";
+  }else{
+    info.innerText = "LOGIN: " + s.username + " (PERMANEN)";
+  }
+}
+
+/* ===== AUTO EXPIRE ===== */
+setInterval(()=>{
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return;
+
+  const s = JSON.parse(raw);
+
+  if(s.username==="TRIAL"){
+    if(Date.now() > s.expireAt){
+      localStorage.removeItem(SESSION_KEY);
+      alert("⛔ WAKTU TRIAL HABIS");
+      location.reload();
+    }else{
+      updateInfo();
+    }
+  }
+},1000);
+
+/* ===== ANTI REFRESH (TRIAL) ===== */
+window.addEventListener("beforeunload", function (e) {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return;
+
+  const s = JSON.parse(raw);
+  if(s.username==="TRIAL"){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+/* ===== LOGOUT ===== */
+function logout(){
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+/* ===== AUTO LOGIN JIKA ADA SESSION ===== */
+if(localStorage.getItem(SESSION_KEY)){
+  showApp();
+}
+</script>
+
+</body>
+</html>
