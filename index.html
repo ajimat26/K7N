@@ -3,151 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K7N Access</title>
-
+<title>K7N PROJECT</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0b0012;
-  color:#fff;
-}
-#login,#wait{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.card{
-  background:#11162a;
-  padding:25px;
-  border-radius:14px;
-  width:100%;
-  max-width:360px;
-}
-h2{text-align:center;color:#7cc4ff}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border:none;
-  border-radius:8px;
-}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0d0014;color:#fff;}
+#loginBox,#app{height:100vh;display:flex;justify-content:center;align-items:center;}
+.card{background:#101322;padding:25px;border-radius:14px;width:100%;max-width:380px;box-shadow:0 0 25px rgba(0,0,0,.6);}
+h2{text-align:center;color:#6ab8ff}
+input,button{width:100%;padding:12px;margin-top:12px;border-radius:8px;border:none;}
 input{background:#0f1720;color:#fff}
-button{background:#7cc4ff;font-weight:bold;cursor:pointer}
+button{background:#6ab8ff;font-weight:bold;cursor:pointer}
 #msg{text-align:center;color:#ff6b6b;margin-top:10px}
-#cd{text-align:center;margin-top:10px;font-size:18px}
+#info{margin-bottom:15px;text-align:center}
+#content{width:100%;background:#0f1720;padding:20px;border-radius:10px;}
 </style>
 </head>
 <body>
 
-<div id="login">
+<!-- LOGIN -->
+<div id="loginBox">
   <div class="card">
-    <h2>K7N ACCESS</h2>
+    <h2>K7N LOGIN</h2>
     <input id="pw" type="password" placeholder="Password">
     <button onclick="login()">MASUK</button>
     <div id="msg"></div>
   </div>
 </div>
 
-<div id="wait" style="display:none">
+<!-- APP -->
+<div id="app" style="display:none">
   <div class="card">
-    <h2>MENYIAPKAN AKSES</h2>
-    <div id="cd"></div>
+    <div id="info"></div>
+    <div id="content">
+      <!-- Konten web tujuan akan dimuat di sini -->
+    </div>
+    <button onclick="logout()">LOGOUT</button>
   </div>
 </div>
 
 <script>
-/* ============== CONFIG ================= */
-const STORAGE = "K7N_TOKEN_SESSION";
-const TARGET = atob(
-  "aHR0cDovL3NlcnZlcnB1Ymxpay1waXJ6eS5hbnRpLWRkb3MubWU6MjAxOS9kYXNoYm9hcmQ="
-);
-const TRIAL_TIME = 30 * 60 * 1000;
-const SECRET = "K7N@2025";
-/* ====================================== */
+/* ===== CONFIG ===== */
+const STORAGE_KEY = "K7N_TOKEN_SESSION";
+const TRIAL_TIME = 30 * 60 * 1000; // 30 menit
+const SECRET = "K7N2025SECRET";
 
-/* HASH SEDERHANA */
-function sign(str){
-  let h = 0;
-  for(let i=0;i<str.length;i++){
-    h = (h<<5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
-  return btoa(h.toString());
+/* ===== UTILITY ===== */
+function hash(str){
+  let h=0; for(let i=0;i<str.length;i++){ h=(h<<5)-h+str.charCodeAt(i); h|=0;} return btoa(h.toString());
 }
 
-/* GENERATE TOKEN */
 function createToken(role, exp){
   const ts = Date.now();
   const rnd = Math.random().toString(36).slice(2,10);
-  const raw = `K7N|${role}|${ts}|${rnd}|${exp ?? "∞"}`;
-  return raw + "|" + sign(raw + SECRET);
+  const raw = `${role}|${ts}|${rnd}|${exp||"∞"}`;
+  return raw + "|" + hash(raw+SECRET);
 }
 
+function verifyToken(token){
+  const parts = token.split("|");
+  if(parts.length!==4 && parts.length!==5) return false;
+  const raw = parts.slice(0,parts.length-1).join("|");
+  return hash(raw+SECRET)===parts[parts.length-1];
+}
+
+/* ===== LOGIN ===== */
 function login(){
-  const p = pw.value;
-  let role = null;
-  let exp = null;
+  const p = pw.value.trim();
+  let role = null, exp = null;
 
-  if(p === "nvrz") role = "OWNER";
-  if(p === "T30"){
-    role = "TRIAL";
-    exp = Date.now() + TRIAL_TIME;
-  }
+  if(p==="nvrz") role="OWNER";
+  else if(p==="T30"){ role="TRIAL"; exp = Date.now()+TRIAL_TIME; }
 
-  if(!role){
-    msg.innerText = "Password salah";
-    return;
-  }
+  if(!role){ msg.innerText="Password salah"; return; }
 
   const token = createToken(role, exp);
-  localStorage.setItem(STORAGE, JSON.stringify({
-    token, role, exp
-  }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({token, role, exp}));
 
-  redirect();
+  showApp();
 }
 
-function redirect(){
-  login.style.display="none";
-  wait.style.display="flex";
-
-  let t = 3;
-  const i = setInterval(()=>{
-    cd.innerText = "Redirect dalam " + t + " detik...";
-    if(--t < 0){
-      clearInterval(i);
-      window.location.replace(TARGET);
-    }
-  },1000);
-}
-
-/* AUTO CHECK TOKEN */
-(function(){
-  const raw = localStorage.getItem(STORAGE);
+/* ===== SHOW APP ===== */
+function showApp(){
+  const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw) return;
 
   const s = JSON.parse(raw);
-  const parts = s.token.split("|");
-  if(parts.length !== 6){
-    localStorage.removeItem(STORAGE);
+  if(!verifyToken(s.token)){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
     return;
   }
 
-  const checkRaw = parts.slice(0,5).join("|");
-  if(sign(checkRaw + SECRET) !== parts[5]){
-    localStorage.removeItem(STORAGE);
+  if(s.role==="TRIAL" && Date.now()>s.exp){
+    localStorage.removeItem(STORAGE_KEY);
+    alert("⛔ TRIAL HABIS");
+    location.reload();
     return;
   }
 
-  if(s.role === "TRIAL" && Date.now() > s.exp){
-    localStorage.removeItem(STORAGE);
-    return;
-  }
+  loginBox.style.display="none";
+  app.style.display="flex";
 
-  redirect();
-})();
+  updateInfo();
+  loadContent();
+}
+
+/* ===== INFO BAR ===== */
+function updateInfo(){
+  const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(s.role==="TRIAL"){
+    const left = Math.max(0,s.exp - Date.now());
+    info.innerText = `TRIAL | Sisa ${Math.floor(left/60000)} menit`;
+  }else{
+    info.innerText = `LOGIN: OWNER (PERMANEN)`;
+  }
+}
+
+/* ===== AUTO UPDATE / AUTO EXPIRE ===== */
+setInterval(()=>{
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+
+  const s = JSON.parse(raw);
+  if(s.role==="TRIAL" && Date.now()>s.exp){
+    localStorage.removeItem(STORAGE_KEY);
+    alert("⛔ WAKTU TRIAL HABIS");
+    location.reload();
+  }else if(raw){ updateInfo(); }
+},1000);
+
+/* ===== LOGOUT ===== */
+function logout(){ localStorage.removeItem(STORAGE_KEY); location.reload(); }
+
+/* ===== LOAD CONTENT DI HALAMAN SAMA ===== */
+function loadContent(){
+  const contentDiv = document.getElementById("content");
+  const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  // Contoh konten tujuan: bisa diganti HTML/JS sendiri
+  if(s.role==="OWNER"){
+    contentDiv.innerHTML = "<h3>Selamat datang OWNER!</h3><p>Konten permanen dapat diakses.</p>";
+  }else{
+    contentDiv.innerHTML = "<h3>TRIAL AKSES</h3><p>Konten terbatas 30 menit.</p>";
+  }
+}
+
+/* ===== AUTO LOGIN JIKA ADA SESSION ===== */
+if(localStorage.getItem(STORAGE_KEY)) showApp();
 </script>
 
 </body>
