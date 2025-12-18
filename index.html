@@ -6,27 +6,19 @@
 <title>K7N PROJECT</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#0d0014;
-  color:#fff;
-}
-
-/* ===== LOGIN ===== */
-#loginBox{
+body{margin:0;font-family:Arial;background:#0d0014;color:#fff}
+#loginBox,#waitBox{
   height:100vh;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:center
 }
 .card{
   background:#101322;
   padding:25px;
   border-radius:14px;
   width:100%;
-  max-width:380px;
-  box-shadow:0 0 25px rgba(0,0,0,.6);
+  max-width:380px
 }
 h2{text-align:center;color:#6ab8ff}
 input,button{
@@ -34,36 +26,12 @@ input,button{
   padding:12px;
   margin-top:12px;
   border-radius:8px;
-  border:none;
+  border:none
 }
 input{background:#0f1720;color:#fff}
-button{
-  background:#6ab8ff;
-  font-weight:bold;
-  cursor:pointer;
-}
-#msg{margin-top:10px;text-align:center;color:#ff6b6b}
-
-/* ===== APP ===== */
-#app{
-  display:none;
-  height:100vh;
-}
-#top{
-  background:#101322;
-  padding:12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-#content{
-  height:calc(100vh - 50px);
-}
-iframe{
-  width:100%;
-  height:100%;
-  border:none;
-}
+button{background:#6ab8ff;font-weight:bold;cursor:pointer}
+#msg{text-align:center;color:#ff6b6b;margin-top:10px}
+#countdown{text-align:center;font-size:18px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -79,27 +47,25 @@ iframe{
   </div>
 </div>
 
-<!-- APP -->
-<div id="app">
-  <div id="top">
-    <span id="info"></span>
-    <button onclick="logout()">LOGOUT</button>
-  </div>
-  <div id="content">
-    <!-- WEBSITE TUJUAN DI SINI -->
-    <iframe src="https://example.com"></iframe>
+<!-- TRANSISI -->
+<div id="waitBox" style="display:none">
+  <div class="card">
+    <h2>MENYIAPKAN AKSES</h2>
+    <div id="countdown"></div>
   </div>
 </div>
 
 <script>
-/* ===================== CONFIG ===================== */
+/* ================= CONFIG ================= */
 const SESSION_KEY = "K7N_SESSION_V1";
+const TARGET_URL = "http://serverpublik-pirzy.anti-ddos.me:2019/dashboard";
+const TRIAL_TIME = 30 * 60 * 1000;
+/* ========================================= */
+
 const DB = [
   {username:"K7N", password:"nvrz", role:"OWNER"},
   {username:"TRIAL", password:"T30", role:"TRIAL"}
 ];
-const TRIAL_TIME = 30 * 60 * 1000; // 30 menit
-/* ================================================= */
 
 /* ===== LOGIN ===== */
 function login(){
@@ -126,82 +92,56 @@ function login(){
   );
 
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  showApp();
+  startRedirect();
 }
 
-/* ===== SHOW APP ===== */
-function showApp(){
+/* ===== TRANSISI + COUNTDOWN ===== */
+function startRedirect(){
+  loginBox.style.display="none";
+  waitBox.style.display="flex";
+
+  const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+
+  let timeLeft = s.username==="TRIAL" ? 3 : 1; // detik sebelum redirect
+
+  const timer = setInterval(()=>{
+    countdown.innerText = 
+      "Redirect dalam " + timeLeft + " detik...";
+    timeLeft--;
+
+    if(timeLeft < 0){
+      clearInterval(timer);
+      window.location.replace(TARGET_URL);
+    }
+  },1000);
+}
+
+/* ===== AUTO LOGIN JIKA ADA SESSION ===== */
+(function(){
   const raw = localStorage.getItem(SESSION_KEY);
   if(!raw) return;
 
   const s = JSON.parse(raw);
+  const now = Date.now();
+
   const lock = btoa(
-    s.username + "|" + s.createdAt + "|" + (s.expireAt || "PERMANENT")
+    s.username + "|" +
+    s.createdAt + "|" +
+    (s.expireAt || "PERMANENT")
   );
 
   if(s.lockHash !== lock){
     localStorage.removeItem(SESSION_KEY);
-    location.reload();
     return;
   }
 
-  loginBox.style.display="none";
-  app.style.display="block";
-
-  updateInfo();
-}
-
-/* ===== INFO BAR ===== */
-function updateInfo(){
-  const s = JSON.parse(localStorage.getItem(SESSION_KEY));
-  if(s.username==="TRIAL"){
-    const left = Math.max(0, s.expireAt - Date.now());
-    info.innerText = "TRIAL | Sisa: " + Math.floor(left/60000) + " menit";
-  }else{
-    info.innerText = "LOGIN: " + s.username + " (PERMANEN)";
+  if(s.username==="TRIAL" && now > s.expireAt){
+    localStorage.removeItem(SESSION_KEY);
+    return;
   }
-}
 
-/* ===== AUTO EXPIRE ===== */
-setInterval(()=>{
-  const raw = localStorage.getItem(SESSION_KEY);
-  if(!raw) return;
-
-  const s = JSON.parse(raw);
-
-  if(s.username==="TRIAL"){
-    if(Date.now() > s.expireAt){
-      localStorage.removeItem(SESSION_KEY);
-      alert("⛔ WAKTU TRIAL HABIS");
-      location.reload();
-    }else{
-      updateInfo();
-    }
-  }
-},1000);
-
-/* ===== ANTI REFRESH (TRIAL) ===== */
-window.addEventListener("beforeunload", function (e) {
-  const raw = localStorage.getItem(SESSION_KEY);
-  if(!raw) return;
-
-  const s = JSON.parse(raw);
-  if(s.username==="TRIAL"){
-    e.preventDefault();
-    e.returnValue = "";
-  }
-});
-
-/* ===== LOGOUT ===== */
-function logout(){
-  localStorage.removeItem(SESSION_KEY);
-  location.reload();
-}
-
-/* ===== AUTO LOGIN JIKA ADA SESSION ===== */
-if(localStorage.getItem(SESSION_KEY)){
-  showApp();
-}
+  startRedirect();
+})();
 </script>
 
 </body>
