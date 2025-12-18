@@ -3,144 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K7N PROJECT</title>
+<title>K7N Access</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#0d0014;color:#fff}
-#loginBox,#waitBox{
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0012;
+  color:#fff;
+}
+#login,#wait{
   height:100vh;
   display:flex;
   justify-content:center;
-  align-items:center
+  align-items:center;
 }
 .card{
-  background:#101322;
+  background:#11162a;
   padding:25px;
   border-radius:14px;
   width:100%;
-  max-width:380px
+  max-width:360px;
 }
-h2{text-align:center;color:#6ab8ff}
+h2{text-align:center;color:#7cc4ff}
 input,button{
   width:100%;
   padding:12px;
   margin-top:12px;
+  border:none;
   border-radius:8px;
-  border:none
 }
 input{background:#0f1720;color:#fff}
-button{background:#6ab8ff;font-weight:bold;cursor:pointer}
+button{background:#7cc4ff;font-weight:bold;cursor:pointer}
 #msg{text-align:center;color:#ff6b6b;margin-top:10px}
-#countdown{text-align:center;font-size:18px;margin-top:10px}
+#cd{text-align:center;margin-top:10px;font-size:18px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
+<div id="login">
   <div class="card">
-    <h2>K7N LOGIN</h2>
-    <input id="user" placeholder="Username">
-    <input id="pass" type="password" placeholder="Password">
-    <button onclick="login()">LOGIN</button>
+    <h2>K7N ACCESS</h2>
+    <input id="pw" type="password" placeholder="Password">
+    <button onclick="login()">MASUK</button>
     <div id="msg"></div>
   </div>
 </div>
 
-<!-- TRANSISI -->
-<div id="waitBox" style="display:none">
+<div id="wait" style="display:none">
   <div class="card">
     <h2>MENYIAPKAN AKSES</h2>
-    <div id="countdown"></div>
+    <div id="cd"></div>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const SESSION_KEY = "K7N_SESSION_V1";
-const TARGET_URL = "http://serverpublik-pirzy.anti-ddos.me:2019/dashboard";
+/* ============== CONFIG ================= */
+const STORAGE = "K7N_TOKEN_SESSION";
+const TARGET = atob(
+  "aHR0cDovL3NlcnZlcnB1Ymxpay1waXJ6eS5hbnRpLWRkb3MubWU6MjAxOS9kYXNoYm9hcmQ="
+);
 const TRIAL_TIME = 30 * 60 * 1000;
-/* ========================================= */
+const SECRET = "K7N@2025";
+/* ====================================== */
 
-const DB = [
-  {username:"K7N", password:"nvrz", role:"OWNER"},
-  {username:"TRIAL", password:"T30", role:"TRIAL"}
-];
-
-/* ===== LOGIN ===== */
-function login(){
-  const u = user.value.trim();
-  const p = pass.value;
-
-  const acc = DB.find(a=>a.username===u && a.password===p);
-  if(!acc){ msg.innerText="Username / Password salah"; return; }
-
-  const now = Date.now();
-  const isTrial = acc.username === "TRIAL";
-
-  const session = {
-    username: acc.username,
-    role: acc.role,
-    createdAt: now,
-    expireAt: isTrial ? now + TRIAL_TIME : null
-  };
-
-  session.lockHash = btoa(
-    session.username + "|" +
-    session.createdAt + "|" +
-    (session.expireAt || "PERMANENT")
-  );
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  startRedirect();
+/* HASH SEDERHANA */
+function sign(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){
+    h = (h<<5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return btoa(h.toString());
 }
 
-/* ===== TRANSISI + COUNTDOWN ===== */
-function startRedirect(){
-  loginBox.style.display="none";
-  waitBox.style.display="flex";
+/* GENERATE TOKEN */
+function createToken(role, exp){
+  const ts = Date.now();
+  const rnd = Math.random().toString(36).slice(2,10);
+  const raw = `K7N|${role}|${ts}|${rnd}|${exp ?? "∞"}`;
+  return raw + "|" + sign(raw + SECRET);
+}
 
-  const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+function login(){
+  const p = pw.value;
+  let role = null;
+  let exp = null;
 
-  let timeLeft = s.username==="TRIAL" ? 3 : 1; // detik sebelum redirect
+  if(p === "nvrz") role = "OWNER";
+  if(p === "T30"){
+    role = "TRIAL";
+    exp = Date.now() + TRIAL_TIME;
+  }
 
-  const timer = setInterval(()=>{
-    countdown.innerText = 
-      "Redirect dalam " + timeLeft + " detik...";
-    timeLeft--;
+  if(!role){
+    msg.innerText = "Password salah";
+    return;
+  }
 
-    if(timeLeft < 0){
-      clearInterval(timer);
-      window.location.replace(TARGET_URL);
+  const token = createToken(role, exp);
+  localStorage.setItem(STORAGE, JSON.stringify({
+    token, role, exp
+  }));
+
+  redirect();
+}
+
+function redirect(){
+  login.style.display="none";
+  wait.style.display="flex";
+
+  let t = 3;
+  const i = setInterval(()=>{
+    cd.innerText = "Redirect dalam " + t + " detik...";
+    if(--t < 0){
+      clearInterval(i);
+      window.location.replace(TARGET);
     }
   },1000);
 }
 
-/* ===== AUTO LOGIN JIKA ADA SESSION ===== */
+/* AUTO CHECK TOKEN */
 (function(){
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(STORAGE);
   if(!raw) return;
 
   const s = JSON.parse(raw);
-  const now = Date.now();
-
-  const lock = btoa(
-    s.username + "|" +
-    s.createdAt + "|" +
-    (s.expireAt || "PERMANENT")
-  );
-
-  if(s.lockHash !== lock){
-    localStorage.removeItem(SESSION_KEY);
+  const parts = s.token.split("|");
+  if(parts.length !== 6){
+    localStorage.removeItem(STORAGE);
     return;
   }
 
-  if(s.username==="TRIAL" && now > s.expireAt){
-    localStorage.removeItem(SESSION_KEY);
+  const checkRaw = parts.slice(0,5).join("|");
+  if(sign(checkRaw + SECRET) !== parts[5]){
+    localStorage.removeItem(STORAGE);
     return;
   }
 
-  startRedirect();
+  if(s.role === "TRIAL" && Date.now() > s.exp){
+    localStorage.removeItem(STORAGE);
+    return;
+  }
+
+  redirect();
 })();
 </script>
 
