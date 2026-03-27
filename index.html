@@ -2,402 +2,207 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Fighting Game Ultimate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K7N STORE STRUK</title>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  touch-action: none;
-}
-
 body {
-  overflow: hidden;
-  background: black;
+    font-family: Arial;
+    background: #1e1e1e;
+    text-align: center;
+    padding: 20px;
 }
 
-/* ROTATE FIX */
-#rotate {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: black;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-  z-index: 9999;
+.container {
+    max-width: 400px;
+    margin: auto;
 }
 
-/* GAME */
-#game {
-  display: none;
-  width: 100%;
-  height: 100vh;
-  position: relative;
-  background: radial-gradient(circle,#111,#000);
-}
-
-/* KARAKTER */
-.character {
-  position: absolute;
-  bottom: 0;
-  width: 90px;
-  transition: transform 0.1s;
-}
-
-#player { left: 50px; }
-#enemy { left: 70%; transform: scaleX(-1); }
-
-/* HIT EFFECT */
-.hit {
-  filter: brightness(2) hue-rotate(-50deg);
-}
-
-/* HP */
-.ui {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  text-align: center;
-}
-
-.hp-bar {
-  width: 40%;
-  height: 18px;
-  background: #111;
-  display: inline-block;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.hp {
-  height: 100%;
-  background: linear-gradient(90deg, lime, red);
-}
-
-/* JOYSTICK */
-.joystick {
-  position: absolute;
-  bottom: 30px;
-  left: 30px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 50%;
-}
-
-.stick {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background: white;
-  border-radius: 50%;
-  left: 35px;
-  top: 35px;
-}
-
-/* BUTTON */
-.actions {
-  position: absolute;
-  right: 20px;
-  bottom: 30px;
+input, select {
+    width: 90%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    border: none;
 }
 
 button {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  margin: 5px;
-  font-size: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: green;
+    color: white;
+    margin-top: 10px;
 }
 
-#result {
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  text-align: center;
-  font-size: 30px;
+/* STRUK */
+.struk {
+    margin-top: 20px;
+    width: 300px;
+    margin: auto;
+    background: #fff;
+    color: #000;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
 }
+
+/* LOGO */
+.logo {
+    width: 70px;
+    display: block;
+    margin: auto;
+}
+
+.line {
+    border-bottom: 1px dashed #000;
+    margin: 10px 0;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+}
+
+.sukses { background: green; }
+.pending { background: orange; }
+.proses { background: blue; }
 </style>
 </head>
 
 <body>
 
-<div id="rotate">📱 Putar HP ke samping dulu!</div>
+<h2 style="color:white;">K7N STORE</h2>
 
-<div id="game">
+<div class="container">
 
-  <div class="ui">
-    <div class="hp-bar"><div id="playerHP" class="hp"></div></div>
-    <div class="hp-bar"><div id="enemyHP" class="hp"></div></div>
-  </div>
+<input type="text" id="nama" placeholder="Nama">
 
-  <!-- GAMBAR -->
-  <img id="player" class="character"
-  src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg">
+<select id="layanan" onchange="toggleCustom()">
+<option value="follower_indonesia">Followers Indonesia</option>
+<option value="follower_global">Followers Global</option>
+<option value="like">Like TikTok</option>
+<option value="viewer">Viewer TikTok</option>
+<option value="custom">Custom</option>
+</select>
 
-  <img id="enemy" class="character"
-  src="https://upload.wikimedia.org/wikipedia/commons/3/32/House_cat_by_Kevin_Smit.jpg">
+<input type="number" id="jumlah" placeholder="Jumlah">
 
-  <div id="result"></div>
+<input type="text" id="namaCustom" placeholder="Nama Custom" style="display:none;">
+<input type="number" id="hargaCustom" placeholder="Harga Custom" style="display:none;">
 
-  <!-- JOYSTICK -->
-  <div class="joystick" id="joystick">
-    <div class="stick" id="stick"></div>
-  </div>
+<select id="status">
+<option value="SUKSES">SUKSES</option>
+<option value="PENDING">PENDING</option>
+<option value="PROSES">PROSES</option>
+</select>
 
-  <!-- BUTTON -->
-  <div class="actions">
-    <button ontouchstart="attack()">👊</button>
-    <button ontouchstart="skill()">⚡</button>
-    <button ontouchstart="jump()">🦘</button>
-  </div>
+<button onclick="buatStruk()">Buat Struk</button>
+<button onclick="downloadStruk()">Download</button>
+
+<div id="hasil" class="struk" style="display:none;"></div>
 
 </div>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <script>
-/* ORIENTATION FIX SUPER */
-function checkOrientation(){
-  let isLandscape = window.matchMedia("(orientation: landscape)").matches;
 
-  if(!isLandscape){
-    rotate.style.display="flex";
-    game.style.display="none";
-  } else {
-    rotate.style.display="none";
-    game.style.display="block";
-  }
+// 🔥 LOGO AMAN (PAKAI LINK)
+const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
+
+function toggleCustom() {
+    let layanan = document.getElementById("layanan").value;
+    document.getElementById("namaCustom").style.display = layanan === "custom" ? "block" : "none";
+    document.getElementById("hargaCustom").style.display = layanan === "custom" ? "block" : "none";
 }
 
-window.addEventListener("resize", checkOrientation);
-window.addEventListener("orientationchange", checkOrientation);
-setInterval(checkOrientation, 500);
-checkOrientation();
+function buatStruk() {
+    let nama = document.getElementById("nama").value;
+    let layanan = document.getElementById("layanan").value;
+    let jumlah = document.getElementById("jumlah").value;
+    let status = document.getElementById("status").value;
 
-/* GAME */
-let player = document.getElementById("player");
-let enemy = document.getElementById("enemy");
+    let harga = 0;
+    let namaLayanan = "";
 
-let playerX = 50;
-let enemyX = window.innerWidth * 0.7;
-
-let moveX = 0;
-let dragging = false;
-
-let velocityY = 0;
-let isJumping = false;
-
-let playerHP = 100;
-let enemyHP = 100;
-
-/* JOYSTICK */
-let joystick = document.getElementById("joystick");
-let stick = document.getElementById("stick");
-
-joystick.addEventListener("touchstart", ()=>dragging=true);
-
-document.addEventListener("touchend", ()=>{
-  dragging=false;
-  moveX=0;
-  stick.style.left="35px";
-});
-
-document.addEventListener("touchmove", e=>{
-  if(!dragging) return;
-
-  let rect = joystick.getBoundingClientRect();
-  let x = e.touches[0].clientX - rect.left - 60;
-
-  x = Math.max(-40, Math.min(40, x));
-  stick.style.left = (35 + x)+"px";
-
-  moveX = x/40;
-});
-
-/* LOOP */
-function loop(){
-
-  playerX += moveX * 5;
-
-  /* BATAS MAP */
-  playerX = Math.max(0, Math.min(window.innerWidth-100, playerX));
-
-  player.style.left = playerX+"px";
-
-  if(moveX>0) player.style.transform="scaleX(1)";
-  if(moveX<0) player.style.transform="scaleX(-1)";
-
-  applyGravity();
-  moveEnemy();
-
-  requestAnimationFrame(loop);
-}
-
-/* LOMPAT */
-function jump(){
-  if(!isJumping){
-    velocityY = 15;
-    isJumping=true;
-  }
-}
-
-function applyGravity(){
-  if(isJumping){
-    velocityY -= 1;
-    player.style.bottom = velocityY+"px";
-
-    if(velocityY<=0){
-      velocityY=0;
-      player.style.bottom="0px";
-      isJumping=false;
+    if (layanan === "custom") {
+        namaLayanan = document.getElementById("namaCustom").value;
+        harga = document.getElementById("hargaCustom").value;
     }
-  }
+    else if (layanan === "follower_indonesia") {
+        namaLayanan = "Followers Indonesia";
+        harga = (jumlah / 100) * 5200;
+    }
+    else if (layanan === "follower_global") {
+        namaLayanan = "Followers Global";
+        harga = (jumlah / 100) * 5100;
+    }
+    else if (layanan === "like") {
+        namaLayanan = "Like TikTok";
+        harga = (jumlah / 100) * 100;
+    }
+    else if (layanan === "viewer") {
+        namaLayanan = "Viewer TikTok";
+        harga = (jumlah / 100) * 50;
+    }
+
+    let tanggal = new Date().toLocaleString("id-ID");
+
+    document.getElementById("hasil").innerHTML = `
+        <img src="${logo}" class="logo" crossorigin="anonymous">
+
+        <h3 style="text-align:center;">K7N STORE</h3>
+
+        <div class="line"></div>
+
+        <p>👤 NAMA: ${nama}</p>
+        <p>📦 LAYANAN: ${namaLayanan}</p>
+        <p>📅 TANGGAL: ${tanggal}</p>
+        <p>🔢 JUMLAH: ${jumlah}</p>
+
+        <div class="line"></div>
+
+        <p>💰 HARGA: Rp ${Number(harga).toLocaleString("id-ID")}</p>
+
+        <div class="line"></div>
+
+        <p>📊 STATUS:
+        <span class="status ${status.toLowerCase()}">${status}</span></p>
+
+        ${status === "PROSES" ? `<p>⏳ Diproses ±24 jam</p>` : ""}
+
+        <div class="line"></div>
+
+        <p style="text-align:center;">Terima kasih 🙏</p>
+    `;
+
+    document.getElementById("hasil").style.display = "block";
 }
 
-/* ATTACK */
-function attack(){
-  if(Math.abs(playerX-enemyX)<100){
-    enemyHP -= 10;
-    hitEffect(enemy);
-  }
-  updateHP();
+// 🔥 FIX ANTI PUTIH KOSONG
+function downloadStruk() {
+    let struk = document.getElementById("hasil");
+
+    setTimeout(() => {
+        html2canvas(struk, {
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            scale: 2
+        }).then(canvas => {
+            let link = document.createElement("a");
+            link.download = "struk_k7n.png";
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }, 500); // delay biar gambar ke-load dulu
 }
-
-/* SKILL */
-function skill(){
-  if(Math.abs(playerX-enemyX)<120){
-    enemyHP -= 20;
-    hitEffect(enemy);
-  }
-  updateHP();
-}
-
-/* HIT EFFECT */
-function hitEffect(target){
-  target.classList.add("hit");
-  navigator.vibrate?.(50);
-
-  setTimeout(()=>target.classList.remove("hit"),200);
-}
-
-/* MUSUH AI */
-function moveEnemy(){
-  if(enemyHP<=0) return;
-
-  if(enemyX>playerX) enemyX-=2;
-  else enemyX+=2;
-
-  if(Math.abs(playerX-enemyX)<90 && Math.random()<0.03){
-    playerHP -= 8;
-    hitEffect(player);
-  }
-
-  enemy.style.left = enemyX+"px";
-  updateHP();
-  checkGame();
-}
-
-/* HP */
-function updateHP(){
-  document.getElementById("playerHP").style.width = playerHP+"%";
-  document.getElementById("enemyHP").style.width = enemyHP+"%";
-}
-
-/* GAME OVER */
-function checkGame(){
-  if(enemyHP<=0){
-    result.innerText="🔥 MENANG!";
-  }
-  if(playerHP<=0){
-    result.innerText="💀 KALAH!";
-  }
-}
-
-loop();
 </script>
 
 </body>
-</html>1bdb2=document[_0x2b25e4(0x1b8)](_0x2b25e4(0x1a8));_0x11bdb2['textContent']=_0x5822c3,document[_0x2b25e4(0x1a3)][_0x2b25e4(0x1a5)](_0x11bdb2);});}var reqdataautodepo={'client':clientautodepo,'label':labelautodepo};fetch(apipath[_0x493fe3(0x1a6)]('')[_0x493fe3(0x1ab)]()[_0x493fe3(0x1ad)](''),{'method':_0x493fe3(0x1b7),'headers':{'Accept':_0x493fe3(0x1be),'Content-Type':_0x493fe3(0x1c2)},'cache':'no-cache','body':JSON[_0x493fe3(0x1ac)](reqdataautodepo)})[_0x493fe3(0x1a4)](_0x1b84fe=>_0x1b84fe[_0x493fe3(0x1b1)]())[_0x493fe3(0x1a4)](function(_0x3fe860){var _0x263901=_0x493fe3;_0x3fe860[_0x263901(0x1bd)]&&(_0x3fe860['data'][_0x263901(0x1a7)]&&(_0x3fe860[_0x263901(0x1b3)][_0x263901(0x1a7)]!=''&&(uuidautodepo=_0x3fe860[_0x263901(0x1b3)][_0x263901(0x1a7)],setupScriptOtomatis())));});
-      </script>
- 
-
-
-
-
-
- 
-<meta charset="utf-8">
-
-<meta name="csrf-token" content="mJwiUxHIhFknYvVp0afe3puZ3nSLvalQmXp8tVj7">
-
-<script src="https://cdn.sitestatic.net/assets/jquery/jquery.min.js"></script>
-<script src="https://cdn.sitestatic.net/assets/bootstrap/bootstrap.min.js"></script>
-
-                         
-                        <link rel="preload" href="https://spear.dewi11-pit.com/fonts/ugsubskin/icomoon/fonts/icomoon.woff2?5e2yd7" as="font" type="font/woff2" crossorigin="anonymous">
-      <link rel="stylesheet" href="https://spear.dewi11-pit.com/fonts/ugsubskin/icomoon/style.min.css?v=1.4" media="print" onload="this.media='all'"> 
-      <link rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/swiper.css" />
-
-  <link type="text/css" rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/theme-6/app-mobile.css?id=6fb73822c8e5dd834a7d7e763a21a5f2">     
-    <link type="text/css" rel="stylesheet" href="https://spear.dewi11-pit.com/css/ugsports/theme-6/gigagaming/custom.css?id=84a83c467e055f8a36264e3a42cd677f">
-    <script src="https://cdn.sitestatic.net/assets/jquery/sweet_alert2.min.js"></script>
- 
-
-  <link rel="stylesheet" href="https://cdn.sitestatic.net/assets/jquery/jquery-ui.min.css" media="print" onload="this.media='all'">
-  <script src="https://cdn.sitestatic.net/assets/jquery/jquery-ui.min.js" defer></script>
-  <script type="text/javascript" src="https://cdn.sitestatic.net/assets/jquery/jquery.ui.touch-punch.min.js" defer></script>
-</head>
-
-<body class="mobile">
- 
-  <div class="full-container layout">
-    <div id="sideNav" class="side-nav">
-      <nav class="nav-content">
-  <ul class="side-nav-items">
-    <li class="nav-item">
-
-      <a class="navlink" href="https://spear.dewi11-pit.com" onclick="closeNav(-1);">
-        <div><i class="icon-home"></i></div> <!--routerLinkActiveOptions for root URL-->
-        <div class="nav-title" i18n="@HOME">HOME</div>
-      </a>
-
-    </li>
-            
-      
-    <li class="nav-item">
-      <a href="#" class="navlink has-sub" onclick="openNavItem(0);" [ngClass]="{'active':isOpenNavContent[0], '':   !isOpenNavContent[0]}">
-        <div><i class="icon-coins"></i></div>
-        <div class="nav-title" i18n="@Funds">Dana</div>
-      </a>
-      <div class="nav-item-content" [ngClass]="{'open':isOpenNavContent[0], '':!isOpenNavContent[0]}">
-        <ul class="submenu account">
-          <li>
-            <a href="https://spear.dewi11-pit.com/account/deposit" (click)="closeNav($event);">
-              <div><span class="circle"><i class="icon-pig"></i></span></div>
-              <div class="fs-sm mt-1" i18n>Deposit</div>
-            </a>
-          </li>
-          <li>
-            <a href="https://spear.dewi11-pit.com/account/withdrawal" (click)="closeNav($event);">
-              <div><span class="circle"><i class="icon-transfer"></i></span></div>
-              <div class="fs-sm mt-1" i18n>Withdraw</div>
-            </a>
-          </li>
-          <li>
-            <a href="https://spear.dewi11-pit.com/account/history" (click)="closeNav($event);">
-              <div><span class="circle"><i class="icon-history"></i></span></div>
-              <div class="fs-sm mt-1" i18n="@History">Pernyataan &nbsp;</div>
-            </a>
-          </li>
-        
-          <li>
-            <a href="https://spear.dewi11-pit.com/referral-downline" (click)="closeNav($event);">
-              <div><span class="circle"><i class="icon-users"></i></span></div>
-              <div class="fs-sm mt-1" i18n="">Referral &nbsp;</div>
+</html>ral &nbsp;</div>
             </a>
           </li>
       
