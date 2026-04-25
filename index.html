@@ -113,8 +113,10 @@ margin:auto;
 
 <script>
 
+/* ===== DATABASE ===== */
 let db = JSON.parse(localStorage.getItem("k7n")) || [];
 
+/* ===== PRODUK ===== */
 const produk = [
 {nama:"Follower Indo 100", harga:10500},
 {nama:"Follower Global 100", harga:5000},
@@ -124,6 +126,7 @@ const produk = [
 
 const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
 
+/* ===== PAGE ===== */
 function page(p){
 
 if(p=="buat"){
@@ -133,7 +136,7 @@ produk.forEach((x,i)=>{
 opt+=`<option value="${i}">${x.nama} - Rp ${x.harga}</option>`;
 });
 
-app.innerHTML=`
+document.getElementById("app").innerHTML=`
 <div class="card">
 <h3>Buat Struk</h3>
 
@@ -169,42 +172,60 @@ html+=`
 <b>${x.id}</b><br>
 ${x.nama}<br>
 ${x.layanan}<br>
-Rp ${x.harga}<br>
+Rp ${Number(x.harga).toLocaleString("id-ID")}<br>
 <span class="status ${x.status.toLowerCase()}">${x.status}</span>
 </div>`;
 });
-app.innerHTML=html;
+document.getElementById("app").innerHTML=html;
 }
 
 if(p=="grafik"){
-app.innerHTML=`<div class="card"><canvas id="c"></canvas></div>`;
+
+let s=0,pd=0,pr=0,g=0,total=0;
+
+db.forEach(x=>{
+if(x.status=="SUKSES"){s++; total+=Number(x.harga);}
+if(x.status=="PENDING")pd++;
+if(x.status=="PROSES")pr++;
+if(x.status=="GAGAL")g++;
+});
+
+document.getElementById("app").innerHTML=`
+<div class="card">
+<h3>Grafik</h3>
+<canvas id="c"></canvas>
+<p>Total: Rp ${total.toLocaleString("id-ID")}</p>
+</div>
+`;
+
 setTimeout(()=>{
-new Chart(c,{
+new Chart(document.getElementById("c"),{
 type:"bar",
 data:{
-labels:["Data"],
-datasets:[{data:[db.length]}]
+labels:["SUKSES","PENDING","PROSES","GAGAL"],
+datasets:[{data:[s,pd,pr,g]}]
 }
 });
 },100);
-}
 
 }
 
-/* AUTO HARGA */
+}
+
+/* ===== AUTO HARGA ===== */
 function isiHarga(){
-let val = document.getElementById("produk").value;
+let val=document.getElementById("produk").value;
 if(val!=="custom" && val!==""){
-harga.value = produk[val].harga;
+document.getElementById("harga").value=produk[val].harga;
 }
 }
 
-/* BUAT STRUK */
+/* ===== BUAT STRUK ===== */
 function buat(){
 
-let nama=nama.value;
-let harga=harga.value;
-let status=status.value;
+let nama=document.getElementById("nama").value;
+let harga=document.getElementById("harga").value;
+let status=document.getElementById("status").value;
 let p=document.getElementById("produk").value;
 
 if(!nama||!harga)return alert("Isi dulu!");
@@ -217,8 +238,8 @@ let obj={id,nama,layanan:namaProduk,harga,status,tanggal};
 db.push(obj);
 localStorage.setItem("k7n",JSON.stringify(db));
 
-/* STRUK HTML */
-hasil.innerHTML=`
+/* STRUK */
+document.getElementById("hasil").innerHTML=`
 <div id="strukBox" class="struk">
 <img src="${logo}" class="logo">
 <h3 style="text-align:center;">K7N STORE</h3>
@@ -243,12 +264,12 @@ hasil.innerHTML=`
 <p style="text-align:center;">Terima kasih 🙏</p>
 </div>
 
-<button onclick="download()">📥 Download Gambar</button>
+<button onclick="download()">📥 Download</button>
 <button onclick='wa(${JSON.stringify(obj)})'>📤 WhatsApp</button>
 `;
 }
 
-/* DOWNLOAD */
+/* ===== DOWNLOAD ===== */
 function download(){
 html2canvas(document.getElementById("strukBox")).then(canvas=>{
 let a=document.createElement("a");
@@ -258,7 +279,7 @@ a.click();
 });
 }
 
-/* WA */
+/* ===== WA ===== */
 function wa(x){
 let text=`🧾 K7N STORE
 
