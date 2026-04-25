@@ -2,203 +2,278 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>K7N STORE STRUK</title>
+<title>K7N STORE</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <style>
-body {
-    font-family: Arial;
-    background: #1e1e1e;
-    text-align: center;
-    padding: 20px;
+body{margin:0;font-family:Arial;background:#f5f5f5;}
+.header{background:#ee4d2d;color:white;padding:15px;font-size:20px;}
+.container{display:flex;flex-direction:column;height:100vh;}
+.content{flex:1;padding:20px;overflow:auto;}
+
+.menu-bottom{
+background:white;
+padding:10px;
+border-top:2px solid #eee;
+display:flex;
+gap:10px;
 }
 
-.container {
-    max-width: 400px;
-    margin: auto;
+.menu-btn{
+flex:1;
+text-align:center;
+padding:12px;
+border:2px solid #ddd;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+background:#fff;
+}
+.menu-btn:hover{
+border-color:#ee4d2d;
+background:#fff3f0;
 }
 
-input, select {
-    width: 90%;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 8px;
-    border: none;
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+border:1px solid #eee;
 }
 
-button {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: green;
-    color: white;
-    margin-top: 10px;
+input,select{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid #ddd;
 }
 
-/* STRUK */
-.struk {
-    margin-top: 20px;
-    width: 300px;
-    margin: auto;
-    background: #fff;
-    color: #000;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: left;
+button{
+width:100%;
+padding:10px;
+background:#ee4d2d;
+color:white;
+border:none;
+border-radius:8px;
+margin-top:5px;
 }
 
-/* LOGO */
-.logo {
-    width: 70px;
-    display: block;
-    margin: auto;
+.struk{
+background:#fff;
+padding:15px;
+margin-top:10px;
+font-family:monospace;
+border-radius:10px;
+color:black;
 }
 
-.line {
-    border-bottom: 1px dashed #000;
-    margin: 10px 0;
+.line{
+border-bottom:1px dashed #aaa;
+margin:8px 0;
 }
 
-.status {
-    padding: 4px 8px;
-    border-radius: 6px;
-    color: white;
-    font-size: 12px;
+.status{
+padding:3px 6px;
+border-radius:5px;
+color:white;
+font-size:12px;
 }
+.sukses{background:green}
+.pending{background:orange}
+.proses{background:blue}
+.gagal{background:red}
 
-.sukses { background: green; }
-.pending { background: orange; }
-.proses { background: blue; }
+.logo{
+width:50px;
+display:block;
+margin:auto;
+}
 </style>
 </head>
 
 <body>
 
-<h2 style="color:white;">K7N STORE</h2>
-
 <div class="container">
 
-<input type="text" id="nama" placeholder="Nama">
+<div class="header">K7N STORE</div>
 
-<select id="layanan" onchange="toggleCustom()">
-<option value="follower_indonesia">Followers Indonesia</option>
-<option value="follower_global">Followers Global</option>
-<option value="like">Like TikTok</option>
-<option value="viewer">Viewer TikTok</option>
-<option value="custom">Custom</option>
-</select>
+<div class="content" id="app"></div>
 
-<input type="number" id="jumlah" placeholder="Jumlah">
-
-<input type="text" id="namaCustom" placeholder="Nama Custom" style="display:none;">
-<input type="number" id="hargaCustom" placeholder="Harga Custom" style="display:none;">
-
-<select id="status">
-<option value="SUKSES">SUKSES</option>
-<option value="PENDING">PENDING</option>
-<option value="PROSES">PROSES</option>
-</select>
-
-<button onclick="buatStruk()">Buat Struk</button>
-<button onclick="downloadStruk()">Download</button>
-
-<div id="hasil" class="struk" style="display:none;"></div>
+<div class="menu-bottom">
+<div class="menu-btn" onclick="page('buat')">📦 Buat</div>
+<div class="menu-btn" onclick="page('riwayat')">📊 Riwayat</div>
+<div class="menu-btn" onclick="page('grafik')">📈 Grafik</div>
+</div>
 
 </div>
 
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
 <script>
 
-// 🔥 LOGO AMAN (PAKAI LINK)
+let db = JSON.parse(localStorage.getItem("k7n")) || [];
+
+const produk = [
+{nama:"Follower Indo 100", harga:10500},
+{nama:"Follower Global 100", harga:5000},
+{nama:"Like TikTok 100", harga:800},
+{nama:"Viewer 1000", harga:800}
+];
+
 const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
 
-function toggleCustom() {
-    let layanan = document.getElementById("layanan").value;
-    document.getElementById("namaCustom").style.display = layanan === "custom" ? "block" : "none";
-    document.getElementById("hargaCustom").style.display = layanan === "custom" ? "block" : "none";
+function page(p){
+
+if(p=="buat"){
+
+let opt="";
+produk.forEach((x,i)=>{
+opt+=`<option value="${i}">${x.nama} - Rp ${x.harga}</option>`;
+});
+
+app.innerHTML=`
+<div class="card">
+<h3>Buat Struk</h3>
+
+<input id="nama" placeholder="Nama">
+
+<select id="produk" onchange="isiHarga()">
+<option value="">-- Pilih Produk --</option>
+${opt}
+<option value="custom">Custom</option>
+</select>
+
+<input id="harga" type="number" placeholder="Harga">
+
+<select id="status">
+<option>SUKSES</option>
+<option>PENDING</option>
+<option>PROSES</option>
+<option>GAGAL</option>
+</select>
+
+<button onclick="buat()">Buat Struk</button>
+
+<div id="hasil"></div>
+</div>
+`;
 }
 
-function buatStruk() {
-    let nama = document.getElementById("nama").value;
-    let layanan = document.getElementById("layanan").value;
-    let jumlah = document.getElementById("jumlah").value;
-    let status = document.getElementById("status").value;
-
-    let harga = 0;
-    let namaLayanan = "";
-
-    if (layanan === "custom") {
-        namaLayanan = document.getElementById("namaCustom").value;
-        harga = document.getElementById("hargaCustom").value;
-    }
-    else if (layanan === "follower_indonesia") {
-        namaLayanan = "Followers Indonesia";
-        harga = (jumlah / 100) * 5200;
-    }
-    else if (layanan === "follower_global") {
-        namaLayanan = "Followers Global";
-        harga = (jumlah / 100) * 5100;
-    }
-    else if (layanan === "like") {
-        namaLayanan = "Like TikTok";
-        harga = (jumlah / 100) * 100;
-    }
-    else if (layanan === "viewer") {
-        namaLayanan = "Viewer TikTok";
-        harga = (jumlah / 100) * 50;
-    }
-
-    let tanggal = new Date().toLocaleString("id-ID");
-
-    document.getElementById("hasil").innerHTML = `
-        <img src="${logo}" class="logo" crossorigin="anonymous">
-
-        <h3 style="text-align:center;">K7N STORE</h3>
-
-        <div class="line"></div>
-
-        <p>👤 NAMA: ${nama}</p>
-        <p>📦 LAYANAN: ${namaLayanan}</p>
-        <p>📅 TANGGAL: ${tanggal}</p>
-        <p>🔢 JUMLAH: ${jumlah}</p>
-
-        <div class="line"></div>
-
-        <p>💰 HARGA: Rp ${Number(harga).toLocaleString("id-ID")}</p>
-
-        <div class="line"></div>
-
-        <p>📊 STATUS:
-        <span class="status ${status.toLowerCase()}">${status}</span></p>
-
-        ${status === "PROSES" ? `<p>⏳ Diproses ±24 jam</p>` : ""}
-
-        <div class="line"></div>
-
-        <p style="text-align:center;">Terima kasih 🙏</p>
-    `;
-
-    document.getElementById("hasil").style.display = "block";
+if(p=="riwayat"){
+let html="";
+db.slice().reverse().forEach(x=>{
+html+=`
+<div class="card">
+<b>${x.id}</b><br>
+${x.nama}<br>
+${x.layanan}<br>
+Rp ${x.harga}<br>
+<span class="status ${x.status.toLowerCase()}">${x.status}</span>
+</div>`;
+});
+app.innerHTML=html;
 }
 
-// 🔥 FIX ANTI PUTIH KOSONG
-function downloadStruk() {
-    let struk = document.getElementById("hasil");
-
-    setTimeout(() => {
-        html2canvas(struk, {
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            scale: 2
-        }).then(canvas => {
-            let link = document.createElement("a");
-            link.download = "struk_k7n.png";
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-    }, 500); // delay biar gambar ke-load dulu
+if(p=="grafik"){
+app.innerHTML=`<div class="card"><canvas id="c"></canvas></div>`;
+setTimeout(()=>{
+new Chart(c,{
+type:"bar",
+data:{
+labels:["Data"],
+datasets:[{data:[db.length]}]
 }
+});
+},100);
+}
+
+}
+
+/* AUTO HARGA */
+function isiHarga(){
+let val = document.getElementById("produk").value;
+if(val!=="custom" && val!==""){
+harga.value = produk[val].harga;
+}
+}
+
+/* BUAT STRUK */
+function buat(){
+
+let nama=nama.value;
+let harga=harga.value;
+let status=status.value;
+let p=document.getElementById("produk").value;
+
+if(!nama||!harga)return alert("Isi dulu!");
+
+let namaProduk = (p==="custom"||p==="") ? "Custom" : produk[p].nama;
+let id="K7N-"+Math.random().toString(36).substr(2,5);
+let tanggal=new Date().toLocaleString("id-ID");
+
+let obj={id,nama,layanan:namaProduk,harga,status,tanggal};
+db.push(obj);
+localStorage.setItem("k7n",JSON.stringify(db));
+
+/* STRUK HTML */
+hasil.innerHTML=`
+<div id="strukBox" class="struk">
+<img src="${logo}" class="logo">
+<h3 style="text-align:center;">K7N STORE</h3>
+
+<div class="line"></div>
+
+<p>ID: ${id}</p>
+<p>Nama: ${nama}</p>
+<p>Layanan: ${namaProduk}</p>
+<p>Tanggal: ${tanggal}</p>
+
+<div class="line"></div>
+
+<p>Harga: Rp ${Number(harga).toLocaleString("id-ID")}</p>
+
+<div class="line"></div>
+
+<p>Status: <span class="status ${status.toLowerCase()}">${status}</span></p>
+
+<div class="line"></div>
+
+<p style="text-align:center;">Terima kasih 🙏</p>
+</div>
+
+<button onclick="download()">📥 Download Gambar</button>
+<button onclick='wa(${JSON.stringify(obj)})'>📤 WhatsApp</button>
+`;
+}
+
+/* DOWNLOAD */
+function download(){
+html2canvas(document.getElementById("strukBox")).then(canvas=>{
+let a=document.createElement("a");
+a.download="struk_k7n.png";
+a.href=canvas.toDataURL();
+a.click();
+});
+}
+
+/* WA */
+function wa(x){
+let text=`🧾 K7N STORE
+
+ID: ${x.id}
+Nama: ${x.nama}
+Layanan: ${x.layanan}
+Harga: Rp ${x.harga}
+Status: ${x.status}`;
+
+window.open("https://wa.me/?text="+encodeURIComponent(text));
+}
+
+/* START */
+page("buat");
+
 </script>
 
 </body>
