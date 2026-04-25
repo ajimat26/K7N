@@ -40,7 +40,7 @@ background:#fff3f0;
 background:white;
 padding:15px;
 border-radius:10px;
-margin-bottom:15px;
+margin-bottom:10px;
 border:1px solid #eee;
 }
 
@@ -54,11 +54,17 @@ border:1px solid #ddd;
 
 button{
 width:100%;
-padding:10px;
+padding:8px;
 background:#ee4d2d;
 color:white;
 border:none;
 border-radius:8px;
+margin-top:5px;
+}
+
+.btn-small{
+padding:6px;
+font-size:12px;
 margin-top:5px;
 }
 
@@ -113,10 +119,8 @@ margin:auto;
 
 <script>
 
-/* ===== DATABASE ===== */
 let db = JSON.parse(localStorage.getItem("k7n")) || [];
 
-/* ===== PRODUK ===== */
 const produk = [
 {nama:"Follower Indo 100", harga:10500},
 {nama:"Follower Global 100", harga:5000},
@@ -126,7 +130,7 @@ const produk = [
 
 const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
 
-/* ===== PAGE ===== */
+/* PAGE */
 function page(p){
 
 if(p=="buat"){
@@ -136,7 +140,7 @@ produk.forEach((x,i)=>{
 opt+=`<option value="${i}">${x.nama} - Rp ${x.harga}</option>`;
 });
 
-document.getElementById("app").innerHTML=`
+app.innerHTML=`
 <div class="card">
 <h3>Buat Struk</h3>
 
@@ -166,7 +170,7 @@ ${opt}
 
 if(p=="riwayat"){
 let html="";
-db.slice().reverse().forEach(x=>{
+db.slice().reverse().forEach((x,i)=>{
 html+=`
 <div class="card">
 <b>${x.id}</b><br>
@@ -174,36 +178,46 @@ ${x.nama}<br>
 ${x.layanan}<br>
 Rp ${Number(x.harga).toLocaleString("id-ID")}<br>
 <span class="status ${x.status.toLowerCase()}">${x.status}</span>
+
+<button class="btn-small" onclick="editData(${i})">✏️ Edit</button>
+<button class="btn-small" onclick="hapus(${i})">🗑️ Hapus</button>
 </div>`;
 });
-document.getElementById("app").innerHTML=html;
+app.innerHTML=html;
 }
 
 if(p=="grafik"){
 
-let s=0,pd=0,pr=0,g=0,total=0;
+let map = {};
 
 db.forEach(x=>{
-if(x.status=="SUKSES"){s++; total+=Number(x.harga);}
-if(x.status=="PENDING")pd++;
-if(x.status=="PROSES")pr++;
-if(x.status=="GAGAL")g++;
+if(x.status==="SUKSES"){
+let t = new Date(x.tanggal).toLocaleDateString("id-ID");
+map[t] = (map[t] || 0) + Number(x.harga);
+}
 });
 
-document.getElementById("app").innerHTML=`
+let labels = Object.keys(map);
+let data = Object.values(map);
+
+app.innerHTML=`
 <div class="card">
-<h3>Grafik</h3>
+<h3>Grafik Harian</h3>
 <canvas id="c"></canvas>
-<p>Total: Rp ${total.toLocaleString("id-ID")}</p>
 </div>
 `;
 
 setTimeout(()=>{
 new Chart(document.getElementById("c"),{
-type:"bar",
+type:"line",
 data:{
-labels:["SUKSES","PENDING","PROSES","GAGAL"],
-datasets:[{data:[s,pd,pr,g]}]
+labels:labels,
+datasets:[{
+label:"Pemasukan",
+data:data,
+fill:false,
+tension:0.3
+}]
 }
 });
 },100);
@@ -212,7 +226,7 @@ datasets:[{data:[s,pd,pr,g]}]
 
 }
 
-/* ===== AUTO HARGA ===== */
+/* AUTO HARGA */
 function isiHarga(){
 let val=document.getElementById("produk").value;
 if(val!=="custom" && val!==""){
@@ -220,7 +234,7 @@ document.getElementById("harga").value=produk[val].harga;
 }
 }
 
-/* ===== BUAT STRUK ===== */
+/* BUAT */
 function buat(){
 
 let nama=document.getElementById("nama").value;
@@ -232,13 +246,12 @@ if(!nama||!harga)return alert("Isi dulu!");
 
 let namaProduk = (p==="custom"||p==="") ? "Custom" : produk[p].nama;
 let id="K7N-"+Math.random().toString(36).substr(2,5);
-let tanggal=new Date().toLocaleString("id-ID");
+let tanggal=new Date().toISOString();
 
 let obj={id,nama,layanan:namaProduk,harga,status,tanggal};
 db.push(obj);
 localStorage.setItem("k7n",JSON.stringify(db));
 
-/* STRUK */
 document.getElementById("hasil").innerHTML=`
 <div id="strukBox" class="struk">
 <img src="${logo}" class="logo">
@@ -249,7 +262,6 @@ document.getElementById("hasil").innerHTML=`
 <p>ID: ${id}</p>
 <p>Nama: ${nama}</p>
 <p>Layanan: ${namaProduk}</p>
-<p>Tanggal: ${tanggal}</p>
 
 <div class="line"></div>
 
@@ -269,7 +281,35 @@ document.getElementById("hasil").innerHTML=`
 `;
 }
 
-/* ===== DOWNLOAD ===== */
+/* EDIT */
+function editData(i){
+
+let x = db[i];
+
+let nama = prompt("Nama:", x.nama);
+let harga = prompt("Harga:", x.harga);
+let status = prompt("Status (SUKSES/PENDING/PROSES/GAGAL):", x.status);
+
+if(!nama||!harga||!status)return;
+
+db[i].nama = nama;
+db[i].harga = harga;
+db[i].status = status;
+
+localStorage.setItem("k7n",JSON.stringify(db));
+page("riwayat");
+}
+
+/* HAPUS */
+function hapus(i){
+if(confirm("Hapus data ini?")){
+db.splice(i,1);
+localStorage.setItem("k7n",JSON.stringify(db));
+page("riwayat");
+}
+}
+
+/* DOWNLOAD */
 function download(){
 html2canvas(document.getElementById("strukBox")).then(canvas=>{
 let a=document.createElement("a");
@@ -279,7 +319,7 @@ a.click();
 });
 }
 
-/* ===== WA ===== */
+/* WA */
 function wa(x){
 let text=`🧾 K7N STORE
 
