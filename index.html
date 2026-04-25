@@ -19,37 +19,68 @@ background:var(--tema);
 color:white;
 padding:15px;
 font-size:20px;
+text-align:center;
 }
 
 .container{display:flex;flex-direction:column;height:100vh;}
-
 .content{flex:1;padding:20px;overflow:auto;}
 
-.menu-bottom{
-background:white;
-padding:10px;
-border-top:2px solid #eee;
-display:flex;
-gap:8px;
-flex-wrap:wrap;
+/* ===== DASHBOARD MENU NEON ===== */
+.menu-center{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+margin-top:20px;
 }
 
-.menu-btn{
-flex:1;
-text-align:center;
-padding:10px;
-border:2px solid #ddd;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
+.menu-card{
+position:relative;
+padding:20px;
 background:#fff;
-font-size:13px;
-}
-.menu-btn:hover{
-border-color:var(--tema);
-background:#fff3f0;
+border-radius:15px;
+text-align:center;
+font-weight:bold;
+cursor:pointer;
+overflow:hidden;
 }
 
+/* garis neon */
+.menu-card::before{
+content:"";
+position:absolute;
+top:-2px;
+left:-2px;
+right:-2px;
+bottom:-2px;
+border-radius:15px;
+background:linear-gradient(90deg,transparent,#00eaff,transparent);
+background-size:300% 300%;
+animation:jalan 2s linear infinite;
+z-index:0;
+}
+
+/* isi */
+.menu-card span{
+position:relative;
+z-index:2;
+}
+
+/* lapisan putih */
+.menu-card::after{
+content:"";
+position:absolute;
+inset:2px;
+background:#fff;
+border-radius:13px;
+z-index:1;
+}
+
+@keyframes jalan{
+0%{background-position:0%;}
+100%{background-position:300%;}
+}
+
+/* ===== CARD ===== */
 .card{
 background:white;
 padding:15px;
@@ -74,12 +105,7 @@ color:white;
 border:none;
 border-radius:8px;
 margin-top:5px;
-}
-
-.btn-small{
-padding:6px;
-font-size:12px;
-margin-top:5px;
+cursor:pointer;
 }
 
 .struk{
@@ -91,10 +117,7 @@ border-radius:10px;
 color:black;
 }
 
-.line{
-border-bottom:1px dashed #aaa;
-margin:8px 0;
-}
+.line{border-bottom:1px dashed #aaa;margin:8px 0;}
 
 .status{
 padding:3px 6px;
@@ -123,28 +146,20 @@ margin:auto;
 
 <div class="content" id="app"></div>
 
-<div class="menu-bottom">
-<div class="menu-btn" onclick="page('dashboard')">🏠 Home</div>
-<div class="menu-btn" onclick="page('buat')">📦 Buat</div>
-<div class="menu-btn" onclick="page('riwayat')">📊 Riwayat</div>
-<div class="menu-btn" onclick="page('grafik')">📈 Grafik</div>
-<div class="menu-btn" onclick="page('setting')">⚙️ Setting</div>
-</div>
-
 </div>
 
 <script>
 
-/* ===== LOAD TEMA ===== */
+/* LOAD TEMA */
 let savedTema = localStorage.getItem("tema");
 if(savedTema){
 document.documentElement.style.setProperty('--tema', savedTema);
 }
 
-/* ===== DATABASE ===== */
+/* DATABASE */
 let db = JSON.parse(localStorage.getItem("k7n")) || [];
 
-/* ===== PRODUK ===== */
+/* PRODUK */
 const produk = [
 {nama:"Follower Indo 100", harga:10500},
 {nama:"Follower Global 100", harga:5000},
@@ -152,66 +167,33 @@ const produk = [
 {nama:"Viewer 1000", harga:800}
 ];
 
-const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
+const logo="https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
 
-/* ===== PAGE ===== */
+/* PAGE */
 function page(p){
 
 /* DASHBOARD */
 if(p=="dashboard"){
 
-let total=0,s=0,pd=0,pr=0,g=0;
+let total=0;
+db.forEach(x=>{if(x.status==="SUKSES")total+=Number(x.harga);});
 
-db.forEach(x=>{
-if(x.status==="SUKSES"){total+=Number(x.harga);s++;}
-if(x.status==="PENDING")pd++;
-if(x.status==="PROSES")pr++;
-if(x.status==="GAGAL")g++;
-});
-
-let last=db.slice(-5).reverse();
-
-let html=`
+app.innerHTML=`
 <div class="card">
 <h3>📊 Dashboard</h3>
 <p>💰 Rp ${total.toLocaleString("id-ID")}</p>
 <p>📦 ${db.length} Transaksi</p>
 </div>
 
-<div class="card">
-<h3>Status</h3>
-<p>✅ ${s} | ⏳ ${pd} | 🔄 ${pr} | ❌ ${g}</p>
-</div>
+<div class="menu-center">
 
-<div class="card">
-<canvas id="miniChart"></canvas>
-</div>
+<div class="menu-card" onclick="page('buat')"><span>📦 Buat Struk</span></div>
+<div class="menu-card" onclick="page('riwayat')"><span>📊 Riwayat</span></div>
+<div class="menu-card" onclick="page('grafik')"><span>📈 Grafik</span></div>
+<div class="menu-card" onclick="page('setting')"><span>⚙️ Setting</span></div>
 
-<div class="card">
-<h3>Transaksi Terakhir</h3>
+</div>
 `;
-
-last.forEach(x=>{
-html+=`
-<div style="border-top:1px solid #eee;padding:5px 0">
-<b>${x.id}</b> - Rp ${Number(x.harga).toLocaleString("id-ID")}
-</div>`;
-});
-
-html+=`</div>`;
-
-app.innerHTML=html;
-
-setTimeout(()=>{
-new Chart(document.getElementById("miniChart"),{
-type:"doughnut",
-data:{
-labels:["SUKSES","PENDING","PROSES","GAGAL"],
-datasets:[{data:[s,pd,pr,g]}]
-}
-});
-},100);
-
 }
 
 /* BUAT */
@@ -262,8 +244,8 @@ ${x.layanan}<br>
 Rp ${Number(x.harga).toLocaleString("id-ID")}<br>
 <span class="status ${x.status.toLowerCase()}">${x.status}</span>
 
-<button class="btn-small" onclick="editData(${i})">✏️ Edit</button>
-<button class="btn-small" onclick="hapus(${i})">🗑️ Hapus</button>
+<button onclick="editData(${i})">Edit</button>
+<button onclick="hapus(${i})">Hapus</button>
 </div>`;
 });
 app.innerHTML=html;
@@ -271,9 +253,7 @@ app.innerHTML=html;
 
 /* GRAFIK */
 if(p=="grafik"){
-
 let map={};
-
 db.forEach(x=>{
 if(x.status==="SUKSES"){
 let t=new Date(x.tanggal).toLocaleDateString("id-ID");
@@ -281,36 +261,25 @@ map[t]=(map[t]||0)+Number(x.harga);
 }
 });
 
-let labels=Object.keys(map);
-let data=Object.values(map);
-
-app.innerHTML=`
-<div class="card">
-<canvas id="c"></canvas>
-</div>
-`;
+app.innerHTML=`<div class="card"><canvas id="c"></canvas></div>`;
 
 setTimeout(()=>{
-new Chart(document.getElementById("c"),{
+new Chart(c,{
 type:"line",
 data:{
-labels:labels,
-datasets:[{label:"Pemasukan",data:data,tension:0.3}]
+labels:Object.keys(map),
+datasets:[{data:Object.values(map),tension:0.3}]
 }
 });
 },100);
-
 }
 
 /* SETTING */
 if(p=="setting"){
-
 let tema=localStorage.getItem("tema")||"#ee4d2d";
-
 app.innerHTML=`
 <div class="card">
 <h3>Pengaturan Tema</h3>
-
 <input type="color" id="color" value="${tema}">
 <button onclick="simpanTema()">Simpan</button>
 </div>
@@ -319,15 +288,15 @@ app.innerHTML=`
 
 }
 
-/* ===== AUTO HARGA ===== */
+/* AUTO HARGA */
 function isiHarga(){
-let val=document.getElementById("produk").value;
-if(val!=="custom" && val!==""){
-document.getElementById("harga").value=produk[val].harga;
+let v=document.getElementById("produk").value;
+if(v!=="custom" && v!==""){
+document.getElementById("harga").value=produk[v].harga;
 }
 }
 
-/* ===== BUAT STRUK ===== */
+/* BUAT */
 function buat(){
 
 let nama=document.getElementById("nama").value;
@@ -363,72 +332,58 @@ document.getElementById("hasil").innerHTML=`
 <div class="line"></div>
 
 <p>Status: <span class="status ${status.toLowerCase()}">${status}</span></p>
-
-<div class="line"></div>
-
-<p style="text-align:center;">Terima kasih 🙏</p>
 </div>
 
-<button onclick="download()">📥 Download</button>
-<button onclick='wa(${JSON.stringify(obj)})'>📤 WhatsApp</button>
+<button onclick="download()">Download</button>
+<button onclick='wa(${JSON.stringify(obj)})'>WhatsApp</button>
 `;
 }
 
-/* ===== EDIT ===== */
+/* EDIT */
 function editData(i){
 let x=db[i];
 let nama=prompt("Nama:",x.nama);
 let harga=prompt("Harga:",x.harga);
 let status=prompt("Status:",x.status);
-
 if(!nama||!harga||!status)return;
-
 db[i].nama=nama;
 db[i].harga=harga;
 db[i].status=status;
-
 localStorage.setItem("k7n",JSON.stringify(db));
 page("riwayat");
 }
 
-/* ===== HAPUS ===== */
+/* HAPUS */
 function hapus(i){
-if(confirm("Hapus data?")){
+if(confirm("Hapus?")){
 db.splice(i,1);
 localStorage.setItem("k7n",JSON.stringify(db));
 page("riwayat");
 }
 }
 
-/* ===== DOWNLOAD ===== */
+/* DOWNLOAD */
 function download(){
-html2canvas(document.getElementById("strukBox")).then(canvas=>{
+html2canvas(document.getElementById("strukBox")).then(c=>{
 let a=document.createElement("a");
-a.download="struk_k7n.png";
-a.href=canvas.toDataURL();
+a.href=c.toDataURL();
+a.download="struk.png";
 a.click();
 });
 }
 
-/* ===== WA ===== */
+/* WA */
 function wa(x){
-let text=`🧾 K7N STORE
-
-ID: ${x.id}
-Nama: ${x.nama}
-Layanan: ${x.layanan}
-Harga: Rp ${x.harga}
-Status: ${x.status}`;
-
-window.open("https://wa.me/?text="+encodeURIComponent(text));
+let t=`ID:${x.id}\nNama:${x.nama}\nHarga:${x.harga}`;
+window.open("https://wa.me/?text="+encodeURIComponent(t));
 }
 
-/* ===== SIMPAN TEMA ===== */
+/* TEMA */
 function simpanTema(){
 let warna=document.getElementById("color").value;
 localStorage.setItem("tema",warna);
 document.documentElement.style.setProperty('--tema',warna);
-alert("Tema diganti!");
+alert("Tema diganti");
 }
 
 /* START */
