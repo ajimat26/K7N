@@ -2,15 +2,27 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>K7N STORE</title>
+<title>K7N STORE PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <style>
+:root{
+--tema:#ee4d2d;
+}
+
 body{margin:0;font-family:Arial;background:#f5f5f5;}
-.header{background:#ee4d2d;color:white;padding:15px;font-size:20px;}
+
+.header{
+background:var(--tema);
+color:white;
+padding:15px;
+font-size:20px;
+}
+
 .container{display:flex;flex-direction:column;height:100vh;}
+
 .content{flex:1;padding:20px;overflow:auto;}
 
 .menu-bottom{
@@ -18,21 +30,23 @@ background:white;
 padding:10px;
 border-top:2px solid #eee;
 display:flex;
-gap:10px;
+gap:8px;
+flex-wrap:wrap;
 }
 
 .menu-btn{
 flex:1;
 text-align:center;
-padding:12px;
+padding:10px;
 border:2px solid #ddd;
 border-radius:10px;
 cursor:pointer;
 font-weight:bold;
 background:#fff;
+font-size:13px;
 }
 .menu-btn:hover{
-border-color:#ee4d2d;
+border-color:var(--tema);
 background:#fff3f0;
 }
 
@@ -54,8 +68,8 @@ border:1px solid #ddd;
 
 button{
 width:100%;
-padding:8px;
-background:#ee4d2d;
+padding:10px;
+background:var(--tema);
 color:white;
 border:none;
 border-radius:8px;
@@ -110,17 +124,27 @@ margin:auto;
 <div class="content" id="app"></div>
 
 <div class="menu-bottom">
+<div class="menu-btn" onclick="page('dashboard')">🏠 Home</div>
 <div class="menu-btn" onclick="page('buat')">📦 Buat</div>
 <div class="menu-btn" onclick="page('riwayat')">📊 Riwayat</div>
 <div class="menu-btn" onclick="page('grafik')">📈 Grafik</div>
+<div class="menu-btn" onclick="page('setting')">⚙️ Setting</div>
 </div>
 
 </div>
 
 <script>
 
+/* ===== LOAD TEMA ===== */
+let savedTema = localStorage.getItem("tema");
+if(savedTema){
+document.documentElement.style.setProperty('--tema', savedTema);
+}
+
+/* ===== DATABASE ===== */
 let db = JSON.parse(localStorage.getItem("k7n")) || [];
 
+/* ===== PRODUK ===== */
 const produk = [
 {nama:"Follower Indo 100", harga:10500},
 {nama:"Follower Global 100", harga:5000},
@@ -130,9 +154,67 @@ const produk = [
 
 const logo = "https://i.supaimg.com/2c1011f1-f260-4955-af4a-29c7a57d78c9.png";
 
-/* PAGE */
+/* ===== PAGE ===== */
 function page(p){
 
+/* DASHBOARD */
+if(p=="dashboard"){
+
+let total=0,s=0,pd=0,pr=0,g=0;
+
+db.forEach(x=>{
+if(x.status==="SUKSES"){total+=Number(x.harga);s++;}
+if(x.status==="PENDING")pd++;
+if(x.status==="PROSES")pr++;
+if(x.status==="GAGAL")g++;
+});
+
+let last=db.slice(-5).reverse();
+
+let html=`
+<div class="card">
+<h3>📊 Dashboard</h3>
+<p>💰 Rp ${total.toLocaleString("id-ID")}</p>
+<p>📦 ${db.length} Transaksi</p>
+</div>
+
+<div class="card">
+<h3>Status</h3>
+<p>✅ ${s} | ⏳ ${pd} | 🔄 ${pr} | ❌ ${g}</p>
+</div>
+
+<div class="card">
+<canvas id="miniChart"></canvas>
+</div>
+
+<div class="card">
+<h3>Transaksi Terakhir</h3>
+`;
+
+last.forEach(x=>{
+html+=`
+<div style="border-top:1px solid #eee;padding:5px 0">
+<b>${x.id}</b> - Rp ${Number(x.harga).toLocaleString("id-ID")}
+</div>`;
+});
+
+html+=`</div>`;
+
+app.innerHTML=html;
+
+setTimeout(()=>{
+new Chart(document.getElementById("miniChart"),{
+type:"doughnut",
+data:{
+labels:["SUKSES","PENDING","PROSES","GAGAL"],
+datasets:[{data:[s,pd,pr,g]}]
+}
+});
+},100);
+
+}
+
+/* BUAT */
 if(p=="buat"){
 
 let opt="";
@@ -168,6 +250,7 @@ ${opt}
 `;
 }
 
+/* RIWAYAT */
 if(p=="riwayat"){
 let html="";
 db.slice().reverse().forEach((x,i)=>{
@@ -186,23 +269,23 @@ Rp ${Number(x.harga).toLocaleString("id-ID")}<br>
 app.innerHTML=html;
 }
 
+/* GRAFIK */
 if(p=="grafik"){
 
-let map = {};
+let map={};
 
 db.forEach(x=>{
 if(x.status==="SUKSES"){
-let t = new Date(x.tanggal).toLocaleDateString("id-ID");
-map[t] = (map[t] || 0) + Number(x.harga);
+let t=new Date(x.tanggal).toLocaleDateString("id-ID");
+map[t]=(map[t]||0)+Number(x.harga);
 }
 });
 
-let labels = Object.keys(map);
-let data = Object.values(map);
+let labels=Object.keys(map);
+let data=Object.values(map);
 
 app.innerHTML=`
 <div class="card">
-<h3>Grafik Harian</h3>
 <canvas id="c"></canvas>
 </div>
 `;
@@ -212,21 +295,31 @@ new Chart(document.getElementById("c"),{
 type:"line",
 data:{
 labels:labels,
-datasets:[{
-label:"Pemasukan",
-data:data,
-fill:false,
-tension:0.3
-}]
+datasets:[{label:"Pemasukan",data:data,tension:0.3}]
 }
 });
 },100);
 
 }
 
+/* SETTING */
+if(p=="setting"){
+
+let tema=localStorage.getItem("tema")||"#ee4d2d";
+
+app.innerHTML=`
+<div class="card">
+<h3>Pengaturan Tema</h3>
+
+<input type="color" id="color" value="${tema}">
+<button onclick="simpanTema()">Simpan</button>
+</div>
+`;
 }
 
-/* AUTO HARGA */
+}
+
+/* ===== AUTO HARGA ===== */
 function isiHarga(){
 let val=document.getElementById("produk").value;
 if(val!=="custom" && val!==""){
@@ -234,7 +327,7 @@ document.getElementById("harga").value=produk[val].harga;
 }
 }
 
-/* BUAT */
+/* ===== BUAT STRUK ===== */
 function buat(){
 
 let nama=document.getElementById("nama").value;
@@ -244,7 +337,7 @@ let p=document.getElementById("produk").value;
 
 if(!nama||!harga)return alert("Isi dulu!");
 
-let namaProduk = (p==="custom"||p==="") ? "Custom" : produk[p].nama;
+let namaProduk=(p==="custom"||p==="")?"Custom":produk[p].nama;
 let id="K7N-"+Math.random().toString(36).substr(2,5);
 let tanggal=new Date().toISOString();
 
@@ -281,35 +374,33 @@ document.getElementById("hasil").innerHTML=`
 `;
 }
 
-/* EDIT */
+/* ===== EDIT ===== */
 function editData(i){
-
-let x = db[i];
-
-let nama = prompt("Nama:", x.nama);
-let harga = prompt("Harga:", x.harga);
-let status = prompt("Status (SUKSES/PENDING/PROSES/GAGAL):", x.status);
+let x=db[i];
+let nama=prompt("Nama:",x.nama);
+let harga=prompt("Harga:",x.harga);
+let status=prompt("Status:",x.status);
 
 if(!nama||!harga||!status)return;
 
-db[i].nama = nama;
-db[i].harga = harga;
-db[i].status = status;
+db[i].nama=nama;
+db[i].harga=harga;
+db[i].status=status;
 
 localStorage.setItem("k7n",JSON.stringify(db));
 page("riwayat");
 }
 
-/* HAPUS */
+/* ===== HAPUS ===== */
 function hapus(i){
-if(confirm("Hapus data ini?")){
+if(confirm("Hapus data?")){
 db.splice(i,1);
 localStorage.setItem("k7n",JSON.stringify(db));
 page("riwayat");
 }
 }
 
-/* DOWNLOAD */
+/* ===== DOWNLOAD ===== */
 function download(){
 html2canvas(document.getElementById("strukBox")).then(canvas=>{
 let a=document.createElement("a");
@@ -319,7 +410,7 @@ a.click();
 });
 }
 
-/* WA */
+/* ===== WA ===== */
 function wa(x){
 let text=`🧾 K7N STORE
 
@@ -332,8 +423,16 @@ Status: ${x.status}`;
 window.open("https://wa.me/?text="+encodeURIComponent(text));
 }
 
+/* ===== SIMPAN TEMA ===== */
+function simpanTema(){
+let warna=document.getElementById("color").value;
+localStorage.setItem("tema",warna);
+document.documentElement.style.setProperty('--tema',warna);
+alert("Tema diganti!");
+}
+
 /* START */
-page("buat");
+page("dashboard");
 
 </script>
 
