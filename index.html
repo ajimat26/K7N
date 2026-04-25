@@ -10,22 +10,29 @@
 <style>
 :root{
 --tema:#ee4d2d;
+--bg:#f5f5f5;
 }
 
-body{margin:0;font-family:Arial;background:#f5f5f5;}
+body{
+margin:0;
+font-family:Arial;
+background:var(--bg);
+}
 
+/* HEADER */
 .header{
 background:var(--tema);
 color:white;
 padding:15px;
-font-size:20px;
 text-align:center;
+font-size:20px;
 }
 
+/* LAYOUT */
 .container{display:flex;flex-direction:column;height:100vh;}
 .content{flex:1;padding:20px;overflow:auto;}
 
-/* ===== DASHBOARD MENU NEON ===== */
+/* DASHBOARD MENU */
 .menu-center{
 display:grid;
 grid-template-columns:repeat(2,1fr);
@@ -42,16 +49,14 @@ text-align:center;
 font-weight:bold;
 cursor:pointer;
 overflow:hidden;
+transition:0.2s;
 }
 
-/* garis neon */
+/* GARIS NEON */
 .menu-card::before{
 content:"";
 position:absolute;
-top:-2px;
-left:-2px;
-right:-2px;
-bottom:-2px;
+inset:-2px;
 border-radius:15px;
 background:linear-gradient(90deg,transparent,#00eaff,transparent);
 background-size:300% 300%;
@@ -59,13 +64,6 @@ animation:jalan 2s linear infinite;
 z-index:0;
 }
 
-/* isi */
-.menu-card span{
-position:relative;
-z-index:2;
-}
-
-/* lapisan putih */
 .menu-card::after{
 content:"";
 position:absolute;
@@ -75,12 +73,24 @@ border-radius:13px;
 z-index:1;
 }
 
+.menu-card span{
+position:relative;
+z-index:2;
+}
+
+/* EFEK KLIK GLOW */
+.menu-card:active{
+transform:scale(0.95);
+box-shadow:0 0 20px #00eaff;
+}
+
+/* ANIMASI */
 @keyframes jalan{
 0%{background-position:0%;}
 100%{background-position:300%;}
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card{
 background:white;
 padding:15px;
@@ -108,6 +118,7 @@ margin-top:5px;
 cursor:pointer;
 }
 
+/* STRUK */
 .struk{
 background:#fff;
 padding:15px;
@@ -141,20 +152,18 @@ margin:auto;
 <body>
 
 <div class="container">
-
 <div class="header">K7N STORE</div>
-
 <div class="content" id="app"></div>
-
 </div>
 
 <script>
 
 /* LOAD TEMA */
-let savedTema = localStorage.getItem("tema");
-if(savedTema){
-document.documentElement.style.setProperty('--tema', savedTema);
-}
+let t = localStorage.getItem("tema");
+let bg = localStorage.getItem("bg");
+
+if(t) document.documentElement.style.setProperty('--tema', t);
+if(bg) document.documentElement.style.setProperty('--bg', bg);
 
 /* DATABASE */
 let db = JSON.parse(localStorage.getItem("k7n")) || [];
@@ -186,19 +195,16 @@ app.innerHTML=`
 </div>
 
 <div class="menu-center">
-
-<div class="menu-card" onclick="page('buat')"><span>📦 Buat Struk</span></div>
+<div class="menu-card" onclick="page('buat')"><span>📦 Buat</span></div>
 <div class="menu-card" onclick="page('riwayat')"><span>📊 Riwayat</span></div>
 <div class="menu-card" onclick="page('grafik')"><span>📈 Grafik</span></div>
 <div class="menu-card" onclick="page('setting')"><span>⚙️ Setting</span></div>
-
 </div>
 `;
 }
 
 /* BUAT */
 if(p=="buat"){
-
 let opt="";
 produk.forEach((x,i)=>{
 opt+=`<option value="${i}">${x.nama} - Rp ${x.harga}</option>`;
@@ -206,12 +212,13 @@ opt+=`<option value="${i}">${x.nama} - Rp ${x.harga}</option>`;
 
 app.innerHTML=`
 <div class="card">
-<h3>Buat Struk</h3>
+<button onclick="page('dashboard')">⬅️ Kembali</button>
 
+<h3>Buat Struk</h3>
 <input id="nama" placeholder="Nama">
 
 <select id="produk" onchange="isiHarga()">
-<option value="">-- Pilih Produk --</option>
+<option value="">Pilih Produk</option>
 ${opt}
 <option value="custom">Custom</option>
 </select>
@@ -234,7 +241,7 @@ ${opt}
 
 /* RIWAYAT */
 if(p=="riwayat"){
-let html="";
+let html=`<button onclick="page('dashboard')">⬅️ Kembali</button>`;
 db.slice().reverse().forEach((x,i)=>{
 html+=`
 <div class="card">
@@ -261,7 +268,10 @@ map[t]=(map[t]||0)+Number(x.harga);
 }
 });
 
-app.innerHTML=`<div class="card"><canvas id="c"></canvas></div>`;
+app.innerHTML=`
+<button onclick="page('dashboard')">⬅️ Kembali</button>
+<div class="card"><canvas id="c"></canvas></div>
+`;
 
 setTimeout(()=>{
 new Chart(c,{
@@ -277,10 +287,20 @@ datasets:[{data:Object.values(map),tension:0.3}]
 /* SETTING */
 if(p=="setting"){
 let tema=localStorage.getItem("tema")||"#ee4d2d";
+let bg=localStorage.getItem("bg")||"#f5f5f5";
+
 app.innerHTML=`
 <div class="card">
-<h3>Pengaturan Tema</h3>
+<button onclick="page('dashboard')">⬅️ Kembali</button>
+
+<h3>Pengaturan</h3>
+
+<label>Warna Tema</label>
 <input type="color" id="color" value="${tema}">
+
+<label>Warna Background</label>
+<input type="color" id="bgcolor" value="${bg}">
+
 <button onclick="simpanTema()">Simpan</button>
 </div>
 `;
@@ -298,7 +318,6 @@ document.getElementById("harga").value=produk[v].harga;
 
 /* BUAT */
 function buat(){
-
 let nama=document.getElementById("nama").value;
 let harga=document.getElementById("harga").value;
 let status=document.getElementById("status").value;
@@ -314,7 +333,7 @@ let obj={id,nama,layanan:namaProduk,harga,status,tanggal};
 db.push(obj);
 localStorage.setItem("k7n",JSON.stringify(db));
 
-document.getElementById("hasil").innerHTML=`
+hasil.innerHTML=`
 <div id="strukBox" class="struk">
 <img src="${logo}" class="logo">
 <h3 style="text-align:center;">K7N STORE</h3>
@@ -378,12 +397,18 @@ let t=`ID:${x.id}\nNama:${x.nama}\nHarga:${x.harga}`;
 window.open("https://wa.me/?text="+encodeURIComponent(t));
 }
 
-/* TEMA */
+/* SIMPAN TEMA */
 function simpanTema(){
 let warna=document.getElementById("color").value;
+let bg=document.getElementById("bgcolor").value;
+
 localStorage.setItem("tema",warna);
+localStorage.setItem("bg",bg);
+
 document.documentElement.style.setProperty('--tema',warna);
-alert("Tema diganti");
+document.documentElement.style.setProperty('--bg',bg);
+
+alert("Tema disimpan!");
 }
 
 /* START */
