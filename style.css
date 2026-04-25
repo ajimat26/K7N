@@ -1,41 +1,61 @@
-body {
-  background: #111;
-  color: white;
-  font-family: Arial, sans-serif;
-  padding: 20px;
+/* === DASHBOARD MENU BOX === */
+.menu-center{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+margin-top:20px;
 }
 
-h1, h2 {
-  text-align: center;
-  color: #00ffcc;
+/* === BOX MENU === */
+.menu-card{
+position:relative;
+padding:20px;
+background:#fff;
+border-radius:15px;
+text-align:center;
+font-weight:bold;
+cursor:pointer;
+overflow:hidden;
+border:2px solid transparent;
 }
 
-.user-box {
-  background: #222;
-  margin: 10px auto;
-  padding: 15px;
-  border-radius: 10px;
-  max-width: 500px;
-  box-shadow: 0 0 10px rgba(0,255,204,0.5);
-  transition: all 0.3s ease;
+/* === EFEK GARIS BERJALAN === */
+.menu-card::before{
+content:"";
+position:absolute;
+top:-2px;
+left:-2px;
+right:-2px;
+bottom:-2px;
+border-radius:15px;
+background:linear-gradient(
+90deg,
+transparent,
+#00eaff,
+transparent
+);
+animation:jalan 2s linear infinite;
+z-index:0;
 }
 
-.user-box:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(0,255,204,0.8);
+/* layer dalam biar ga ketutup */
+.menu-card span{
+position:relative;
+z-index:2;
 }
 
-.user-box h3 {
-  margin: 0 0 10px;
-  color: #00ffaa;
+/* glow effect */
+.menu-card::after{
+content:"";
+position:absolute;
+inset:0;
+background:#fff;
+border-radius:15px;
+z-index:1;
 }
 
-.log-entry {
-  background: #333;
-  margin-top: 5px;
-  padding: 5px;
-  border-radius: 5px;
-  font-size: 14px;
-  color: #ddd;
-  border-left: 3px solid #00ffaa;
+/* animasi garis */
+@keyframes jalan{
+0%{background-position:0 0;}
+100%{background-position:300% 0;}
 }
