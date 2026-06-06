@@ -188,3 +188,4 @@ app.get('/stop', (req, res) => {
     if (botProcess) {
         lastLog += "[System] Memicu perintah STOP secara manual...\n";
         botProcess.kill();
+        botProcess = null;}res.redirect('/');});app.get('/restart', (req, res) => {lastLog += "[System] Memicu proses RESTART server bot...\n";if (botProcess) botProcess.kill();setTimeout(() => {jalankanBot();res.redirect('/');}, 1500);});// Jalankan server panelapp.listen(port, () => {console.log(Panel premium buatan sendiri berjalan di http://localhost:${port});});
