@@ -3,158 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Bot WhatsApp 24 Jam</title>
-    <!-- Menggunakan Tailwind CSS untuk tampilan modern -->
-    <script src="https://jsdelivr.net"></script>
+    <title>Novipay - Rekber Game No Kos</title>
     <style>
-        .status-aktif { color: #22c55e; }
-        .status-mati { color: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 480px; width: 100%; background: #202024; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #29292e; }
+        h1 { color: #00b37e; text-align: center; font-size: 24px; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #8d8d99; font-size: 14px; margin-bottom: 20px; }
+        .box-qris { background: #fff; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .box-qris img { max-width: 180px; width: 100%; height: auto; }
+        .box-qris p { color: #121214; font-weight: bold; font-size: 14px; margin-top: 5px; }
+        .alert-info { background: #29292e; border-left: 4px solid #00b37e; padding: 12px; border-radius: 4px; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .btn-wa { display: block; background: #00b37e; color: #fff; text-align: center; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 15px; transition: background 0.2s; }
+        .btn-wa:hover { background: #00875f; }
+        .kalkulator { background: #121214; padding: 15px; border-radius: 8px; border: 1px solid #29292e; margin-bottom: 15px; }
+        .kalkulator h3 { font-size: 14px; color: #00b37e; margin-bottom: 10px; text-transform: uppercase; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: #8d8d99; margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 8px; background: #202024; border: 1px solid #29292e; color: #fff; border-radius: 4px; }
+        .hasil-hitung { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #29292e; font-size: 13px; }
+        .hasil-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .total-terima { font-weight: bold; color: #00b37e; border-top: 1px solid #29292e; padding-top: 5px; margin-top: 5px; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+<body>
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="flex justify-between items-center border-b border-gray-800 pb-6 mb-8">
-            <div>
-                <h1 class="text-2xl font-bold text-green-400">WA Bot Control Panel</h1>
-                <p class="text-sm text-gray-400">Node.js v20 + Firebase Realtime Database</p>
-            </div>
-            <div class="text-right">
-                <span class="text-sm text-gray-400">Status Bot:</span>
-                <div id="botStatus" class="font-bold text-lg status-mati">Memuat...</div>
-            </div>
-        </header>
+<div class="container">
+    <h1>NOVIPAY</h1>
+    <p class="subtitle">Sistem Rekber Jembatan Instan & Aman</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Kontrol Utama -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg md:col-span-1">
-                <h2 class="text-lg font-semibold mb-4 text-gray-200">Kontrol Bot</h2>
-                <div class="space-y-3">
-                    <button id="btnStart" class="w-full bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 cursor-pointer">
-                        Nyalakan Bot
-                    </button>
-                    <button id="btnStop" class="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 cursor-pointer">
-                        Matikan Bot
-                    </button>
-                </div>
-            </div>
+    <!-- Tempat QRIS DANA Bisnis -->
+    <div class="box-qris">
+        <!-- Catatan: Ganti link gambar di bawah dengan link foto Barcode QRIS DANA Bisnis Anda jika sudah ada -->
+        <img src="https://qrserver.com" alt="QRIS Novipay">
+        <p>QRIS PENAMPUNGAN UTAMA</p>
+    </div>
 
-            <!-- Fitur Broadcast / Kirim Pesan -->
-            <div class="bg-gray-800 p-6 rounded-xl shadow-lg md:col-span-2">
-                <h2 class="text-lg font-semibold mb-4 text-gray-200">Kirim Pesan via Panel</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Nomor Tujuan (Gunakan format 628xxx)</label>
-                        <input type="text" id="targetNumber" placeholder="Contoh: 628123456789" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-1">Isi Pesan</label>
-                        <textarea id="messageText" rows="3" placeholder="Tulis pesan Anda di sini..." class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"></textarea>
-                    </div>
-                    <button id="btnSend" class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-6 rounded-lg transition duration-200 cursor-pointer">
-                        Kirim Sekarang
-                    </button>
-                </div>
-            </div>
+    <!-- Aturan Simpel Akurat -->
+    <div class="alert-info">
+        <strong>Aturan Main Penarikan Saldo:</strong><br>
+        • Pembeli bebas scan nominal berapa saja.<br>
+        • Minimal penarikan saldo ke E-Wallet: <strong>Rp 5.000</strong>.<br>
+        • Biaya administrasi penarikan keamanan: <strong>Rp 200 flat</strong>.
+    </div>
+
+    <!-- Kalkulator Akurat Otomatis -->
+    <div class="kalkulator">
+        <h3>Simulasi Penarikan Saldo</h3>
+        <div class="form-group">
+            <label>Masukkan Jumlah Saldo yang Ingin Ditarik (Rp):</label>
+            <input type="number" id="inputSaldo" value="5000" min="5000" oninput="hitungAkurat()">
         </div>
-
-        <!-- Log Aktivitas Sederhana -->
-        <div class="mt-8 bg-gray-800 p-6 rounded-xl shadow-lg">
-            <h2 class="text-lg font-semibold mb-3 text-gray-200">Log Aksi Terakhir</h2>
-            <div id="logConsole" class="bg-gray-950 p-4 rounded-lg font-mono text-sm text-gray-400 h-32 overflow-y-auto">
-                [System] Panel berhasil dimuat. Menunggu koneksi Firebase...
+        <div class="hasil-hitung">
+            <div class="hasil-row">
+                <span>Biaya Keamanan:</span>
+                <span style="color: #f75a68;">- Rp 200</span>
+            </div>
+            <div class="hasil-row total-terima">
+                <span>Uang Masuk ke DANA Anda:</span>
+                <span id="txtTerima">Rp 4.800</span>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK (Modular v10+) -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getDatabase, ref, set, onValue } from "https://gstatic.com";
+    <!-- Tombol Hubungi Anda -->
+    <a href="https://wa.me" class="btn-wa" target="_blank">
+        Hubungi Admin Untuk Verifikasi (WhatsApp)
+    </a>
+</div>
 
-        // Konfigurasi Firebase Milik Anda
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzuWxZ98WtUlHJeaC3ZK1DHnBgThPCNBc",
-            authDomain: "k7n--store.firebaseapp.com",
-            databaseURL: "https://k7n--store-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "k7n--store",
-            storageBucket: "k7n--store.firebasestorage.app",
-            messagingSenderId: "293030742753",
-            appId: "1:293030742753:web:240e6745e04f7930aa05a0",
-            measurementId: "G-BTW6HEL05Z"
-        };
-
-        // Inisialisasi Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Referensi Jalur Database (Path)
-        const botStatusRef = ref(db, 'bot/status');
-        const botCommandRef = ref(db, 'bot/command');
-        const botActionLogRef = ref(db, 'bot/log');
-
-        // Elemen HTML
-        const botStatusEl = document.getElementById('botStatus');
-        const logConsole = document.getElementById('logConsole');
-
-        // Fungsi menulis log di panel HTML
-        function addLog(text) {
-            const time = new Date().toLocaleTimeString();
-            logConsole.innerHTML += `<br>[${time}] ${text}`;
-            logConsole.scrollTop = logConsole.scrollHeight;
+<script>
+    function hitungAkurat() {
+        var saldo = parseInt(document.getElementById('inputSaldo').value);
+        if (isNaN(saldo) || saldo < 5000) {
+            document.getElementById('txtTerima').innerText = "Minimal Rp 5.000";
+            return;
         }
+        // Rumus akurat keinginan Anda: Saldo dikurang Rp200 perak
+        var uangBersih = saldo - 200;
+        
+        // Format ke mata uang rupiah
+        var formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+        document.getElementById('txtTerima').innerText = formatter.format(uangBersih);
+    }
+</script>
 
-        // 1. Membaca Status Bot secara Real-time
-        onValue(botStatusRef, (snapshot) => {
-            const status = snapshot.val() || "Mati";
-            botStatusEl.innerText = status.toUpperCase();
-            
-            if (status.toLowerCase() === 'aktif') {
-                botStatusEl.className = "font-bold text-lg status-aktif";
-            } else {
-                botStatusEl.className = "font-bold text-lg status-mati";
-            }
-        });
-
-        // 2. Membaca Pesan Log Terbaru dari Script Node.js
-        onValue(botActionLogRef, (snapshot) => {
-            if(snapshot.exists()) {
-                addLog(snapshot.val());
-            }
-        });
-
-        // 3. Tombol Aksi Kontrol Bot
-        document.getElementById('btnStart').addEventListener('click', () => {
-            set(botCommandRef, { action: "START", timestamp: Date.now() });
-            addLog("Mengirim perintah: NYALAKAN BOT");
-        });
-
-        document.getElementById('btnStop').addEventListener('click', () => {
-            set(botCommandRef, { action: "STOP", timestamp: Date.now() });
-            addLog("Mengirim perintah: MATIKAN BOT");
-        });
-
-        // 4. Tombol Kirim Pesan / Broadcast
-        document.getElementById('btnSend').addEventListener('click', () => {
-            const number = document.getElementById('targetNumber').value;
-            const message = document.getElementById('messageText').value;
-
-            if(!number || !message) {
-                alert("Nomor dan isi pesan tidak boleh kosong!");
-                return;
-            }
-
-            set(botCommandRef, {
-                action: "SEND_MESSAGE",
-                to: number,
-                text: message,
-                timestamp: Date.now()
-            });
-
-            addLog(`Mengirim perintah: Kirim pesan ke ${number}`);
-            document.getElementById('messageText').value = ""; // Reset form pesan
-        });
-    </script>
 </body>
 </html>
