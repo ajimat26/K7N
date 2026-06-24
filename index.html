@@ -1,92 +1,584 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novipay - Rekber Game No Kos</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121214; color: #e1e1e6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 480px; width: 100%; background: #202024; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border: 1px solid #29292e; }
-        h1 { color: #00b37e; text-align: center; font-size: 24px; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #8d8d99; font-size: 14px; margin-bottom: 20px; }
-        .box-qris { background: #fff; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
-        .box-qris img { max-width: 180px; width: 100%; height: auto; }
-        .box-qris p { color: #121214; font-weight: bold; font-size: 14px; margin-top: 5px; }
-        .alert-info { background: #29292e; border-left: 4px solid #00b37e; padding: 12px; border-radius: 4px; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
-        .btn-wa { display: block; background: #00b37e; color: #fff; text-align: center; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 15px; transition: background 0.2s; }
-        .btn-wa:hover { background: #00875f; }
-        .kalkulator { background: #121214; padding: 15px; border-radius: 8px; border: 1px solid #29292e; margin-bottom: 15px; }
-        .kalkulator h3 { font-size: 14px; color: #00b37e; margin-bottom: 10px; text-transform: uppercase; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 12px; color: #8d8d99; margin-bottom: 4px; }
-        .form-group input { width: 100%; padding: 8px; background: #202024; border: 1px solid #29292e; color: #fff; border-radius: 4px; }
-        .hasil-hitung { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #29292e; font-size: 13px; }
-        .hasil-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .total-terima { font-weight: bold; color: #00b37e; border-top: 1px solid #29292e; padding-top: 5px; margin-top: 5px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>ESP8266 OTA • CYBERDECK FLASHER v2</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: radial-gradient(circle at 30% 20%, #1a1a28, #0a0a12);
+      background-color: #121214;
+      font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      margin: 0;
+      color: #d8d8e8;
+    }
+
+    /* Container utama glassmorphism */
+    .dashboard {
+      max-width: 1350px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      background: rgba(10, 10, 18, 0.5);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      border-radius: 2.8rem;
+      padding: 2.2rem 2.2rem 2.5rem;
+      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(161, 0, 255, 0.25), 0 0 50px rgba(0, 240, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 0.8rem;
+      }
+      .dashboard {
+        padding: 1.5rem 1.2rem;
+        gap: 1.8rem;
+        border-radius: 2rem;
+      }
+    }
+
+    /* Panel atas: 3 Slot Repeater */
+    .repeater-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Panel bawah: Deauther + Console */
+    .bottom-panel {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1.8rem;
+      align-items: start;
+    }
+
+    @media (max-width: 850px) {
+      .bottom-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: rgba(18, 18, 20, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-radius: 2rem;
+      padding: 1.6rem 1.5rem;
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(0, 240, 255, 0.06);
+      transition: transform 0.25s ease, box-shadow 0.3s, border-color 0.2s;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(161, 0, 255, 0.55);
+      box-shadow: 0 22px 45px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.35);
+      transform: translateY(-3px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px dashed rgba(0, 240, 255, 0.5);
+      padding-bottom: 0.5rem;
+    }
+
+    .neon-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #a100ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px #00f0ff70;
+    }
+
+    .slot-item {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 1.5rem;
+      padding: 1.2rem 1.2rem 1.3rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .slot-item:hover {
+      border-color: #00f0ff;
+      box-shadow: 0 0 25px #00f0ff30;
+    }
+
+    .slot-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .badge {
+      padding: 0.25rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      background: #2f2f3a;
+      color: #aaaaaa;
+      border: 1px solid #555;
+      transition: all 0.35s ease;
+    }
+
+    .badge.ready {
+      background: #00ff66;
+      color: #000;
+      border-color: #00ff66;
+      box-shadow: 0 0 22px #00ff66;
+      font-weight: 900;
+    }
+
+    .badge.empty {
+      background: #2e2020;
+      color: #cc8888;
+      border-color: #aa4444;
+    }
+
+    .file-hint {
+      font-size: 0.7rem;
+      color: #00f0ff;
+      opacity: 0.9;
+      margin-top: 0.1rem;
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.4rem 0.1rem;
+      color: #ddd;
+      font-size: 0.8rem;
+      background: transparent;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button {
+      background: #1a1a28;
+      border: 1.5px solid #00f0ff;
+      color: #00f0ff;
+      padding: 0.45rem 1.2rem;
+      border-radius: 2rem;
+      font-weight: bold;
+      margin-right: 0.8rem;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      background: #00f0ff20;
+      box-shadow: 0 0 20px #00f0ff;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 0.65rem;
+      background: #20202b;
+      border-radius: 1rem;
+      margin: 0.7rem 0 0.6rem;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px #000;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f0ff, #a100ff);
+      box-shadow: 0 0 18px #00f0ff;
+      border-radius: 1rem;
+      transition: width 0.2s ease-out;
+    }
+
+    .flash-btn {
+      background: transparent;
+      border: 1.8px solid #a100ff;
+      color: #e8e8ff;
+      font-weight: bold;
+      padding: 0.7rem 1rem;
+      border-radius: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: 0.25s;
+      letter-spacing: 0.7px;
+      backdrop-filter: blur(4px);
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .flash-btn:hover:not(:disabled) {
+      background: #a100ff35;
+      border-color: #00f0ff;
+      box-shadow: 0 0 30px #a100ff, 0 0 12px #00f0ff;
+      color: white;
+    }
+
+    .flash-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      filter: grayscale(0.6);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 1.1rem;
+      height: 1.1rem;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top: 2px solid #00f0ff;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .console-log {
+      background: #05050c;
+      border-radius: 1.2rem;
+      padding: 1.2rem;
+      height: 200px;
+      overflow-y: auto;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.75rem;
+      color: #b8f0ff;
+      border: 1px solid #00f0ff45;
+      box-shadow: inset 0 0 20px #000;
+      margin-top: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .log-line {
+      border-bottom: 1px solid #1e1e2a;
+      padding: 0.3rem 0;
+      color: #c0c0d0;
+    }
+
+    .log-highlight {
+      color: #00ff66;
+      font-weight: bold;
+      text-shadow: 0 0 6px #00ff66;
+    }
+
+    .clear-log-btn {
+      background: transparent;
+      border: 1px solid #444;
+      color: #bbb;
+      padding: 0.4rem 1.2rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      align-self: flex-end;
+      margin-top: 0.8rem;
+      transition: 0.2s;
+    }
+
+    .clear-log-btn:hover {
+      border-color: #00f0ff;
+      color: #00f0ff;
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
 </head>
 <body>
+<div class="dashboard">
+  <!-- BAGIAN ATAS: 3 SLOT REPEATER -->
+  <div class="repeater-panel" id="repeaterContainer">
+    <!-- Slot Repeater 1 -->
+    <div class="glass-card slot-item" data-slot="rep1">
+      <div class="slot-label">
+        <span>🔁 REPEATER - SLOT 1</span>
+        <span class="badge empty" id="badge-rep1">KOSONG</span>
+      </div>
+      <input type="file" id="fileInput-rep1" accept=".bin" class="file-input">
+      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-rep1" style="width:0%"></div></div>
+      <button class="flash-btn" id="flashBtn-rep1" disabled>
+        <span>⚡ JALANKAN / FLASH</span>
+      </button>
+    </div>
+    <!-- Slot Repeater 2 -->
+    <div class="glass-card slot-item" data-slot="rep2">
+      <div class="slot-label">
+        <span>🔁 REPEATER - SLOT 2</span>
+        <span class="badge empty" id="badge-rep2">KOSONG</span>
+      </div>
+      <input type="file" id="fileInput-rep2" accept=".bin" class="file-input">
+      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-rep2" style="width:0%"></div></div>
+      <button class="flash-btn" id="flashBtn-rep2" disabled>
+        <span>⚡ JALANKAN / FLASH</span>
+      </button>
+    </div>
+    <!-- Slot Repeater 3 -->
+    <div class="glass-card slot-item" data-slot="rep3">
+      <div class="slot-label">
+        <span>🔁 REPEATER - SLOT 3</span>
+        <span class="badge empty" id="badge-rep3">KOSONG</span>
+      </div>
+      <input type="file" id="fileInput-rep3" accept=".bin" class="file-input">
+      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-rep3" style="width:0%"></div></div>
+      <button class="flash-btn" id="flashBtn-rep3" disabled>
+        <span>⚡ JALANKAN / FLASH</span>
+      </button>
+    </div>
+  </div>
 
-<div class="container">
-    <h1>NOVIPAY</h1>
-    <p class="subtitle">Sistem Rekber Jembatan Instan & Aman</p>
-
-    <!-- Tempat QRIS DANA Bisnis -->
-    <div class="box-qris">
-        <!-- Catatan: Ganti link gambar di bawah dengan link foto Barcode QRIS DANA Bisnis Anda jika sudah ada -->
-        <img src="https://qrserver.com" alt="QRIS Novipay">
-        <p>QRIS PENAMPUNGAN UTAMA</p>
+  <!-- BAGIAN BAWAH: DEAUTHER + KONSOL -->
+  <div class="bottom-panel">
+    <!-- Slot Deauther -->
+    <div class="glass-card slot-item" data-slot="deauther">
+      <div class="slot-label">
+        <span>📡 DEAUTHER</span>
+        <span class="badge empty" id="badge-deauther">KOSONG</span>
+      </div>
+      <input type="file" id="fileInput-deauther" accept=".bin" class="file-input">
+      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-deauther" style="width:0%"></div></div>
+      <button class="flash-btn" id="flashBtn-deauther" disabled>
+        <span>⚡ JALANKAN / FLASH</span>
+      </button>
     </div>
 
-    <!-- Aturan Simpel Akurat -->
-    <div class="alert-info">
-        <strong>Aturan Main Penarikan Saldo:</strong><br>
-        • Pembeli bebas scan nominal berapa saja.<br>
-        • Minimal penarikan saldo ke E-Wallet: <strong>Rp 5.000</strong>.<br>
-        • Biaya administrasi penarikan keamanan: <strong>Rp 200 flat</strong>.
+    <!-- Konsol Log -->
+    <div class="glass-card flex-col">
+      <div class="card-header">
+        <span class="neon-title">📟 KONSOL LOG</span>
+        <span style="color:#a100ff; font-weight:bold;">LIVE</span>
+      </div>
+      <div class="console-log" id="consoleLog">
+        <div class="log-line">[SISTEM] Menunggu file .bin yang valid...</div>
+      </div>
+      <button class="clear-log-btn" id="clearLogBtn">BERSIHKAN LOG</button>
     </div>
-
-    <!-- Kalkulator Akurat Otomatis -->
-    <div class="kalkulator">
-        <h3>Simulasi Penarikan Saldo</h3>
-        <div class="form-group">
-            <label>Masukkan Jumlah Saldo yang Ingin Ditarik (Rp):</label>
-            <input type="number" id="inputSaldo" value="5000" min="5000" oninput="hitungAkurat()">
-        </div>
-        <div class="hasil-hitung">
-            <div class="hasil-row">
-                <span>Biaya Keamanan:</span>
-                <span style="color: #f75a68;">- Rp 200</span>
-            </div>
-            <div class="hasil-row total-terima">
-                <span>Uang Masuk ke DANA Anda:</span>
-                <span id="txtTerima">Rp 4.800</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tombol Hubungi Anda -->
-    <a href="https://wa.me" class="btn-wa" target="_blank">
-        Hubungi Admin Untuk Verifikasi (WhatsApp)
-    </a>
+  </div>
 </div>
 
 <script>
-    function hitungAkurat() {
-        var saldo = parseInt(document.getElementById('inputSaldo').value);
-        if (isNaN(saldo) || saldo < 5000) {
-            document.getElementById('txtTerima').innerText = "Minimal Rp 5.000";
-            return;
-        }
-        // Rumus akurat keinginan Anda: Saldo dikurang Rp200 perak
-        var uangBersih = saldo - 200;
-        
-        // Format ke mata uang rupiah
-        var formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
-        document.getElementById('txtTerima').innerText = formatter.format(uangBersih);
-    }
-</script>
+  (function() {
+    // --- STATE ---
+    const slots = {
+      rep1: { file: null, label: 'REPEATER SLOT 1' },
+      rep2: { file: null, label: 'REPEATER SLOT 2' },
+      rep3: { file: null, label: 'REPEATER SLOT 3' },
+      deauther: { file: null, label: 'DEAUTHER' }
+    };
 
+    let flashInProgress = false;
+    const consoleEl = document.getElementById('consoleLog');
+    const clearLogBtn = document.getElementById('clearLogBtn');
+
+    // Fungsi log
+    function logMessage(text, isHighlight = false) {
+      const line = document.createElement('div');
+      line.className = 'log-line' + (isHighlight ? ' log-highlight' : '');
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      consoleEl.appendChild(line);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+      if (consoleEl.children.length > 10) {
+        consoleEl.removeChild(consoleEl.children[0]);
+      }
+    }
+
+    clearLogBtn.addEventListener('click', () => {
+      consoleEl.innerHTML = '<div class="log-line">[LOG DIBERSIHKAN]</div>';
+    });
+
+    // Update badge dan tombol
+    function updateSlotUI(slotId) {
+      const badge = document.getElementById(`badge-${slotId}`);
+      const btn = document.getElementById(`flashBtn-${slotId}`);
+      if (!badge || !btn) return;
+      
+      if (slots[slotId].file) {
+        badge.textContent = 'FIRMWARE SIAP';
+        badge.className = 'badge ready';
+        if (!flashInProgress) {
+          btn.disabled = false;
+        }
+      } else {
+        badge.textContent = 'KOSONG';
+        badge.className = 'badge empty';
+        btn.disabled = true;
+      }
+    }
+
+    function setAllFlashButtons(disabled) {
+      Object.keys(slots).forEach(id => {
+        const btn = document.getElementById(`flashBtn-${id}`);
+        if (btn) {
+          if (disabled) {
+            btn.disabled = true;
+          } else {
+            btn.disabled = !slots[id].file;
+          }
+        }
+      });
+    }
+
+    // Animasi progress
+    function animateProgress(progressElement, duration = 700, callback) {
+      let width = 0;
+      progressElement.style.width = '0%';
+      const interval = 18;
+      const step = 100 / (duration / interval);
+      const timer = setInterval(() => {
+        width += step;
+        if (width >= 100) {
+          width = 100;
+          progressElement.style.width = '100%';
+          clearInterval(timer);
+          if (callback) callback();
+        } else {
+          progressElement.style.width = width + '%';
+        }
+      }, interval);
+    }
+
+    // Validasi file .bin dan proses
+    function handleFileSelect(slotId, fileInput, progressBar) {
+      fileInput.addEventListener('change', (e) => {
+        if (flashInProgress) {
+          alert('Proses flashing sedang berlangsung. Tunggu hingga selesai.');
+          fileInput.value = '';
+          return;
+        }
+        
+        const file = e.target.files[0];
+        if (!file) {
+          slots[slotId].file = null;
+          updateSlotUI(slotId);
+          progressBar.style.width = '0%';
+          return;
+        }
+
+        // VALIDASI KETAT: hanya .bin
+        if (!file.name.toLowerCase().endsWith('.bin')) {
+          alert('❌ Format file salah! Harap masukkan file hasil compile berformat .bin');
+          fileInput.value = ''; // reset input
+          progressBar.style.width = '0%';
+          slots[slotId].file = null;
+          updateSlotUI(slotId);
+          logMessage(`⛔ ${slots[slotId].label}: File ditolak (bukan .bin).`, false);
+          return;
+        }
+
+        // File valid .bin
+        progressBar.style.width = '0%';
+        animateProgress(progressBar, 650, () => {
+          slots[slotId].file = file;
+          updateSlotUI(slotId);
+          logMessage(`✅ ${slots[slotId].label}: Firmware "${file.name}" siap.`, true);
+        });
+      });
+    }
+
+    // Simulasi Flash
+    function startFlash(slotId) {
+      if (flashInProgress) {
+        logMessage('❌ Masih ada proses berjalan.', false);
+        return;
+      }
+      const file = slots[slotId].file;
+      if (!file) {
+        alert('Tidak ada firmware yang dipilih.');
+        return;
+      }
+
+      flashInProgress = true;
+      setAllFlashButtons(true);
+      
+      const btn = document.getElementById(`flashBtn-${slotId}`);
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> FLASHING...';
+      
+      logMessage(`🚀 Memulai flash ${slots[slotId].label} (${file.name})`, true);
+      
+      const steps = [
+        { msg: `🔌 Menghubungkan ke ESP8266 (${slots[slotId].label})...`, delay: 1000 },
+        { msg: `📡 Mengirim data firmware .bin...`, delay: 1400 },
+        { msg: `⚙️ Verifikasi integritas...`, delay: 800 },
+        { msg: `✅ Selesai! ESP8266 memuat ulang.`, delay: 600 }
+      ];
+      
+      let stepIndex = 0;
+      function runStep() {
+        if (stepIndex < steps.length) {
+          logMessage(steps[stepIndex].msg, stepIndex === steps.length-1);
+          setTimeout(() => {
+            stepIndex++;
+            runStep();
+          }, steps[stepIndex].delay);
+        } else {
+          btn.innerHTML = originalHTML;
+          flashInProgress = false;
+          setAllFlashButtons(false);
+          logMessage(`✨ ${slots[slotId].label} berhasil di-flash.`, true);
+        }
+      }
+      runStep();
+    }
+
+    // Inisialisasi semua slot
+    const slotIds = ['rep1', 'rep2', 'rep3', 'deauther'];
+    slotIds.forEach(id => {
+      const fileInput = document.getElementById(`fileInput-${id}`);
+      const progressBar = document.getElementById(`progress-${id}`);
+      const flashBtn = document.getElementById(`flashBtn-${id}`);
+      
+      if (fileInput && progressBar) {
+        handleFileSelect(id, fileInput, progressBar);
+      }
+      
+      if (flashBtn) {
+        flashBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (flashInProgress) return;
+          startFlash(id);
+        });
+      }
+      
+      // Set awal
+      updateSlotUI(id);
+    });
+
+    logMessage('🛰️ Cyberdeck OTA v2 siap. Hanya file .bin yang diterima.');
+  })();
+</script>
 </body>
 </html>
