@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>ESP8266 OTA • CYBERDECK FLASHER v2</title>
+  <title>ESP8266 OTA • CYBERDECK v3</title>
   <style>
     * {
       margin: 0;
@@ -12,128 +12,154 @@
     }
 
     body {
-      background: radial-gradient(circle at 30% 20%, #1a1a28, #0a0a12);
-      background-color: #121214;
+      background: radial-gradient(circle at 25% 15%, #1a1a2e, #0b0b0e);
+      background-color: #0b0b0e;
       font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 1.5rem;
+      padding: 1.2rem;
       margin: 0;
-      color: #d8d8e8;
+      color: #d0d0e0;
+      letter-spacing: 0.2px;
     }
 
-    /* Container utama glassmorphism */
+    /* Dashboard utama */
     .dashboard {
-      max-width: 1350px;
+      max-width: 1200px;
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
-      background: rgba(10, 10, 18, 0.5);
-      backdrop-filter: blur(20px) saturate(200%);
-      -webkit-backdrop-filter: blur(20px) saturate(200%);
-      border: 1px solid rgba(0, 240, 255, 0.18);
-      border-radius: 2.8rem;
-      padding: 2.2rem 2.2rem 2.5rem;
-      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(161, 0, 255, 0.25), 0 0 50px rgba(0, 240, 255, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    @media (max-width: 700px) {
-      body {
-        padding: 0.8rem;
-      }
-      .dashboard {
-        padding: 1.5rem 1.2rem;
-        gap: 1.8rem;
-        border-radius: 2rem;
-      }
-    }
-
-    /* Panel atas: 3 Slot Repeater */
-    .repeater-panel {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* Panel bawah: Deauther + Console */
-    .bottom-panel {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
       gap: 1.8rem;
-      align-items: start;
+      background: rgba(12, 12, 20, 0.55);
+      backdrop-filter: blur(22px) saturate(190%);
+      -webkit-backdrop-filter: blur(22px) saturate(190%);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 2.5rem;
+      padding: 2rem 2rem 2.2rem;
+      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(161, 0, 255, 0.3), 0 0 55px rgba(0, 240, 255, 0.25);
     }
 
-    @media (max-width: 850px) {
-      .bottom-panel {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 650px) {
+      body { padding: 0.6rem; }
+      .dashboard { padding: 1.5rem 1.2rem; gap: 1.5rem; }
     }
 
-    /* Glass Card */
+    /* Glass card */
     .glass-card {
-      background: rgba(18, 18, 20, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(0, 240, 255, 0.28);
-      border-radius: 2rem;
+      background: #16161f;
+      background: rgba(22, 22, 31, 0.8);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 1.8rem;
       padding: 1.6rem 1.5rem;
-      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(0, 240, 255, 0.06);
-      transition: transform 0.25s ease, box-shadow 0.3s, border-color 0.2s;
+      box-shadow: 0 18px 35px rgba(0,0,0,0.7), inset 0 0 25px rgba(0,240,255,0.05);
+      transition: all 0.25s ease;
     }
 
     .glass-card:hover {
-      border-color: rgba(161, 0, 255, 0.55);
-      box-shadow: 0 22px 45px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 240, 255, 0.35);
-      transform: translateY(-3px);
+      border-color: rgba(161,0,255,0.5);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.8), 0 0 30px rgba(0,240,255,0.3);
     }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px dashed rgba(0, 240, 255, 0.5);
-      padding-bottom: 0.5rem;
+    /* Panel Info ESP */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
     }
 
-    .neon-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00f0ff, #a100ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 0.5px;
-      text-shadow: 0 0 10px #00f0ff70;
-    }
-
-    .slot-item {
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 1.5rem;
-      padding: 1.2rem 1.2rem 1.3rem;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.25s;
+    .info-item {
+      background: rgba(0,0,0,0.4);
+      border-radius: 1.2rem;
+      padding: 0.9rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.35rem;
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
-    .slot-item:hover {
-      border-color: #00f0ff;
-      box-shadow: 0 0 25px #00f0ff30;
+    .info-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #8888aa;
+      font-weight: 600;
+      letter-spacing: 0.8px;
     }
 
-    .slot-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .info-value {
       font-weight: 700;
       font-size: 1rem;
-      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-online {
+      color: #00ff66;
+      text-shadow: 0 0 10px #00ff66;
+    }
+    .status-offline {
+      color: #ff4466;
+      text-shadow: 0 0 10px #ff4466;
+    }
+
+    .signal-bars {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+    }
+    .bar {
+      width: 5px;
+      background: #00f0ff;
+      border-radius: 2px;
+      box-shadow: 0 0 6px #00f0ff;
+    }
+
+    /* Tab navigasi */
+    .tab-nav {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1.5px solid #2a2a3a;
+      color: #aaa;
+      padding: 0.6rem 1.4rem;
+      border-radius: 2.5rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.25s;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(5px);
+    }
+
+    .tab-btn.active {
+      background: #a100ff20;
+      border-color: #00f0ff;
+      color: #00f0ff;
+      box-shadow: 0 0 22px #00f0ff60;
+    }
+
+    .tab-btn:hover:not(.active) {
+      border-color: #a100ff;
+      color: #ccc;
+    }
+
+    .slot-content {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .slot-content.active {
+      display: flex;
     }
 
     .badge {
@@ -142,19 +168,17 @@
       font-size: 0.7rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
       background: #2f2f3a;
-      color: #aaaaaa;
+      color: #aaa;
       border: 1px solid #555;
-      transition: all 0.35s ease;
+      transition: 0.3s;
     }
 
     .badge.ready {
       background: #00ff66;
       color: #000;
       border-color: #00ff66;
-      box-shadow: 0 0 22px #00ff66;
-      font-weight: 900;
+      box-shadow: 0 0 18px #00ff66;
     }
 
     .badge.empty {
@@ -166,20 +190,14 @@
     .file-hint {
       font-size: 0.7rem;
       color: #00f0ff;
-      opacity: 0.9;
-      margin-top: 0.1rem;
-      margin-bottom: 0.3rem;
-      font-weight: 500;
-      letter-spacing: 0.3px;
+      margin: 0.2rem 0 0.3rem;
     }
 
     input[type="file"] {
       width: 100%;
-      padding: 0.4rem 0.1rem;
       color: #ddd;
       font-size: 0.8rem;
       background: transparent;
-      border-radius: 0.5rem;
       cursor: pointer;
     }
 
@@ -192,7 +210,6 @@
       font-weight: bold;
       margin-right: 0.8rem;
       transition: 0.2s;
-      cursor: pointer;
     }
 
     input[type="file"]::file-selector-button:hover {
@@ -207,7 +224,6 @@
       border-radius: 1rem;
       margin: 0.7rem 0 0.6rem;
       overflow: hidden;
-      box-shadow: inset 0 0 8px #000;
     }
 
     .progress-fill {
@@ -222,7 +238,7 @@
     .flash-btn {
       background: transparent;
       border: 1.8px solid #a100ff;
-      color: #e8e8ff;
+      color: #e0e0ff;
       font-weight: bold;
       padding: 0.7rem 1rem;
       border-radius: 2.5rem;
@@ -232,21 +248,18 @@
       gap: 0.5rem;
       cursor: pointer;
       transition: 0.25s;
-      letter-spacing: 0.7px;
       backdrop-filter: blur(4px);
-      margin-top: 0.4rem;
-      font-size: 0.85rem;
+      margin-top: 0.3rem;
     }
 
     .flash-btn:hover:not(:disabled) {
       background: #a100ff35;
       border-color: #00f0ff;
       box-shadow: 0 0 30px #a100ff, 0 0 12px #00f0ff;
-      color: white;
     }
 
     .flash-btn:disabled {
-      opacity: 0.45;
+      opacity: 0.4;
       cursor: not-allowed;
       filter: grayscale(0.6);
     }
@@ -255,182 +268,173 @@
       display: inline-block;
       width: 1.1rem;
       height: 1.1rem;
-      border: 2px solid rgba(255,255,255,0.25);
+      border: 2px solid rgba(255,255,255,0.2);
       border-top: 2px solid #00f0ff;
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.7s linear infinite;
     }
 
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 
     .console-log {
-      background: #05050c;
+      background: #04040c;
       border-radius: 1.2rem;
       padding: 1.2rem;
-      height: 200px;
+      height: 190px;
       overflow-y: auto;
-      font-family: 'Fira Code', 'Courier New', monospace;
+      font-family: 'Courier New', monospace;
       font-size: 0.75rem;
-      color: #b8f0ff;
-      border: 1px solid #00f0ff45;
-      box-shadow: inset 0 0 20px #000;
+      color: #b0f0ff;
+      border: 1px solid #00f0ff40;
       margin-top: 0.5rem;
       white-space: pre-wrap;
-      word-break: break-word;
     }
 
-    .log-line {
-      border-bottom: 1px solid #1e1e2a;
-      padding: 0.3rem 0;
-      color: #c0c0d0;
+    .log-line { border-bottom: 1px solid #1e1e2a; padding: 0.25rem 0; }
+    .log-highlight { color: #00ff66; font-weight: bold; }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 1.8rem;
     }
 
-    .log-highlight {
-      color: #00ff66;
-      font-weight: bold;
-      text-shadow: 0 0 6px #00ff66;
+    @media (max-width: 750px) {
+      .bottom-row { grid-template-columns: 1fr; }
     }
 
-    .clear-log-btn {
-      background: transparent;
-      border: 1px solid #444;
-      color: #bbb;
-      padding: 0.4rem 1.2rem;
-      border-radius: 2rem;
-      cursor: pointer;
-      align-self: flex-end;
-      margin-top: 0.8rem;
-      transition: 0.2s;
-    }
-
-    .clear-log-btn:hover {
-      border-color: #00f0ff;
-      color: #00f0ff;
-    }
-
-    .flex-col {
-      display: flex;
-      flex-direction: column;
+    .neon-title {
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #a100ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
   </style>
 </head>
 <body>
 <div class="dashboard">
-  <!-- BAGIAN ATAS: 3 SLOT REPEATER -->
-  <div class="repeater-panel" id="repeaterContainer">
-    <!-- Slot Repeater 1 -->
-    <div class="glass-card slot-item" data-slot="rep1">
-      <div class="slot-label">
-        <span>🔁 REPEATER - SLOT 1</span>
-        <span class="badge empty" id="badge-rep1">KOSONG</span>
+  <!-- Panel Info Jaringan ESP -->
+  <div class="glass-card">
+    <div style="font-size:1.1rem; margin-bottom:1rem; font-weight:700;"><span class="neon-title">📡 Status Jaringan Perangkat</span></div>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Koneksi</span>
+        <span class="info-value"><span id="connStatus" class="status-online">● ONLINE (LOKAL)</span></span>
       </div>
-      <input type="file" id="fileInput-rep1" accept=".bin" class="file-input">
-      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-rep1" style="width:0%"></div></div>
-      <button class="flash-btn" id="flashBtn-rep1" disabled>
-        <span>⚡ JALANKAN / FLASH</span>
-      </button>
-    </div>
-    <!-- Slot Repeater 2 -->
-    <div class="glass-card slot-item" data-slot="rep2">
-      <div class="slot-label">
-        <span>🔁 REPEATER - SLOT 2</span>
-        <span class="badge empty" id="badge-rep2">KOSONG</span>
+      <div class="info-item">
+        <span class="info-label">Alamat IP</span>
+        <span class="info-value" id="ipAddress">192.168.4.1</span>
       </div>
-      <input type="file" id="fileInput-rep2" accept=".bin" class="file-input">
-      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-rep2" style="width:0%"></div></div>
-      <button class="flash-btn" id="flashBtn-rep2" disabled>
-        <span>⚡ JALANKAN / FLASH</span>
-      </button>
-    </div>
-    <!-- Slot Repeater 3 -->
-    <div class="glass-card slot-item" data-slot="rep3">
-      <div class="slot-label">
-        <span>🔁 REPEATER - SLOT 3</span>
-        <span class="badge empty" id="badge-rep3">KOSONG</span>
+      <div class="info-item">
+        <span class="info-label">Sinyal (RSSI)</span>
+        <span class="info-value" id="rssiValue">-64 dBm</span>
       </div>
-      <input type="file" id="fileInput-rep3" accept=".bin" class="file-input">
-      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-rep3" style="width:0%"></div></div>
-      <button class="flash-btn" id="flashBtn-rep3" disabled>
-        <span>⚡ JALANKAN / FLASH</span>
-      </button>
+      <div class="info-item">
+        <span class="info-label">Firmware Aktif</span>
+        <span class="info-value" id="activeFirmware">Repeater v2.1</span>
+      </div>
     </div>
   </div>
 
-  <!-- BAGIAN BAWAH: DEAUTHER + KONSOL -->
-  <div class="bottom-panel">
-    <!-- Slot Deauther -->
-    <div class="glass-card slot-item" data-slot="deauther">
-      <div class="slot-label">
-        <span>📡 DEAUTHER</span>
+  <!-- Kotak Multi-Slot Repeater -->
+  <div class="glass-card">
+    <div style="font-size:1.2rem; margin-bottom:1.2rem; font-weight:700;"><span class="neon-title">⚡ Firmware Repeater Multi-Slot</span></div>
+    <div class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="slot1">SLOT 1</button>
+      <button class="tab-btn" data-tab="slot2">SLOT 2</button>
+      <button class="tab-btn" data-tab="slot3">SLOT 3</button>
+    </div>
+    <!-- Konten slot dinamis -->
+    <div id="slotContainer">
+      <div class="slot-content active" id="content-slot1">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>🔁 REPEATER SLOT 1</span>
+          <span class="badge empty" id="badge-slot1">KOSONG</span>
+        </div>
+        <input type="file" id="fileInput-slot1" accept=".bin">
+        <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-slot1"></div></div>
+        <button class="flash-btn" id="flashBtn-slot1" disabled>⚡ JALANKAN / FLASH</button>
+      </div>
+      <div class="slot-content" id="content-slot2">
+        <div style="display:flex; justify-content:space-between;">
+          <span>🔁 REPEATER SLOT 2</span>
+          <span class="badge empty" id="badge-slot2">KOSONG</span>
+        </div>
+        <input type="file" id="fileInput-slot2" accept=".bin">
+        <div class="file-hint">⚡ Format wajib: .bin</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-slot2"></div></div>
+        <button class="flash-btn" id="flashBtn-slot2" disabled>⚡ JALANKAN / FLASH</button>
+      </div>
+      <div class="slot-content" id="content-slot3">
+        <div style="display:flex; justify-content:space-between;">
+          <span>🔁 REPEATER SLOT 3</span>
+          <span class="badge empty" id="badge-slot3">KOSONG</span>
+        </div>
+        <input type="file" id="fileInput-slot3" accept=".bin">
+        <div class="file-hint">⚡ Format wajib: .bin</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-slot3"></div></div>
+        <button class="flash-btn" id="flashBtn-slot3" disabled>⚡ JALANKAN / FLASH</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bawah: Deauther + Console -->
+  <div class="bottom-row">
+    <div class="glass-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+        <span class="neon-title" style="font-size:1rem;">📡 DEAUTHER</span>
         <span class="badge empty" id="badge-deauther">KOSONG</span>
       </div>
-      <input type="file" id="fileInput-deauther" accept=".bin" class="file-input">
-      <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-deauther" style="width:0%"></div></div>
-      <button class="flash-btn" id="flashBtn-deauther" disabled>
-        <span>⚡ JALANKAN / FLASH</span>
-      </button>
+      <input type="file" id="fileInput-deauther" accept=".bin">
+      <div class="file-hint">⚡ Format wajib: .bin</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-deauther"></div></div>
+      <button class="flash-btn" id="flashBtn-deauther" disabled>⚡ JALANKAN / FLASH</button>
     </div>
-
-    <!-- Konsol Log -->
-    <div class="glass-card flex-col">
-      <div class="card-header">
+    <div class="glass-card" style="display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between;">
         <span class="neon-title">📟 KONSOL LOG</span>
-        <span style="color:#a100ff; font-weight:bold;">LIVE</span>
+        <button id="clearLogBtn" style="background:none; border:1px solid #444; color:#aaa; padding:0.2rem 1rem; border-radius:2rem;">bersihkan</button>
       </div>
-      <div class="console-log" id="consoleLog">
-        <div class="log-line">[SISTEM] Menunggu file .bin yang valid...</div>
-      </div>
-      <button class="clear-log-btn" id="clearLogBtn">BERSIHKAN LOG</button>
+      <div class="console-log" id="consoleLog"><div class="log-line">[SISTEM] Cyberdeck v3 siap.</div></div>
     </div>
   </div>
 </div>
 
 <script>
-  (function() {
-    // --- STATE ---
+  (() => {
+    // State slot (simultan)
     const slots = {
-      rep1: { file: null, label: 'REPEATER SLOT 1' },
-      rep2: { file: null, label: 'REPEATER SLOT 2' },
-      rep3: { file: null, label: 'REPEATER SLOT 3' },
+      slot1: { file: null, label: 'REPEATER SLOT 1' },
+      slot2: { file: null, label: 'REPEATER SLOT 2' },
+      slot3: { file: null, label: 'REPEATER SLOT 3' },
       deauther: { file: null, label: 'DEAUTHER' }
     };
 
     let flashInProgress = false;
     const consoleEl = document.getElementById('consoleLog');
-    const clearLogBtn = document.getElementById('clearLogBtn');
-
-    // Fungsi log
-    function logMessage(text, isHighlight = false) {
-      const line = document.createElement('div');
-      line.className = 'log-line' + (isHighlight ? ' log-highlight' : '');
-      line.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
-      consoleEl.appendChild(line);
+    
+    function log(msg, highlight=false) {
+      const div = document.createElement('div');
+      div.className = 'log-line' + (highlight ? ' log-highlight' : '');
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      consoleEl.appendChild(div);
       consoleEl.scrollTop = consoleEl.scrollHeight;
-      if (consoleEl.children.length > 10) {
-        consoleEl.removeChild(consoleEl.children[0]);
-      }
+      if(consoleEl.children.length > 12) consoleEl.removeChild(consoleEl.children[0]);
     }
 
-    clearLogBtn.addEventListener('click', () => {
+    document.getElementById('clearLogBtn').addEventListener('click',()=>{
       consoleEl.innerHTML = '<div class="log-line">[LOG DIBERSIHKAN]</div>';
     });
 
-    // Update badge dan tombol
-    function updateSlotUI(slotId) {
+    function updateBadge(slotId) {
       const badge = document.getElementById(`badge-${slotId}`);
       const btn = document.getElementById(`flashBtn-${slotId}`);
-      if (!badge || !btn) return;
-      
-      if (slots[slotId].file) {
+      if(!badge || !btn) return;
+      if(slots[slotId].file) {
         badge.textContent = 'FIRMWARE SIAP';
         badge.className = 'badge ready';
-        if (!flashInProgress) {
-          btn.disabled = false;
-        }
+        if(!flashInProgress) btn.disabled = false;
       } else {
         badge.textContent = 'KOSONG';
         badge.className = 'badge empty';
@@ -438,146 +442,96 @@
       }
     }
 
-    function setAllFlashButtons(disabled) {
+    function setAllButtons(disabled) {
       Object.keys(slots).forEach(id => {
         const btn = document.getElementById(`flashBtn-${id}`);
-        if (btn) {
-          if (disabled) {
-            btn.disabled = true;
-          } else {
-            btn.disabled = !slots[id].file;
-          }
-        }
+        if(btn) btn.disabled = disabled ? true : !slots[id].file;
       });
     }
 
-    // Animasi progress
-    function animateProgress(progressElement, duration = 700, callback) {
-      let width = 0;
-      progressElement.style.width = '0%';
-      const interval = 18;
-      const step = 100 / (duration / interval);
+    function animateProgress(el, cb) {
+      el.style.width = '0%';
+      let w = 0;
       const timer = setInterval(() => {
-        width += step;
-        if (width >= 100) {
-          width = 100;
-          progressElement.style.width = '100%';
-          clearInterval(timer);
-          if (callback) callback();
-        } else {
-          progressElement.style.width = width + '%';
-        }
-      }, interval);
+        w += 5;
+        if(w >= 100) { w=100; el.style.width='100%'; clearInterval(timer); if(cb) cb(); }
+        else el.style.width = w+'%';
+      }, 30);
     }
 
-    // Validasi file .bin dan proses
-    function handleFileSelect(slotId, fileInput, progressBar) {
-      fileInput.addEventListener('change', (e) => {
-        if (flashInProgress) {
-          alert('Proses flashing sedang berlangsung. Tunggu hingga selesai.');
-          fileInput.value = '';
-          return;
-        }
-        
+    function setupFileInput(slotId) {
+      const input = document.getElementById(`fileInput-${slotId}`);
+      const prog = document.getElementById(`progress-${slotId}`);
+      input.addEventListener('change', (e) => {
+        if(flashInProgress) { alert('Tunggu proses selesai.'); input.value=''; return; }
         const file = e.target.files[0];
-        if (!file) {
-          slots[slotId].file = null;
-          updateSlotUI(slotId);
-          progressBar.style.width = '0%';
-          return;
-        }
-
-        // VALIDASI KETAT: hanya .bin
-        if (!file.name.toLowerCase().endsWith('.bin')) {
+        if(!file) { slots[slotId].file=null; updateBadge(slotId); prog.style.width='0%'; return; }
+        if(!file.name.toLowerCase().endsWith('.bin')) {
           alert('❌ Format file salah! Harap masukkan file hasil compile berformat .bin');
-          fileInput.value = ''; // reset input
-          progressBar.style.width = '0%';
-          slots[slotId].file = null;
-          updateSlotUI(slotId);
-          logMessage(`⛔ ${slots[slotId].label}: File ditolak (bukan .bin).`, false);
+          input.value = ''; prog.style.width='0%'; slots[slotId].file=null; updateBadge(slotId);
+          log(`⛔ ${slots[slotId].label}: file bukan .bin ditolak.`);
           return;
         }
-
-        // File valid .bin
-        progressBar.style.width = '0%';
-        animateProgress(progressBar, 650, () => {
+        animateProgress(prog, () => {
           slots[slotId].file = file;
-          updateSlotUI(slotId);
-          logMessage(`✅ ${slots[slotId].label}: Firmware "${file.name}" siap.`, true);
+          updateBadge(slotId);
+          log(`✅ ${slots[slotId].label}: "${file.name}" siap.`, true);
         });
       });
     }
 
-    // Simulasi Flash
-    function startFlash(slotId) {
-      if (flashInProgress) {
-        logMessage('❌ Masih ada proses berjalan.', false);
-        return;
-      }
+    function flash(slotId) {
+      if(flashInProgress) return;
       const file = slots[slotId].file;
-      if (!file) {
-        alert('Tidak ada firmware yang dipilih.');
-        return;
-      }
-
+      if(!file) { alert('Pilih file .bin dulu.'); return; }
       flashInProgress = true;
-      setAllFlashButtons(true);
-      
+      setAllButtons(true);
       const btn = document.getElementById(`flashBtn-${slotId}`);
-      const originalHTML = btn.innerHTML;
+      const orig = btn.innerHTML;
       btn.innerHTML = '<span class="spinner"></span> FLASHING...';
-      
-      logMessage(`🚀 Memulai flash ${slots[slotId].label} (${file.name})`, true);
-      
+      log(`🚀 Mulai flash ${slots[slotId].label}`, true);
       const steps = [
-        { msg: `🔌 Menghubungkan ke ESP8266 (${slots[slotId].label})...`, delay: 1000 },
-        { msg: `📡 Mengirim data firmware .bin...`, delay: 1400 },
-        { msg: `⚙️ Verifikasi integritas...`, delay: 800 },
-        { msg: `✅ Selesai! ESP8266 memuat ulang.`, delay: 600 }
+        '🔌 Menghubungkan ke ESP8266...',
+        '📡 Mengirim data firmware...',
+        '⚙️ Verifikasi...',
+        '✅ Selesai! ESP memuat ulang.'
       ];
-      
-      let stepIndex = 0;
-      function runStep() {
-        if (stepIndex < steps.length) {
-          logMessage(steps[stepIndex].msg, stepIndex === steps.length-1);
-          setTimeout(() => {
-            stepIndex++;
-            runStep();
-          }, steps[stepIndex].delay);
+      let i=0;
+      function next() {
+        if(i<steps.length) {
+          log(steps[i], i===steps.length-1);
+          setTimeout(()=>{ i++; next(); }, 900);
         } else {
-          btn.innerHTML = originalHTML;
+          btn.innerHTML = orig;
           flashInProgress = false;
-          setAllFlashButtons(false);
-          logMessage(`✨ ${slots[slotId].label} berhasil di-flash.`, true);
+          setAllButtons(false);
         }
       }
-      runStep();
+      next();
     }
 
     // Inisialisasi semua slot
-    const slotIds = ['rep1', 'rep2', 'rep3', 'deauther'];
-    slotIds.forEach(id => {
-      const fileInput = document.getElementById(`fileInput-${id}`);
-      const progressBar = document.getElementById(`progress-${id}`);
-      const flashBtn = document.getElementById(`flashBtn-${id}`);
-      
-      if (fileInput && progressBar) {
-        handleFileSelect(id, fileInput, progressBar);
-      }
-      
-      if (flashBtn) {
-        flashBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (flashInProgress) return;
-          startFlash(id);
-        });
-      }
-      
-      // Set awal
-      updateSlotUI(id);
+    ['slot1','slot2','slot3','deauther'].forEach(id => {
+      setupFileInput(id);
+      document.getElementById(`flashBtn-${id}`).addEventListener('click', ()=> flash(id));
+      updateBadge(id);
     });
 
-    logMessage('🛰️ Cyberdeck OTA v2 siap. Hanya file .bin yang diterima.');
+    // Tab navigasi
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.slot-content');
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        contents.forEach(c => c.classList.remove('active'));
+        document.getElementById(`content-${target}`).classList.add('active');
+      });
+    });
+
+    // Simulasi info ESP (bisa diubah manual)
+    log('🛰️ Sistem OTA offline siap. Panel info ESP aktif.');
   })();
 </script>
 </body>
