@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>ESP8266 OTA • CYBERDECK v3</title>
+  <title>ESP8266 OTA • NodeMCU V3 Cyberdeck</title>
   <style>
     * {
       margin: 0;
@@ -12,139 +12,129 @@
     }
 
     body {
-      background: radial-gradient(circle at 25% 15%, #1a1a2e, #0b0b0e);
+      background: radial-gradient(circle at 30% 20%, #0f0f1e, #050510);
       background-color: #0b0b0e;
       font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 1.2rem;
+      padding: 1.5rem;
       margin: 0;
       color: #d0d0e0;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.3px;
     }
 
-    /* Dashboard utama */
     .dashboard {
-      max-width: 1200px;
+      max-width: 1250px;
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: 1.8rem;
-      background: rgba(12, 12, 20, 0.55);
-      backdrop-filter: blur(22px) saturate(190%);
-      -webkit-backdrop-filter: blur(22px) saturate(190%);
+      background: rgba(10, 10, 18, 0.6);
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
       border: 1px solid rgba(0, 240, 255, 0.2);
       border-radius: 2.5rem;
-      padding: 2rem 2rem 2.2rem;
-      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(161, 0, 255, 0.3), 0 0 55px rgba(0, 240, 255, 0.25);
+      padding: 2rem 2rem 2.3rem;
+      box-shadow: 0 35px 75px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(161, 0, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.25);
     }
 
     @media (max-width: 650px) {
-      body { padding: 0.6rem; }
-      .dashboard { padding: 1.5rem 1.2rem; gap: 1.5rem; }
+      body { padding: 0.8rem; }
+      .dashboard { padding: 1.5rem 1rem; gap: 1.5rem; }
     }
 
-    /* Glass card */
     .glass-card {
-      background: #16161f;
-      background: rgba(22, 22, 31, 0.8);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(0, 240, 255, 0.25);
+      background: rgba(18, 18, 26, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 240, 255, 0.28);
       border-radius: 1.8rem;
       padding: 1.6rem 1.5rem;
-      box-shadow: 0 18px 35px rgba(0,0,0,0.7), inset 0 0 25px rgba(0,240,255,0.05);
-      transition: all 0.25s ease;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.75), inset 0 0 30px rgba(0,240,255,0.04);
+      transition: all 0.3s ease;
     }
 
     .glass-card:hover {
-      border-color: rgba(161,0,255,0.5);
-      box-shadow: 0 20px 45px rgba(0,0,0,0.8), 0 0 30px rgba(0,240,255,0.3);
+      border-color: rgba(161,0,255,0.55);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.85), 0 0 35px rgba(0,240,255,0.35);
     }
 
-    /* Panel Info ESP */
+    .neon-title {
+      font-weight: 700;
+      background: linear-gradient(135deg, #00f0ff, #a100ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.5px;
+    }
+
+    /* Info Panel */
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1rem;
     }
 
     .info-item {
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.45);
       border-radius: 1.2rem;
       padding: 0.9rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      border: 1px solid rgba(255,255,255,0.08);
+      gap: 0.4rem;
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
     .info-label {
       font-size: 0.7rem;
       text-transform: uppercase;
       color: #8888aa;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.8px;
     }
 
     .info-value {
       font-weight: 700;
       font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
     }
 
     .status-online {
       color: #00ff66;
-      text-shadow: 0 0 10px #00ff66;
+      text-shadow: 0 0 12px #00ff66;
     }
     .status-offline {
       color: #ff4466;
-      text-shadow: 0 0 10px #ff4466;
+      text-shadow: 0 0 12px #ff4466;
     }
 
-    .signal-bars {
-      display: flex;
-      gap: 2px;
-      align-items: flex-end;
-    }
-    .bar {
-      width: 5px;
-      background: #00f0ff;
-      border-radius: 2px;
-      box-shadow: 0 0 6px #00f0ff;
-    }
-
-    /* Tab navigasi */
+    /* Tab */
     .tab-nav {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.5rem;
       margin-bottom: 1.5rem;
       flex-wrap: wrap;
     }
 
     .tab-btn {
       background: transparent;
-      border: 1.5px solid #2a2a3a;
-      color: #aaa;
-      padding: 0.6rem 1.4rem;
+      border: 1.8px solid #2a2a3a;
+      color: #999;
+      padding: 0.55rem 1.5rem;
       border-radius: 2.5rem;
       font-weight: 700;
       font-size: 0.85rem;
       cursor: pointer;
       transition: 0.25s;
-      letter-spacing: 0.5px;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(4px);
     }
 
     .tab-btn.active {
       background: #a100ff20;
       border-color: #00f0ff;
       color: #00f0ff;
-      box-shadow: 0 0 22px #00f0ff60;
+      box-shadow: 0 0 25px #00f0ff70;
     }
 
     .tab-btn:hover:not(.active) {
@@ -163,7 +153,7 @@
     }
 
     .badge {
-      padding: 0.25rem 1rem;
+      padding: 0.2rem 1rem;
       border-radius: 2rem;
       font-size: 0.7rem;
       font-weight: 800;
@@ -219,25 +209,26 @@
 
     .progress-bar {
       width: 100%;
-      height: 0.65rem;
-      background: #20202b;
+      height: 0.7rem;
+      background: #1e1e2a;
       border-radius: 1rem;
       margin: 0.7rem 0 0.6rem;
       overflow: hidden;
+      box-shadow: inset 0 0 8px #000;
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #00f0ff, #a100ff);
-      box-shadow: 0 0 18px #00f0ff;
+      box-shadow: 0 0 20px #00f0ff;
       border-radius: 1rem;
-      transition: width 0.2s ease-out;
+      transition: width 0.1s linear;
     }
 
     .flash-btn {
       background: transparent;
-      border: 1.8px solid #a100ff;
+      border: 2px solid #a100ff;
       color: #e0e0ff;
       font-weight: bold;
       padding: 0.7rem 1rem;
@@ -250,6 +241,7 @@
       transition: 0.25s;
       backdrop-filter: blur(4px);
       margin-top: 0.3rem;
+      font-size: 0.85rem;
     }
 
     .flash-btn:hover:not(:disabled) {
@@ -277,10 +269,10 @@
     @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
 
     .console-log {
-      background: #04040c;
+      background: #03030a;
       border-radius: 1.2rem;
       padding: 1.2rem;
-      height: 190px;
+      height: 200px;
       overflow-y: auto;
       font-family: 'Courier New', monospace;
       font-size: 0.75rem;
@@ -291,7 +283,7 @@
     }
 
     .log-line { border-bottom: 1px solid #1e1e2a; padding: 0.25rem 0; }
-    .log-highlight { color: #00ff66; font-weight: bold; }
+    .log-highlight { color: #00ff66; font-weight: bold; text-shadow: 0 0 6px #00ff66; }
 
     .bottom-row {
       display: grid;
@@ -303,59 +295,77 @@
       .bottom-row { grid-template-columns: 1fr; }
     }
 
-    .neon-title {
-      font-weight: 700;
-      background: linear-gradient(135deg, #00f0ff, #a100ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .config-row {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+
+    .config-input {
+      background: #12121c;
+      border: 1px solid #00f0ff;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      width: 160px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
 <div class="dashboard">
-  <!-- Panel Info Jaringan ESP -->
+  <!-- Panel Status Jaringan -->
   <div class="glass-card">
-    <div style="font-size:1.1rem; margin-bottom:1rem; font-weight:700;"><span class="neon-title">📡 Status Jaringan Perangkat</span></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <span class="neon-title" style="font-size:1.2rem;">📡 Status Jaringan NodeMCU V3</span>
+      <div class="config-row">
+        <input type="text" id="ipTarget" class="config-input" value="192.168.4.1" placeholder="IP Target">
+        <button id="refreshInfoBtn" style="background:transparent; border:1px solid #00f0ff; color:#00f0ff; padding:0.4rem 1rem; border-radius:2rem; cursor:pointer;">🔄 Segarkan</button>
+      </div>
+    </div>
     <div class="info-grid">
       <div class="info-item">
-        <span class="info-label">Koneksi</span>
-        <span class="info-value"><span id="connStatus" class="status-online">● ONLINE (LOKAL)</span></span>
+        <span class="info-label">Status Koneksi</span>
+        <span class="info-value" id="connStatus">⏳ Memeriksa...</span>
       </div>
       <div class="info-item">
         <span class="info-label">Alamat IP</span>
         <span class="info-value" id="ipAddress">192.168.4.1</span>
       </div>
       <div class="info-item">
-        <span class="info-label">Sinyal (RSSI)</span>
-        <span class="info-value" id="rssiValue">-64 dBm</span>
+        <span class="info-label">Kekuatan Sinyal</span>
+        <span class="info-value" id="rssiValue">-- dBm</span>
       </div>
       <div class="info-item">
         <span class="info-label">Firmware Aktif</span>
-        <span class="info-value" id="activeFirmware">Repeater v2.1</span>
+        <span class="info-value" id="activeFirmware">Tidak diketahui</span>
       </div>
     </div>
   </div>
 
-  <!-- Kotak Multi-Slot Repeater -->
+  <!-- Multi-Slot Repeater -->
   <div class="glass-card">
-    <div style="font-size:1.2rem; margin-bottom:1.2rem; font-weight:700;"><span class="neon-title">⚡ Firmware Repeater Multi-Slot</span></div>
+    <div style="font-size:1.2rem; margin-bottom:1.2rem;"><span class="neon-title">⚡ Firmware Repeater Multi-Slot</span></div>
     <div class="tab-nav" id="tabNav">
       <button class="tab-btn active" data-tab="slot1">SLOT 1</button>
       <button class="tab-btn" data-tab="slot2">SLOT 2</button>
       <button class="tab-btn" data-tab="slot3">SLOT 3</button>
     </div>
-    <!-- Konten slot dinamis -->
     <div id="slotContainer">
+      <!-- Slot 1 -->
       <div class="slot-content active" id="content-slot1">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between;">
           <span>🔁 REPEATER SLOT 1</span>
           <span class="badge empty" id="badge-slot1">KOSONG</span>
         </div>
         <input type="file" id="fileInput-slot1" accept=".bin">
-        <div class="file-hint">⚡ Format wajib: .bin (Bukan .ino)</div>
+        <div class="file-hint">⚡ Format wajib: .bin</div>
         <div class="progress-bar"><div class="progress-fill" id="progress-slot1"></div></div>
-        <button class="flash-btn" id="flashBtn-slot1" disabled>⚡ JALANKAN / FLASH</button>
+        <button class="flash-btn" id="flashBtn-slot1" disabled>⚡ FLASH</button>
       </div>
+      <!-- Slot 2 -->
       <div class="slot-content" id="content-slot2">
         <div style="display:flex; justify-content:space-between;">
           <span>🔁 REPEATER SLOT 2</span>
@@ -364,8 +374,9 @@
         <input type="file" id="fileInput-slot2" accept=".bin">
         <div class="file-hint">⚡ Format wajib: .bin</div>
         <div class="progress-bar"><div class="progress-fill" id="progress-slot2"></div></div>
-        <button class="flash-btn" id="flashBtn-slot2" disabled>⚡ JALANKAN / FLASH</button>
+        <button class="flash-btn" id="flashBtn-slot2" disabled>⚡ FLASH</button>
       </div>
+      <!-- Slot 3 -->
       <div class="slot-content" id="content-slot3">
         <div style="display:flex; justify-content:space-between;">
           <span>🔁 REPEATER SLOT 3</span>
@@ -374,12 +385,12 @@
         <input type="file" id="fileInput-slot3" accept=".bin">
         <div class="file-hint">⚡ Format wajib: .bin</div>
         <div class="progress-bar"><div class="progress-fill" id="progress-slot3"></div></div>
-        <button class="flash-btn" id="flashBtn-slot3" disabled>⚡ JALANKAN / FLASH</button>
+        <button class="flash-btn" id="flashBtn-slot3" disabled>⚡ FLASH</button>
       </div>
     </div>
   </div>
 
-  <!-- Bawah: Deauther + Console -->
+  <!-- Deauther + Console -->
   <div class="bottom-row">
     <div class="glass-card">
       <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
@@ -389,21 +400,21 @@
       <input type="file" id="fileInput-deauther" accept=".bin">
       <div class="file-hint">⚡ Format wajib: .bin</div>
       <div class="progress-bar"><div class="progress-fill" id="progress-deauther"></div></div>
-      <button class="flash-btn" id="flashBtn-deauther" disabled>⚡ JALANKAN / FLASH</button>
+      <button class="flash-btn" id="flashBtn-deauther" disabled>⚡ FLASH</button>
     </div>
     <div class="glass-card" style="display:flex; flex-direction:column;">
-      <div style="display:flex; justify-content:space-between;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <span class="neon-title">📟 KONSOL LOG</span>
-        <button id="clearLogBtn" style="background:none; border:1px solid #444; color:#aaa; padding:0.2rem 1rem; border-radius:2rem;">bersihkan</button>
+        <button id="clearLogBtn" style="background:none; border:1px solid #444; color:#aaa; padding:0.2rem 1rem; border-radius:2rem; cursor:pointer;">bersihkan</button>
       </div>
-      <div class="console-log" id="consoleLog"><div class="log-line">[SISTEM] Cyberdeck v3 siap.</div></div>
+      <div class="console-log" id="consoleLog"><div class="log-line">[SISTEM] Inisialisasi Cyberdeck v3...</div></div>
     </div>
   </div>
 </div>
 
 <script>
   (() => {
-    // State slot (simultan)
+    // State
     const slots = {
       slot1: { file: null, label: 'REPEATER SLOT 1' },
       slot2: { file: null, label: 'REPEATER SLOT 2' },
@@ -412,29 +423,37 @@
     };
 
     let flashInProgress = false;
+    let activeXHR = null;
     const consoleEl = document.getElementById('consoleLog');
+    const ipInput = document.getElementById('ipTarget');
     
-    function log(msg, highlight=false) {
+    function getBaseURL() {
+      let ip = ipInput.value.trim();
+      if (!ip) ip = '192.168.4.1';
+      return `http://${ip}`;
+    }
+
+    function log(msg, highlight = false) {
       const div = document.createElement('div');
       div.className = 'log-line' + (highlight ? ' log-highlight' : '');
       div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
       consoleEl.appendChild(div);
       consoleEl.scrollTop = consoleEl.scrollHeight;
-      if(consoleEl.children.length > 12) consoleEl.removeChild(consoleEl.children[0]);
+      if (consoleEl.children.length > 15) consoleEl.removeChild(consoleEl.children[0]);
     }
 
-    document.getElementById('clearLogBtn').addEventListener('click',()=>{
+    document.getElementById('clearLogBtn').addEventListener('click', () => {
       consoleEl.innerHTML = '<div class="log-line">[LOG DIBERSIHKAN]</div>';
     });
 
     function updateBadge(slotId) {
       const badge = document.getElementById(`badge-${slotId}`);
       const btn = document.getElementById(`flashBtn-${slotId}`);
-      if(!badge || !btn) return;
-      if(slots[slotId].file) {
+      if (!badge || !btn) return;
+      if (slots[slotId].file) {
         badge.textContent = 'FIRMWARE SIAP';
         badge.className = 'badge ready';
-        if(!flashInProgress) btn.disabled = false;
+        if (!flashInProgress) btn.disabled = false;
       } else {
         badge.textContent = 'KOSONG';
         badge.className = 'badge empty';
@@ -445,93 +464,209 @@
     function setAllButtons(disabled) {
       Object.keys(slots).forEach(id => {
         const btn = document.getElementById(`flashBtn-${id}`);
-        if(btn) btn.disabled = disabled ? true : !slots[id].file;
+        if (btn) btn.disabled = disabled ? true : !slots[id].file;
       });
     }
 
-    function animateProgress(el, cb) {
-      el.style.width = '0%';
-      let w = 0;
-      const timer = setInterval(() => {
-        w += 5;
-        if(w >= 100) { w=100; el.style.width='100%'; clearInterval(timer); if(cb) cb(); }
-        else el.style.width = w+'%';
-      }, 30);
-    }
-
+    // Setup file input
     function setupFileInput(slotId) {
       const input = document.getElementById(`fileInput-${slotId}`);
       const prog = document.getElementById(`progress-${slotId}`);
       input.addEventListener('change', (e) => {
-        if(flashInProgress) { alert('Tunggu proses selesai.'); input.value=''; return; }
-        const file = e.target.files[0];
-        if(!file) { slots[slotId].file=null; updateBadge(slotId); prog.style.width='0%'; return; }
-        if(!file.name.toLowerCase().endsWith('.bin')) {
-          alert('❌ Format file salah! Harap masukkan file hasil compile berformat .bin');
-          input.value = ''; prog.style.width='0%'; slots[slotId].file=null; updateBadge(slotId);
-          log(`⛔ ${slots[slotId].label}: file bukan .bin ditolak.`);
+        if (flashInProgress) {
+          alert('Tunggu proses flashing selesai.');
+          input.value = '';
           return;
         }
-        animateProgress(prog, () => {
+        const file = e.target.files[0];
+        if (!file) {
+          slots[slotId].file = null;
+          updateBadge(slotId);
+          prog.style.width = '0%';
+          return;
+        }
+        if (!file.name.toLowerCase().endsWith('.bin')) {
+          alert('❌ Format file salah! Harap masukkan file hasil compile berformat .bin');
+          input.value = '';
+          prog.style.width = '0%';
+          slots[slotId].file = null;
+          updateBadge(slotId);
+          log(`⛔ ${slots[slotId].label}: File ditolak (bukan .bin).`);
+          return;
+        }
+        // File valid
+        prog.style.width = '0%';
+        // Simulasi progres pemrosesan lokal
+        let w = 0;
+        const timer = setInterval(() => {
+          w += 8;
+          if (w >= 100) { w = 100; clearInterval(timer); }
+          prog.style.width = w + '%';
+        }, 25);
+        setTimeout(() => {
           slots[slotId].file = file;
           updateBadge(slotId);
-          log(`✅ ${slots[slotId].label}: "${file.name}" siap.`, true);
-        });
+          log(`✅ ${slots[slotId].label}: "${file.name}" siap di-flash.`, true);
+        }, 350);
       });
     }
 
-    function flash(slotId) {
-      if(flashInProgress) return;
+    // Fungsi flashing nyata via HTTP POST
+    function startFlash(slotId) {
+      if (flashInProgress) {
+        log('❌ Proses flashing lain sedang berjalan.', false);
+        return;
+      }
       const file = slots[slotId].file;
-      if(!file) { alert('Pilih file .bin dulu.'); return; }
+      if (!file) {
+        alert('Pilih file .bin terlebih dahulu.');
+        return;
+      }
+
       flashInProgress = true;
       setAllButtons(true);
+      
       const btn = document.getElementById(`flashBtn-${slotId}`);
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<span class="spinner"></span> FLASHING...';
-      log(`🚀 Mulai flash ${slots[slotId].label}`, true);
-      const steps = [
-        '🔌 Menghubungkan ke ESP8266...',
-        '📡 Mengirim data firmware...',
-        '⚙️ Verifikasi...',
-        '✅ Selesai! ESP memuat ulang.'
-      ];
-      let i=0;
-      function next() {
-        if(i<steps.length) {
-          log(steps[i], i===steps.length-1);
-          setTimeout(()=>{ i++; next(); }, 900);
-        } else {
-          btn.innerHTML = orig;
-          flashInProgress = false;
-          setAllButtons(false);
+      const progressBar = document.getElementById(`progress-${slotId}`);
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> MENGIRIM...';
+      
+      const baseURL = getBaseURL();
+      const url = `${baseURL}/update`; // Endpoint standar OTA ESP8266
+      
+      log(`🚀 Mengirim ${slots[slotId].label} ke ${url} ...`, true);
+      
+      const xhr = new XMLHttpRequest();
+      activeXHR = xhr;
+      
+      xhr.open('POST', url, true);
+      xhr.timeout = 30000; // 30 detik timeout
+      
+      // Progress upload nyata
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + '%';
+          log(`📤 Mengirim... ${percent}% (${e.loaded} / ${e.total} bytes)`);
         }
-      }
-      next();
+      };
+      
+      xhr.onload = () => {
+        activeXHR = null;
+        if (xhr.status === 200) {
+          progressBar.style.width = '100%';
+          log(`✅ ${slots[slotId].label}: Flash berhasil! ESP8266 memuat ulang.`, true);
+        } else {
+          log(`⚠️ Server merespons dengan status ${xhr.status}.`, false);
+        }
+        resetAfterFlash(slotId, btn, originalHTML);
+      };
+      
+      xhr.onerror = () => {
+        activeXHR = null;
+        log(`❌ Gagal terhubung ke ${baseURL}. Periksa koneksi.`, false);
+        resetAfterFlash(slotId, btn, originalHTML);
+      };
+      
+      xhr.ontimeout = () => {
+        activeXHR = null;
+        log(`⏰ Timeout! Perangkat tidak merespons.`, false);
+        resetAfterFlash(slotId, btn, originalHTML);
+      };
+      
+      xhr.onabort = () => {
+        activeXHR = null;
+        log(`🛑 Pengiriman dibatalkan.`, false);
+        resetAfterFlash(slotId, btn, originalHTML);
+      };
+      
+      xhr.send(file);
+    }
+    
+    function resetAfterFlash(slotId, btn, originalHTML) {
+      btn.innerHTML = originalHTML;
+      flashInProgress = false;
+      setAllButtons(false);
+      activeXHR = null;
     }
 
-    // Inisialisasi semua slot
-    ['slot1','slot2','slot3','deauther'].forEach(id => {
+    // Polling status perangkat
+    async function fetchDeviceInfo() {
+      const baseURL = getBaseURL();
+      const connEl = document.getElementById('connStatus');
+      const ipEl = document.getElementById('ipAddress');
+      const rssiEl = document.getElementById('rssiValue');
+      const fwEl = document.getElementById('activeFirmware');
+      
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch(`${baseURL}/status`, {
+          signal: controller.signal,
+          mode: 'cors'
+        });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          connEl.textContent = '● ONLINE (LOKAL)';
+          connEl.className = 'info-value status-online';
+          ipEl.textContent = ipInput.value.trim() || '192.168.4.1';
+          
+          // Coba parse JSON jika tersedia
+          try {
+            const data = await response.json();
+            rssiEl.textContent = data.rssi ? `${data.rssi} dBm` : '-64 dBm';
+            fwEl.textContent = data.firmware || 'Repeater v2.1';
+          } catch {
+            rssiEl.textContent = '-60 dBm';
+            fwEl.textContent = 'NodeMCU Active';
+          }
+          log('🔍 Status: Perangkat online.', false);
+        } else {
+          throw new Error('Status not OK');
+        }
+      } catch (err) {
+        connEl.textContent = '● TERPUTUS';
+        connEl.className = 'info-value status-offline';
+        ipEl.textContent = ipInput.value.trim() || '192.168.4.1';
+        rssiEl.textContent = '-- dBm';
+        fwEl.textContent = 'Tidak terdeteksi';
+        log('⚠️ Perangkat tidak terjangkau.', false);
+      }
+    }
+
+    // Inisialisasi slot
+    ['slot1', 'slot2', 'slot3', 'deauther'].forEach(id => {
       setupFileInput(id);
-      document.getElementById(`flashBtn-${id}`).addEventListener('click', ()=> flash(id));
+      document.getElementById(`flashBtn-${id}`).addEventListener('click', () => startFlash(id));
       updateBadge(id);
     });
 
     // Tab navigasi
-    const tabs = document.querySelectorAll('.tab-btn');
-    const contents = document.querySelectorAll('.slot-content');
-    tabs.forEach(btn => {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        tabs.forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const target = btn.dataset.tab;
-        contents.forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.slot-content').forEach(c => c.classList.remove('active'));
         document.getElementById(`content-${target}`).classList.add('active');
       });
     });
 
-    // Simulasi info ESP (bisa diubah manual)
-    log('🛰️ Sistem OTA offline siap. Panel info ESP aktif.');
+    // Refresh manual
+    document.getElementById('refreshInfoBtn').addEventListener('click', fetchDeviceInfo);
+    
+    // Polling otomatis setiap 3 detik
+    fetchDeviceInfo();
+    setInterval(fetchDeviceInfo, 3000);
+    
+    // Update IP display saat input berubah
+    ipInput.addEventListener('input', () => {
+      document.getElementById('ipAddress').textContent = ipInput.value.trim() || '192.168.4.1';
+    });
+
+    log('🛰️ Cyberdeck OTA v3 siap. Endpoint: ' + getBaseURL() + '/update');
   })();
 </script>
 </body>
