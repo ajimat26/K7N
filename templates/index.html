@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K7N KILLER VOSW | Terminal Online v3.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #13131a;
+            --bg-tertiary: #1a1a24;
+            --text-primary: #e0e0e0;
+            --text-secondary: #8888aa;
+            --accent-cyan: #00ffff;
+            --accent-magenta: #ff00ff;
+            --accent-yellow: #ffff00;
+            --accent-green: #00ff00;
+            --accent-red: #ff3333;
+            --accent-orange: #ff9900;
+            --glass-bg: rgba(20, 20, 30, 0.8);
+            --glass-border: rgba(0, 255, 255, 0.2);
+            --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3);
+            --glow-magenta: 0 0 20px rgba(255, 0, 255, 0.3);
+            --glow-green: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Matrix Rain Canvas */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        /* Particles Container */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Glass Effect */
+        .glass-effect {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-radius: 15px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo-text h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent-cyan);
+            text-shadow: var(--glow-cyan);
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--accent-magenta);
+            letter-spacing: 5px;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch 0.3s infinite;
+            color: var(--accent-magenta);
+            z-index: -1;
+        }
+
+        .glitch::after {
+            animation: glitch 0.3s infinite reverse;
+            color: var(--accent-cyan);
+            z-index: -2;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        .status-dot.online {
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .status-dot.offline {
+            background: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .time {
+            color: var(--accent-cyan);
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Content Wrapper */
+        .content-wrapper {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            padding: 20px;
+            border-radius: 15px;
+            overflow-y: auto;
+            animation: slideLeft 0.5s ease-out;
+        }
+
+        @keyframes slideLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 10px;
+        }
+
+        .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .menu-title {
+            color: var(--accent-cyan);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-shadow: var(--glow-cyan);
+        }
+
+        .icon {
+            margin-right: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .btn-upload {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-upload:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .btn-stop {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-stop:hover {
+            background: rgba(255, 51, 51, 0.1);
+        }
+
+        .btn-clear {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 255, 0, 0.1);
+        }
+
+        .btn-run {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.6); }
+        }
+
+        .btn-run:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        .btn-run.running {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+            animation: none;
+        }
+
+        /* Script List */
+        .script-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .script-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .script-item:hover {
+            border-left-color: var(--accent-cyan);
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .script-item.selected {
+            border-left-color: var(--accent-green);
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .script-item .script-name {
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+        }
+
+        .script-item .script-type {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        .script-item .delete-btn {
+            color: var(--accent-red);
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s;
+        }
+
+        .script-item .delete-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Help Content */
+        .help-content {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .help-content p {
+            margin-bottom: 8px;
+        }
+
+        /* Terminal Area */
+        .terminal-area {
+            flex: 1;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideRight 0.5s ease-out;
+        }
+
+        @keyframes slideRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+        }
+
+        .tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .tab:hover {
+            background: rgba(0, 255, 255, 0.03);
+        }
+
+        /* Terminal Container */
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-title {
+            margin-left: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .terminal-output {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .terminal-output::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 10px;
+        }
+
+        /* ASCII Art */
+        .ascii-art {
+            color: var(--accent-cyan);
+            font-size: 0.55rem;
+            line-height: 1.2;
+            text-shadow: var(--glow-cyan);
+        }
+
+        .welcome-text {
+            margin-top: 5px;
+            color: var(--text-secondary);
+        }
+
+        .cmd-highlight {
+            color: var(--accent-yellow);
+            background: rgba(255, 255, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Output Styling */
+        .output-line {
+            margin: 2px 0;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .output-line.stdout { color: var(--accent-green); }
+        .output-line.stderr { color: var(--accent-red); }
+        .output-line.info { color: var(--accent-cyan); }
+        .output-line.warning { color: var(--accent-yellow); }
+        .output-line.error { color: var(--accent-red); }
+        .output-line.system { color: var(--accent-magenta); }
+
+        /* Command Input */
+        .command-input-area {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .prompt {
+            color: var(--accent-green);
+            margin-right: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            white-space: nowrap;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .command-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* Preview Container */
+        .preview-container {
+            flex: 1;
+        }
+
+        #preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Script Info */
+        .script-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .info-value {
+            color: var(--accent-cyan);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            display: none;
+            font-size: 0.9rem;
+            max-width: 400px;
+        }
+
+        .toast.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .toast.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .toast.info {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .terminal-area {
+                min-height: 400px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo-text h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-bg"></canvas>
+    
+    <!-- Particles -->
+    <div id="particles"></div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header glass-effect">
+            <div class="logo-container">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1 class="glitch" data-text="K7N KILLER">K7N KILLER</h1>
+                    <span class="subtitle">VOSW Terminal v3.0</span>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="connection-status">Connecting...</span>
+                <span class="time" id="current-time"></span>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Sidebar -->
+            <aside class="sidebar glass-effect">
+                <div class="menu-section">
+                    <h3 class="menu-title">
+                        <span class="icon">📁</span> Script Manager
+                    </h3>
+                    <button class="btn btn-upload" onclick="document.getElementById('file-upload').click()">
+                        <span class="btn-icon">⬆️</span> Upload Script
+                    </button>
+                    <input type="file" id="file-upload" accept=".py,.html,.txt,.sh,.json" hidden onchange="uploadScript(this)">
+                    
+                    <div style="margin-bottom: 10px;">
+                        <small style="color: var(--text-secondary);">
+                            📂 Total: <span id="script-count">0</span> scripts
+                        </small>
+                    </div>
+                    
+                    <div class="script-list" id="script-list">
+                        <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                            <span class="spinner"></span> Loading scripts...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <h3 class="menu-title">
+                        <span class="icon">⚙️</span> Controls
+                    </h3>
+                    <button class="btn btn-stop" onclick="stopExecution()">
+                        <span class="btn-icon">⏹️</span> Stop Script
+                    </button>
+                    <button class="btn btn-clear" onclick="clearTerminal()">
+                        <span class="btn-icon">🗑️</span> Clear Terminal
+                    </button>
+                    <button class="btn" onclick="refreshScripts()" style="border-color: var(--accent-magenta); color: var(--accent-magenta);">
+                        <span class="btn-icon">🔄</span> Refresh Scripts
+                    </button>
+                </div>
+                
+                <div class="menu-section">
+                    <h3 class="menu-title">
+                        <span class="icon">❓</span> Bantuan
+                    </h3>
+                    <div class="help-content">
+                        <p><strong>📤 Upload:</strong> Upload file .py/.html</p>
+                        <p><strong>👆 Pilih:</strong> Klik script</p>
+                        <p><strong>▶️ Run:</strong> Klik tombol RUN</p>
+                        <p><strong>💻 CMD:</strong> Terminal commands</p>
+                        <p><strong>⌨️ Shortcuts:</strong></p>
+                        <p>  • <span class="cmd-highlight">Ctrl+U</span> Upload</p>
+                        <p>  • <span class="cmd-highlight">Ctrl+R</span> Run</p>
+                        <p>  • <span class="cmd-highlight">Ctrl+L</span> Clear</p>
+                        <p>  • <span class="cmd-highlight">Ctrl+C</span> Stop</p>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Terminal Area -->
+            <main class="terminal-area glass-effect">
+                <!-- Tab Bar -->
+                <div class="tab-bar">
+                    <div class="tab active" data-tab="terminal" onclick="switchTab('terminal')">
+                        <span class="tab-icon">💻</span> Terminal
+                    </div>
+                    <div class="tab" data-tab="preview" onclick="switchTab('preview')">
+                        <span class="tab-icon">🌐</span> HTML Preview
+                    </div>
+                </div>
+                
+                <!-- Terminal Output -->
+                <div class="terminal-container" id="terminal-container">
+                    <div class="terminal-header">
+                        <span class="terminal-dot red"></span>
+                        <span class="terminal-dot yellow"></span>
+                        <span class="terminal-dot green"></span>
+                        <span class="terminal-title">K7N-KILLER-VOSW ~ Terminal</span>
+                    </div>
+                    <div class="terminal-output" id="terminal-output">
+                        <!-- Welcome message akan ditambahkan oleh JS -->
+                    </div>
+                    
+                    <!-- Command Input -->
+                    <div class="command-input-area">
+                        <span class="prompt">k7n@vosw:~$</span>
+                        <input type="text" id="command-input" class="command-input" 
+                               placeholder="Type command or script input here..." 
+                               autocomplete="off">
+                    </div>
+                </div>
+                
+                <!-- HTML Preview -->
+                <div class="preview-container" id="preview-container" style="display: none;">
+                    <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+                
+                <!-- Script Info Panel -->
+                <div class="script-info" id="script-info">
+                    <span class="info-label">📄 Selected:</span>
+                    <span class="info-value" id="selected-script">None</span>
+                    <button class="btn btn-run" id="btn-run" onclick="runScript()" disabled>
+                        <span class="btn-icon">▶️</span> RUN
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // K7N KILLER VOSW - Main JavaScript
+        // ============================================
+
+        // Socket.IO Connection
+        const socket = io();
+        
+        // DOM Elements
+        const terminalOutput = document.getElementById('terminal-output');
+        const commandInput = document.getElementById('command-input');
+        const scriptList = document.getElementById('script-list');
+        const selectedScript = document.getElementById('selected-script');
+        const btnRun = document.getElementById('btn-run');
+        const previewContainer = document.getElementById('preview-container');
+        const terminalContainer = document.getElementById('terminal-container');
+        const previewFrame = document.getElementById('preview-frame');
+        const toast = document.getElementById('toast');
+        const connectionStatus = document.getElementById('connection-status');
+        const statusDot = document.getElementById('status-dot');
+        const currentTimeEl = document.getElementById('current-time');
+        const scriptCount = document.getElementById('script-count');
+
+        // State
+        let currentSelectedScript = null;
+        let uploadedScripts = [];
+        let commandHistory = [];
+        let historyIndex = -1;
+        let isExecuting = false;
+        let isConnected = false;
+
+        // ============================================
+        // Matrix Rain Background
+        // ============================================
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+
+        const matrixChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+{}|:<>?~`-=[];\',./!';
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = [];
+
+        function initDrops() {
+            columns = Math.floor(canvas.width / fontSize);
+            drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * canvas.height;
+            }
+        }
+        initDrops();
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                const x = i * fontSize;
+                const y = drops[i] * fontSize;
+                
+                ctx.fillText(text, x, y);
+
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initDrops();
+        });
+
+        // ============================================
+        // Floating Particles
+        // ============================================
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#00ffff', '#ff00ff', '#ffff00', '#00ff00', '#ff3333', '#ff9900'];
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // ============================================
+        // Clock Update
+        // ============================================
+        function updateClock() {
+            const now = new Date();
+            currentTimeEl.textContent = now.toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ============================================
+        // Socket.IO Event Handlers
+        // ============================================
+        socket.on('connect', () => {
+            isConnected = true;
+            connectionStatus.textContent = 'Connected';
+            statusDot.className = 'status-dot online';
+            addToTerminal('🔌 Connected to K7N KILLER VOSW Server', 'system');
+            refreshScripts();
+        });
+
+        socket.on('disconnect', () => {
+            isConnected = false;
+            connectionStatus.textContent = 'Disconnected';
+            statusDot.className = 'status-dot offline';
+            addToTerminal('🔌 Disconnected from server', 'error');
+        });
+
+        socket.on('connected', (data) => {
+            addToTerminal(`✅ ${data.message}`, 'system');
+        });
+
+        socket.on('terminal_output', (data) => {
+            addToTerminal(data.data, data.type);
+        });
+
+        socket.on('execution_started', (data) => {
+            isExecuting = true;
+            btnRun.classList.add('running');
+            btnRun.innerHTML = '<span class="spinner"></span> RUNNING...';
+            addToTerminal(`🚀 Execution started - PID: ${data.pid}`, 'info');
+            commandInput.placeholder = 'Type input for script here...';
+        });
+
+        socket.on('execution_complete', (data) => {
+            isExecuting = false;
+            btnRun.classList.remove('running');
+            btnRun.innerHTML = '<span class="btn-icon">▶️</span> RUN';
+            addToTerminal(data.message, 'info');
+            if (data.execution_time) {
+                addToTerminal(`⏱️ Execution time: ${data.execution_time.toFixed(2)} seconds`, 'info');
+            }
+            addToTerminal('─'.repeat(60), 'info');
+            commandInput.placeholder = 'Type command here...';
+        });
+
+        // ============================================
+        // Terminal Functions
+        // ============================================
+        function addToTerminal(text, type = 'stdout') {
+            const line = document.createElement('div');
+            line.classList.add('output-line', type);
+            line.textContent = text;
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function clearTerminal() {
+            terminalOutput.innerHTML = '';
+            addToTerminal('✨ Terminal cleared', 'info');
+        }
+
+        function showWelcome() {
+            addToTerminal('', 'system');
+            addToTerminal('██╗  ██╗███████╗███╗   ██╗    ██╗  ██╗██╗██╗     ██╗     ███████╗██████╗ ', 'system');
+            addToTerminal('██║ ██╔╝╚════██║████╗  ██║    ██║ ██╔╝██║██║     ██║     ██╔════╝██╔══██╗', 'system');
+            addToTerminal('█████╔╝     ██╔╝██╔██╗ ██║    █████╔╝ ██║██║     ██║     █████╗  ██████╔╝', 'system');
+            addToTerminal('██╔═██╗    ██╔╝ ██║╚██╗██║    ██╔═██╗ ██║██║     ██║     ██╔══╝  ██╔══██╗', 'system');
+            addToTerminal('██║  ██╗   ██║  ██║ ╚████║    ██║  ██╗██║███████╗███████╗███████╗██║  ██║', 'system');
+            addToTerminal('╚═╝  ╚═╝   ╚═╝  ╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝', 'system');
+            addToTerminal('', 'system');
+            addToTerminal('🚀 Welcome to K7N KILLER VOSW Terminal v3.0', 'info');
+            addToTerminal('📤 Upload your Python/HTML script and execute it in REAL-TIME!', 'info');
+            addToTerminal('💡 Type ' + 'help'.fontcolor('#ffff00') + ' for available commands', 'info');
+            addToTerminal('─'.repeat(60), 'info');
+        }
+
+        // ============================================
+        // Command Handler
+        // ============================================
+        function executeCommand(command) {
+            if (!command.trim()) return;
+            
+            addToTerminal(`k7n@vosw:~$ ${command}`, 'info');
+            
+            const cmd = command.trim().toLowerCase();
+            const cmdParts = command.trim().split(/\s+/);
+            const cmdBase = cmdParts[0];
+            
+            // Local commands
+            switch(cmdBase) {
+                case 'help':
+                    showHelp();
+                    return;
+                    
+                case 'clear':
+                case 'cls':
+                    clearTerminal();
+                    return;
+                    
+                case 'ls':
+                    listScriptsLocal();
+                    return;
+                    
+                case 'date':
+                    addToTerminal(new Date().toString(), 'stdout');
+                    return;
+                    
+                case 'whoami':
+                    addToTerminal('k7n-killer', 'stdout');
+                    return;
+                    
+                case 'version':
+                    addToTerminal('K7N KILLER VOSW Terminal v3.0', 'info');
+                    addToTerminal('Build: 2024 Real Execution Edition', 'stdout');
+                    return;
+                    
+                case 'status':
+                    addToTerminal(`Connection: ${isConnected ? '✅ Connected' : '❌ Disconnected'}`, 'info');
+                    addToTerminal(`Scripts loaded: ${uploadedScripts.length}`, 'info');
+                    addToTerminal(`Executing: ${isExecuting ? 'Yes' : 'No'}`, 'info');
+                    return;
+            }
+            
+            // Send to server for remote execution
+            if (isConnected) {
+                socket.emit('run_command', { command: command });
+            } else {
+                addToTerminal('❌ Not connected to server', 'error');
+            }
+        }
+
+        function showHelp() {
+            addToTerminal('📋 Available Commands:', 'info');
+            addToTerminal('  Local Commands:', 'system');
+            addToTerminal('    help      - Show this help', 'stdout');
+            addToTerminal('    clear     - Clear terminal', 'stdout');
+            addToTerminal('    ls        - List scripts', 'stdout');
+            addToTerminal('    date      - Show date/time', 'stdout');
+            addToTerminal('    whoami    - Show user', 'stdout');
+            addToTerminal('    version   - Version info', 'stdout');
+            addToTerminal('    status    - Connection status', 'stdout');
+            addToTerminal('  Server Commands:', 'system');
+            addToTerminal('    python3 script.py  - Run Python', 'stdout');
+            addToTerminal('    pip list           - List packages', 'stdout');
+            addToTerminal('    cat file           - View file', 'stdout');
+            addToTerminal('    ls -la             - List files', 'stdout');
+        }
+
+        function listScriptsLocal() {
+            if (uploadedScripts.length === 0) {
+                addToTerminal('No scripts uploaded yet.', 'warning');
+            } else {
+                addToTerminal(`📁 Scripts (${uploadedScripts.length}):`, 'info');
+                uploadedScripts.forEach((script, index) => {
+                    const icon = script.type === 'python' ? '🐍' : script.type === 'html' ? '🌐' : '📄';
+                    addToTerminal(`  ${index + 1}. ${icon} ${script.original_name} (${script.type})`, 'stdout');
+                });
+            }
+        }
+
+        // ============================================
+        // Command Input Handler
+        // ============================================
+        commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const value = commandInput.value.trim();
+                
+                if (isExecuting) {
+                    // Send input to running script
+                    if (value) {
+                        socket.emit('send_input', { input: value });
+                        addToTerminal(`[input] ${value}`, 'system');
+                    }
+                } else {
+                    // Execute as command
+                    if (value) {
+                        commandHistory.push(value);
+                        historyIndex = commandHistory.length;
+                        executeCommand(value);
+                    }
+                }
+                
+                commandInput.value = '';
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    commandInput.value = '';
+                }
+            } else if (e.key === 'c' && e.ctrlKey && isExecuting) {
+                // Ctrl+C to stop execution
+                e.preventDefault();
+                stopExecution();
+            }
+        });
+
+        // Focus command input when clicking on terminal
+        terminalOutput.addEventListener('click', () => {
+            commandInput.focus();
+        });
+
+        // ============================================
+        // Tab Switching
+        // ============================================
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            if (tabName === 'terminal') {
+                document.querySelector('[data-tab="terminal"]').classList.add('active');
+                terminalContainer.style.display = 'flex';
+                previewContainer.style.display = 'none';
+            } else if (tabName === 'preview') {
+                document.querySelector('[data-tab="preview"]').classList.add('active');
+                terminalContainer.style.display = 'none';
+                previewContainer.style.display = 'block';
+            }
+        }
+
+        // ============================================
+        // Script Management
+        // ============================================
+        function uploadScript(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const allowedExtensions = ['.py', '.html', '.txt', '.sh', '.json', '.xml', '.csv'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedExtensions.includes(fileExt)) {
+                showToast(`❌ Format tidak didukung: ${fileExt}`, 'error');
+                input.value = '';
+                return;
+            }
+
+            // Show uploading status
+            addToTerminal(`📤 Uploading: ${file.name}...`, 'info');
+            
+            // Create FormData
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload to server
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addToTerminal(`✅ Uploaded: ${data.original_name} (${data.type})`, 'info');
+                    showToast(`✅ ${data.original_name} uploaded!`, 'success');
+                    refreshScripts();
+                } else {
+                    addToTerminal(`❌ Upload failed: ${data.error}`, 'error');
+                    showToast(`❌ ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addToTerminal(`❌ Upload error: ${error.message}`, 'error');
+                showToast('❌ Upload failed', 'error');
+            });
+
+            input.value = '';
+        }
+
+        function refreshScripts() {
+            fetch('/api/scripts')
+                .then(response => response.json())
+                .then(data => {
+                    uploadedScripts = data.scripts;
+                    scriptCount.textContent = data.total;
+                    renderScriptList();
+                })
+                .catch(error => {
+                    console.error('Error loading scripts:', error);
+                    scriptList.innerHTML = `
+                        <div style="color: var(--accent-red); text-align: center; padding: 20px;">
+                            ❌ Failed to load scripts
+                        </div>
+                    `;
+                });
+        }
+
+        function renderScriptList() {
+            if (uploadedScripts.length === 0) {
+                scriptList.innerHTML = `
+                    <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
+                        📭 No scripts uploaded yet
+                        <br><small>Upload .py or .html files</small>
+                    </div>
+                `;
+                return;
+            }
+
+            scriptList.innerHTML = uploadedScripts.map((script, index) => `
+                <div class="script-item ${currentSelectedScript === index ? 'selected' : ''}" 
+                     onclick="selectScript(${index})">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="script-name" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${script.type === 'python' ? '🐍' : script.type === 'html' ? '🌐' : '📄'} ${script.original_name}
+                        </div>
+                        <small style="color: var(--text-secondary); font-size: 0.65rem;">
+                            ${new Date(script.uploaded).toLocaleString()}
+                        </small>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        <span class="script-type">${script.type.toUpperCase()}</span>
+                        <span class="delete-btn" onclick="deleteScript(event, '${script.name}')">🗑️</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectScript(index) {
+            currentSelectedScript = index;
+            const script = uploadedScripts[index];
+            
+            selectedScript.textContent = script.original_name;
+            btnRun.disabled = false;
+            
+            addToTerminal(`📄 Selected: ${script.original_name} (${script.type})`, 'info');
+            
+            // If HTML, show preview automatically
+            if (script.type === 'html') {
+                fetch(`/api/script/${script.name}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const blob = new Blob([data.content], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        previewFrame.src = url;
+                        switchTab('preview');
+                    });
+            }
+            
+            renderScriptList();
+        }
+
+        function deleteScript(event, filename) {
+            event.stopPropagation();
+            
+            if (!confirm(`Delete ${filename}?`)) return;
+            
+            fetch(`/api/delete/${filename}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addToTerminal(`🗑️ Deleted: ${filename}`, 'warning');
+                    showToast(`Deleted ${filename}`, 'success');
+                    
+                    if (currentSelectedScript !== null && 
+                        uploadedScripts[currentSelectedScript]?.name === filename) {
+                        currentSelectedScript = null;
+                        selectedScript.textContent = 'None';
+                        btnRun.disabled = true;
+                    }
+                    
+                    refreshScripts();
+                } else {
+                    showToast(`❌ ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('❌ Delete failed', 'error');
+            });
+        }
+
+        // ============================================
+        // Run Script (REAL EXECUTION)
+        // ============================================
+        function runScript() {
+            if (currentSelectedScript === null) {
+                showToast('⚠️ Please select a script first!', 'error');
+                return;
+            }
+
+            if (!isConnected) {
+                showToast('❌ Not connected to server!', 'error');
+                return;
+            }
+
+            if (isExecuting) {
+                showToast('⚠️ Script is already running!', 'warning');
+                return;
+            }
+
+            const script = uploadedScripts[currentSelectedScript];
+            
+            addToTerminal('─'.repeat(60), 'info');
+            addToTerminal(`🚀 EXECUTING: ${script.original_name}`, 'info');
+            addToTerminal(`📁 Path: ${script.path}`, 'info');
+            addToTerminal(`📝 Type: ${script.type}`, 'info');
+            addToTerminal('─'.repeat(60), 'info');
+
+            if (script.type === 'html') {
+                // HTML preview
+                fetch(`/api/script/${script.name}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        const blob = new Blob([data.content], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        previewFrame.src = url;
+                        switchTab('preview');
+                        addToTerminal('✅ HTML loaded in preview tab', 'info');
+                        showToast('HTML preview ready!', 'success');
+                    });
+            } else if (script.type === 'python') {
+                // REAL Python execution via WebSocket
+                isExecuting = true;
+                btnRun.classList.add('running');
+                btnRun.innerHTML = '<span class="spinner"></span> RUNNING...';
+                commandInput.placeholder = 'Type input for script here...';
+                
+                socket.emit('execute_python', {
+                    path: script.path,
+                    params: []
+                });
+                
+                showToast('🚀 Executing script...', 'info');
+            }
+        }
+
+        function stopExecution() {
+            if (isExecuting) {
+                socket.emit('stop_execution');
+                addToTerminal('⏹️ Sending stop signal...', 'warning');
+                showToast('Stopping execution...', 'info');
+            } else {
+                addToTerminal('ℹ️ No script is currently running', 'info');
+            }
+        }
+
+        // ============================================
+        // Toast Notification
+        // ============================================
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // ============================================
+        // Keyboard Shortcuts
+        // ============================================
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+L - Clear terminal
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                clearTerminal();
+            }
+            
+            // Ctrl+U - Upload script
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                document.getElementById('file-upload').click();
+            }
+            
+            // Ctrl+R - Run script
+            if (e.ctrlKey && e.key === 'r' && !isExecuting) {
+                e.preventDefault();
+                if (currentSelectedScript !== null) {
+                    runScript();
+                }
+            }
+            
+            // Escape - Focus command input
+            if (e.key === 'Escape') {
+                commandInput.focus();
+            }
+        });
+
+        // ============================================
+        // Drag and Drop Upload
+        // ============================================
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fakeInput = {
+                    files: files,
+                    value: ''
+                };
+                uploadScript(fakeInput);
+            }
+        });
+
+        // ============================================
+        // Initialize
+        // ============================================
+        function init() {
+            showWelcome();
+            addToTerminal('🔌 Connecting to server...', 'system');
+            
+            // Load scripts
+            setTimeout(() => {
+                if (isConnected) {
+                    refreshScripts();
+                }
+            }, 1000);
+        }
+
+        // Start the application
+        init();
+        commandInput.focus();
+
+        console.log(`
+        ╔══════════════════════════════════════╗
+        ║   K7N KILLER VOSW Terminal v3.0     ║
+        ║   REAL EXECUTION EDITION 🚀         ║
+        ╚══════════════════════════════════════╝
+        `);
+    </script>
+</body>
+</html>
